@@ -285,14 +285,35 @@ export function buildControlStatusSummary(answers, options = {}) {
 
 // Named export expected by routes/assessment.routes.js
 export function buildAnswersForExport(assessment) {
-  // Minimal safe implementation to unblock server start.
-  // Adjust mapping later to match your assessment schema / export format.
-  if (!assessment) return [];
+  // Return answers in a shape suitable for report/export.
+  // Current assessment schema stores answers as an object keyed by stage:
+  // { stage1: {...}, stage2: {...}, stage3: {...}, stage4: {...}, stage5: {...} }
+  // Older/legacy schemas may store answers as an array of response items.
+  if (!assessment) return {};
 
-  // Common patterns:
-  if (Array.isArray(assessment.answers)) return assessment.answers;
-  if (Array.isArray(assessment.responses)) return assessment.responses;
+  // If caller passed the answers object directly, keep it as-is.
+  // (This is the current usage from routes/assessment.routes.js)
+  if (!Array.isArray(assessment) && typeof assessment === "object") {
+    const hasStageKeys =
+      Object.prototype.hasOwnProperty.call(assessment, "stage1") ||
+      Object.prototype.hasOwnProperty.call(assessment, "stage2") ||
+      Object.prototype.hasOwnProperty.call(assessment, "stage3") ||
+      Object.prototype.hasOwnProperty.call(assessment, "stage4") ||
+      Object.prototype.hasOwnProperty.call(assessment, "stage5");
 
-  // If answers are nested in sections/questions, keep it non-crashing for now.
-  return [];
+    if (hasStageKeys) return assessment;
+  }
+
+  // If caller passed a whole assessment object, unwrap common fields.
+  if (assessment && typeof assessment === "object") {
+    if (assessment.answers && typeof assessment.answers === "object") return assessment.answers;
+    if (assessment.responses && typeof assessment.responses === "object") return assessment.responses;
+  }
+
+  // Legacy array shape.
+  if (Array.isArray(assessment)) return assessment;
+  if (Array.isArray(assessment?.answers)) return assessment.answers;
+  if (Array.isArray(assessment?.responses)) return assessment.responses;
+
+  return {};
 }

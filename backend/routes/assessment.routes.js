@@ -287,7 +287,9 @@ router.get("/report/:assessmentId", (req, res) => {
       result?.smeProfile?.organizationName || assessment?.smeProfile?.organizationName || ""
     ).trim();
 
-    // Export-specific: auto-fill gateway-controlled follow-ups as NO so reports show recommendations.
+    // Export-specific: use the stored answers object as-is.
+    // Gateway/showIf rules are handled via applicability logic so suppressed questions/controls
+    // appear as N/A (and do not produce irrelevant recommendations).
     const exportAnswers = buildAnswersForExport(resolvedAnswers);
 
     const controlStatuses = buildControlStatusSummary(exportAnswers, {
