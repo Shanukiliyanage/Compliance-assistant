@@ -1,0 +1,199 @@
+:root {
+  --blue: #2563eb;
+  --teal: #14b8a6;
+  --yellow: #facc15;
+  --red: #fb6b5b;
+  --bg: #f4f5fb;
+  --text-main: #0f172a;
+  --text-muted: #6b7280;
+  --white: #ffffff;
+  --border: #e5e7eb;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: var(--bg);
+  color: var(--text-main);
+}
+
+/* Generic buttons */
+
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  color: var(--white);
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.3);
+}
+
+/* Landing page layout */
+
+.page-landing {
+  min-height: 100vh;
+  display: flex;
+  padding: 2.5rem 3rem;
+  gap: 2.5rem;
+  align-items: stretch;
+}
+
+.landing-left {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 2rem;
+}
+
+.landing-right {
+  flex: 2;
+  position: relative;
+  border-radius: 1.75rem;
+  background: #0f172a;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Blobs */
+
+.blob {
+  position: absolute;
+  border-radius: 999px;
+  opacity: 0.9;
+}
+
+.blob-red {
+  width: 160px;
+  height: 160px;
+  background: var(--red);
+  top: -30px;
+  left: -30px;
+}
+
+.blob-teal {
+  width: 190px;
+  height: 190px;
+  background: var(--teal);
+  top: 38%;
+  right: -55px;
+}
+
+.blob-yellow {
+  width: 210px;
+  height: 210px;
+  background: var(--yellow);
+  bottom: -55px;
+  left: 12%;
+}
+
+/* Simple line icon cards */
+
+.line-card {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0.4rem;
+  color: var(--white);
+  font-size: 0.75rem;
+}
+
+.line-card.book {
+  top: 18%;
+  left: 18%;
+}
+
+.line-card.note {
+  top: 50%;
+  left: 40%;
+}
+
+.line-card.bulb {
+  bottom: 14%;
+  right: 18%;
+}
+
+.icon-title {
+  width: 100%;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--blue);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.landing-heading {
+  font-size: 2.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.landing-text {
+  max-width: 480px;
+  color: var(--text-muted);
+  margin-bottom: 1.6rem;
+}
+
+.hint-text {
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .page-landing {
+    flex-direction: column;
+    padding: 1.8rem 1.4rem;
+  }
+
+  .landing-left {
+    padding-right: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .landing-right {
+    min-height: 260px;
+  }
+
+  .landing-heading {
+    font-size: 2rem;
+  }
+}

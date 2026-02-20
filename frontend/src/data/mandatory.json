@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "clause": "4.1",
+    "question": "Have you identified and documented your organization’s business purpose, strategic direction, and the internal and external issues that affect information security?",
+    "explanation": "Your business purpose/strategy and the internal/external issues (e.g., market, legal, technology, organizational changes) that influence information security."
+  },
+  {
+    "id": 2,
+    "clause": "4.2",
+    "question": "Have you identified and documented the interested parties relevant to your ISMS (such as customers, regulators, employees, suppliers, and partners) and their information security requirements?",
+    "explanation": "Relevant interested parties and what they require/expect for information security (laws, contracts, privacy, service requirements)."
+  },
+  {
+    "id": 3,
+    "clause": "4.3",
+    "question": "Have you defined and documented the scope of your ISMS, including the locations, systems, data, and processes covered?",
+    "explanation": "A clear definition of what is in-scope (and out-of-scope) for the ISMS: locations, systems, data, processes, and relevant third parties."
+  },
+  {
+    "id": 4,
+    "clause": "5.1",
+    "question": "Does top management (owner/CEO/directors) actively demonstrate commitment to information security (e.g., approving policies, allocating budget, reviewing security performance)?",
+    "explanation": "Active leadership support for security direction, ownership/accountability, resources (budget/time/tools), and regular review of security performance."
+  },
+  {
+    "id": 5,
+    "clause": "5.2",
+    "question": "Is there a formal, management approved Information Security Policy that is communicated to employees?",
+    "explanation": "A documented policy approved by management and communicated to employees (including onboarding), with an owner and review date."
+  },
+  {
+    "id": 6,
+    "clause": "6.1",
+    "question": "Do you have a formal, repeatable process to identify and assess information security risks (including assets, threats, vulnerabilities, and impact/likelihood)?",
+    "explanation": "A consistent method for risk assessment: identify assets/threats/vulnerabilities, rate likelihood and impact, and keep results recorded (e.g., risk register)."
+  },
+  {
+    "id": 7,
+    "clause": "6.2",
+    "question": "Have you documented risk treatment decisions (accept, mitigate, transfer, or avoid) and mapped them to specific security controls or actions?",
+    "explanation": "Risk treatment decisions mapped to specific controls/actions, with owners, deadlines, and evidence of completion (including approvals for accepted risks)."
+  },
+  {
+    "id": 8,
+    "clause": "7.1",
+    "question": "Do you regularly provide information security awareness or training to employees (for example during onboarding and through periodic refresh sessions)?",
+    "explanation": "Security awareness/training for all staff (onboarding + periodic refresh), covering key topics and keeping evidence such as attendance records."
+  },
+  {
+    "id": 9,
+    "clause": "7.2",
+    "question": "Have you clearly assigned and documented information security roles and responsibilities (for example who owns security, who handles incidents, and who manages access)?",
+    "explanation": "Clear, documented roles and responsibilities for key security tasks, including communication and escalation paths."
+  },
+  {
+    "id": 10,
+    "clause": "7.3",
+    "question": "Do you maintain a competency or skills record (such as a competency matrix) to ensure personnel involved in information security have appropriate knowledge and skills?",
+    "explanation": "A competency/skills record for security-relevant roles showing required skills, current capability, gaps, and training/experience evidence."
+  },
+  {
+    "id": 11,
+    "clause": "8.1",
+    "question": "Do you have documented, implemented procedures for key security operations (such as access management, backup and restore, incident handling, and change management)?",
+    "explanation": "Documented procedures for key security operations that are implemented and understood (who does what, when, and how)."
+  },
+  {
+    "id": 12,
+    "clause": "8.2",
+    "question": "Are these procedures actually followed in day-to-day operations and supported by evidence (logs, tickets, backup reports, incident records)?",
+    "explanation": "Procedures are followed consistently and supported by evidence such as logs, tickets, approvals, backup/restore results, incident records, and change records."
+  },
+  {
+    "id": 13,
+    "clause": "9.1",
+    "question": "Do you perform regular internal reviews or audits of your information-security controls (at least annually), and document the findings?",
+    "explanation": "Internal reviews/audits performed at planned intervals with documented findings and tracked corrective actions."
+  },
+  {
+    "id": 14,
+    "clause": "9.2",
+    "question": "Does top management review information-security performance (e.g., incidents, audit results, key metrics) at planned intervals and decide on actions?",
+    "explanation": "Management reviews security performance and decides actions with owners and deadlines, with decisions recorded and tracked to completion."
+  },
+  {
+    "id": 15,
+    "clause": "10.1",
+    "question": "When security incidents, audit findings or non-conformities are identified, do you record them and track corrective actions until they are completed?",
+    "explanation": "Issues are logged and corrective actions are assigned, tracked to completion, and verified for effectiveness."
+  },
+  {
+    "id": 16,
+    "clause": "10.2",
+    "question": "Do you periodically review your ISMS and controls to identify opportunities for improvement (not just fixes), and then implement those improvements?",
+    "explanation": "Regular review of ISMS/controls to identify improvements and implement them with tracking to completion."
+  }
+]

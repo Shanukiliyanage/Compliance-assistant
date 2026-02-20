@@ -1,0 +1,110 @@
+{
+  "stage": 3,
+  "title": "Stage 3, People Controls",
+  "subtitle": "Answer all questions on this page. Every question is mandatory.",
+  "controls": [
+    {
+      "controlId": "A.6.1",
+      "controlName": "Screening",
+      "questions": [
+        {
+          "id": "A.6.1-Q1",
+          "text": "Before employees or contractors join, do you conduct background checks (for example education, employment history, criminal records)?",
+          "helpText": "This checks whether you verify a person’s suitability before granting access to systems or sensitive information."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.2",
+      "controlName": "Terms and conditions of employment",
+      "questions": [
+        {
+          "id": "A.6.2-Q1",
+          "text": "Do employment contracts clearly define information security responsibilities for employees?",
+          "helpText": "Contracts should clearly define security obligations, acceptable behavior, and responsibilities for protecting information."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.3",
+      "controlName": "Information security awareness, education and training",
+      "questions": [
+        {
+          "id": "A.6.3-Q1",
+          "text": "Do all employees receive regular information security awareness training (for example on policies, phishing, password security)?",
+          "helpText": "Training reduces human error and improves recognition of common attacks like phishing and social engineering."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.4",
+      "controlName": "Disciplinary process",
+      "questions": [
+        {
+          "id": "A.6.4-Q1",
+          "text": "Do you have a formal disciplinary process for employees who violate information security policies?",
+          "helpText": "A formal process discourages policy violations and supports fair handling of incidents and misconduct."
+        },
+        {
+          "id": "A.6.4-Q2",
+          "text": "Is this process documented and communicated to all staff?",
+          "helpText": "Employees should know what happens when policies are violated, and managers should apply rules consistently."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.5",
+      "controlName": "Responsibilities after termination or change of employment",
+      "questions": [
+        {
+          "id": "A.6.5-Q1",
+          "text": "When an employee leaves or changes roles, do you have a defined process to remove their access and collect company assets?",
+          "helpText": "This reduces the risk of unauthorized access by ensuring accounts, devices, and credentials are handled promptly."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.6",
+      "controlName": "Confidentiality or non-disclosure agreements",
+      "questions": [
+        {
+          "id": "A.6.6-Q1",
+          "text": "Do all employees and relevant third parties sign confidentiality or non-disclosure agreements (NDAs)?",
+          "helpText": "NDAs help protect sensitive information and set clear expectations about disclosure and data handling."
+        },
+        {
+          "id": "A.6.6-Q2",
+          "text": "Are these agreements reviewed and updated regularly?",
+          "helpText": "Reviewing ensures the terms remain aligned with business changes, regulations, and new risks."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.7",
+      "controlName": "Remote working",
+      "questions": [
+        {
+          "id": "A.6.7-Q1",
+          "text": "When employees work remotely, do you have security measures in place (for example VPN, encryption, secure Wi-Fi guidance)?",
+          "helpText": "Remote controls reduce exposure from unsecured networks and unmanaged devices."
+        }
+      ]
+    },
+    {
+      "controlId": "A.6.8",
+      "controlName": "Information security event reporting",
+      "questions": [
+        {
+          "id": "A.6.8-Q1",
+          "text": "Do you have clear, accessible channels for employees to report suspected security incidents or events?",
+          "helpText": "Fast reporting reduces impact by enabling early response and containment."
+        },
+        {
+          "id": "A.6.8-Q2",
+          "text": "Are employees trained on what to report and how to report it?",
+          "helpText": "Training ensures incidents are reported early, with the right details to support investigation."
+        }
+      ]
+    }
+  ]
+}
