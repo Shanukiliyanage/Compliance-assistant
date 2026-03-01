@@ -38122,5 +38122,1078 @@
         "recommendation": "ABC Company should improve by ensuring encryption is consistently applied across systems and suppliers and by strengthening key management practices."
       }
     ]
+  },
+  {
+    "assessmentId": "eecac9fb-3ac1-4b02-bc25-9a84b1cb28ee",
+    "userId": "BAcyxBjlnFhGIdJYzMWm2ALbqOF3",
+    "timestamp": "2026-03-01T18:34:50.833Z",
+    "smeProfile": {
+      "organizationName": "ABC",
+      "sector": "IT / Software Development",
+      "size": "11–50",
+      "dataType": "Financial data"
+    },
+    "scores": {
+      "stageScores": {
+        "stage1": {
+          "totalScore": 9,
+          "maxPossibleScore": 16,
+          "averageScore": 0.5625,
+          "percent": 56,
+          "breakdown": {
+            "counts": {
+              "yes": 6,
+              "partial": 6,
+              "no": 4,
+              "unanswered": 0,
+              "total": 16
+            },
+            "percent": {
+              "fullyCompliant": 38,
+              "partiallyCompliant": 38,
+              "nonCompliant": 25,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 9,
+          "max": 16
+        },
+        "stage2": {
+          "totalScore": 8,
+          "maxPossibleScore": 28,
+          "averageScore": 0.2857142857142857,
+          "percent": 29,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 16,
+              "no": 12,
+              "unanswered": 0,
+              "total": 28
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 57,
+              "nonCompliant": 43,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 9,
+          "raw": 8,
+          "max": 28
+        },
+        "stage3": {
+          "totalScore": 4,
+          "maxPossibleScore": 8,
+          "averageScore": 0.5,
+          "percent": 50,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 8,
+              "no": 0,
+              "unanswered": 0,
+              "total": 8
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 100,
+              "nonCompliant": 0,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 4,
+          "max": 8
+        },
+        "stage4": {
+          "totalScore": 0,
+          "maxPossibleScore": 14,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 14,
+              "unanswered": 0,
+              "total": 14
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 0,
+          "max": 14
+        },
+        "stage5": {
+          "totalScore": 3,
+          "maxPossibleScore": 25,
+          "averageScore": 0.12,
+          "percent": 12,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 6,
+              "no": 19,
+              "unanswered": 0,
+              "total": 25
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 24,
+              "nonCompliant": 76,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 9,
+          "raw": 3,
+          "max": 25
+        }
+      },
+      "overall": {
+        "totalScore": 15,
+        "maxPossibleScore": 75,
+        "averageScore": 0.2,
+        "percent": 20,
+        "maturityLevel": "Initial",
+        "raw": 15,
+        "max": 75
+      },
+      "complianceBreakdown": {
+        "counts": {
+          "yes": 0,
+          "partial": 30,
+          "no": 45,
+          "unanswered": 0,
+          "total": 75
+        },
+        "percent": {
+          "fullyCompliant": 0,
+          "partiallyCompliant": 40,
+          "nonCompliant": 60,
+          "unanswered": 0
+        }
+      },
+      "overallMandatory": {
+        "totalScore": 9,
+        "maxPossibleScore": 16,
+        "averageScore": 0.5625,
+        "percent": 56,
+        "maturityLevel": "Developing",
+        "raw": 9,
+        "max": 16
+      },
+      "overallAnnexA": {
+        "totalScore": 15,
+        "maxPossibleScore": 75,
+        "averageScore": 0.2,
+        "percent": 20,
+        "maturityLevel": "Initial",
+        "raw": 15,
+        "max": 75
+      },
+      "complianceBreakdownMandatory": {
+        "counts": {
+          "yes": 6,
+          "partial": 6,
+          "no": 4,
+          "unanswered": 0,
+          "total": 16
+        },
+        "percent": {
+          "fullyCompliant": 38,
+          "partiallyCompliant": 38,
+          "nonCompliant": 25,
+          "unanswered": 0
+        }
+      },
+      "complianceBreakdownAnnexA": {
+        "counts": {
+          "yes": 0,
+          "partial": 30,
+          "no": 45,
+          "unanswered": 0,
+          "total": 75
+        },
+        "percent": {
+          "fullyCompliant": 0,
+          "partiallyCompliant": 40,
+          "nonCompliant": 60,
+          "unanswered": 0
+        }
+      }
+    },
+    "recommendations": [
+      {
+        "stageId": "stage1",
+        "controlId": "4.1",
+        "questionId": "4.1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should document its business purpose and strategic direction, and identify the key internal and external issues that affect information security (e.g., regulatory, market, technology, organizational changes). Review and update this when significant changes occur."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "9.1",
+        "questionId": "9.1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make reviews more effective by using a plan, covering all key areas, documenting evidence, and verifying corrective actions are completed and working."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "8.1",
+        "questionId": "8.1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should complete missing procedures and standardize how they are followed across teams and systems, not only in some areas."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "7.1",
+        "questionId": "7.1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should run basic security training for all staff during onboarding and at least yearly (phishing, passwords, data handling, incident reporting). Track attendance."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "10.1",
+        "questionId": "10.1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should log incidents and audit findings, assign corrective actions (owner + due date), and track them until they are completed and checked for effectiveness."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "10.2",
+        "questionId": "10.2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make improvement more structured by keeping an improvement list, assigning owners/dates, and confirming improvements are completed and measurable."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "7.3",
+        "questionId": "7.3",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve competence management by completing the competency record for all relevant roles, keeping it up to date, addressing identified gaps with training, and periodically reviewing competence as systems and threats change."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "6.1",
+        "questionId": "6.1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should create a repeatable risk assessment method: list key assets, identify threats and weaknesses, and rate impact and likelihood. Record results in a risk register."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "6.2",
+        "questionId": "6.2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve risk treatment by ensuring every risk has a clear decision, mapped actions/controls, tracked progress, and evidence when actions are completed (including approvals for accepted risks)."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "4.3",
+        "questionId": "4.3",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make the scope clearer and more complete (what’s in/out, key systems and data, third parties). Keep it controlled and updated when the business or IT changes."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.2",
+        "questionId": "A5.2.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define key security responsibilities (governance, risk, access, incident handling, supplier security) and assign named owners for each."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.1",
+        "questionId": "A5.1.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make reviews consistent by using a schedule, recording review outcomes/actions, and tracking updates to completion."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.1",
+        "questionId": "A5.1.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should update the policy to match how the organization operates, ensure everyone receives it and acknowledges it, and confirm it is consistently applied across teams."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.3",
+        "questionId": "A5.3.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should expand segregation to all critical processes, formalize approval workflows, and periodically review exceptions and conflicts."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.3",
+        "questionId": "A5.3.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make awareness consistent (onboarding + refresh), include role-specific responsibilities, and track completion/understanding."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.2",
+        "questionId": "A5.2.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should ensure documentation is up to date, accessible, and understood by all relevant roles, with periodic refresh and evidence of communication."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.4",
+        "questionId": "A5.4.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve consistency by tracking actions to closure, recording evidence of fixes, and reviewing repeat issues to prevent recurrence."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.5",
+        "questionId": "A5.5.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define which authorities/regulators/law enforcement and key contacts may be needed, maintain an up-to-date contact list, and link it to the incident response plan."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.6",
+        "questionId": "A5.6.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should identify relevant communities (industry groups, CERT/CSIRT feeds, vendor security advisories) and assign someone to monitor and share relevant updates."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.7",
+        "questionId": "A5.7.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should set up a basic threat intel process (sources + frequency), assess relevance, and convert key items into actions (patching, alerts, user warnings, risk updates)."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.9",
+        "questionId": "A5.9.Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should assign ownership and a review cadence (e.g., quarterly), update inventory after changes, and keep evidence of review."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.9",
+        "questionId": "A5.9.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should create and maintain an asset inventory covering key systems, devices, applications, data sets, and owners (including criticality and where data is stored)."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.8",
+        "questionId": "A5.8.Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should perform a simple project risk assessment before implementation (data, access, supplier/cloud use, change impact) and record outcomes and required controls."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.8",
+        "questionId": "A5.8.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should embed security in projects (requirements, architecture review, secure configuration, data classification, access design) from the start."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.37",
+        "questionId": "A5.37.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should fill remaining gaps, keep procedures updated as systems change, and periodically verify procedures are followed and effective."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.36",
+        "questionId": "A5.36.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make checks consistent, retain evidence of outcomes, and address repeat issues via root-cause improvements."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.35",
+        "questionId": "A5.35.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve review scope/frequency, keep evidence, and verify that corrective actions are effective after implementation."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.34",
+        "questionId": "A5.34.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should complete PII inventories and risk checks, apply controls consistently across all systems/suppliers, and keep evidence of ongoing privacy compliance reviews."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.33",
+        "questionId": "A5.33.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should extend controls to all critical records, improve integrity/retention consistency, and test recovery and review retention/disposal regularly."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.32",
+        "questionId": "A5.32.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve consistency by inventorying licensed software/assets, checking compliance periodically, and strengthening controls for sensitive IP access and sharing."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.30",
+        "questionId": "A5.30.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should keep the plan current, improve test frequency/quality, and track improvements identified during tests to completion."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.30",
+        "questionId": "A5.30.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve coverage for all critical services and regularly test recovery (including restores) with documented results and follow-up actions."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.31",
+        "questionId": "A5.31.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should keep the register current, review changes regularly, and ensure obligations are implemented and evidenced consistently."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.29",
+        "questionId": "A5.29.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should validate and improve these mechanisms through continuity/incident exercises and document/approve any emergency exceptions."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.24",
+        "questionId": "A5.24.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define and document an incident management approach (roles, reporting, triage, escalation, communications, and response steps) and ensure staff know how to report incidents."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.18",
+        "questionId": "A5.18.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve review consistency and coverage across all key systems, track removals to closure, and report recurring issues."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.17",
+        "questionId": "A5.17.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define authentication standards (strong passwords, MFA for critical systems, secure resets, no sharing) and enforce them technically where possible."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.16",
+        "questionId": "A5.16.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should standardize the process across all systems (including SaaS), improve timeliness, and automate provisioning/deprovisioning where feasible."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.15",
+        "questionId": "A5.15.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should tighten high-risk access, ensure controls apply across all systems, and keep evidence of approvals and periodic reviews."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.14",
+        "questionId": "A5.14.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve enforcement and consistency (coverage for all users, clear exceptions, monitoring and periodic review of email leakage risks)."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.14",
+        "questionId": "A5.14.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should standardize controls across channels (email, file sharing, cloud links, removable media), tune DLP/monitoring, and review repeated leak patterns."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.13",
+        "questionId": "A5.13.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should close gaps by ensuring labeling is used across key tools (email/docs/storage) and reinforcing correct handling through training and checks."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.12",
+        "questionId": "A5.12.Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define how email is classified/handled (labels, warnings, encryption rules), and train staff to apply the rules consistently."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.12",
+        "questionId": "A5.12.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should expand coverage to all important information, align classification with real risk/legal requirements, and check consistency across teams."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.11",
+        "questionId": "A5.11.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve completeness by ensuring every case is recorded, periodically sampling records for missed steps, and correcting recurring gaps."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.11",
+        "questionId": "A5.11.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement a formal leaver/mover process to recover assets and remove access promptly (accounts, keys, badges, devices), with a checklist and owner."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.10",
+        "questionId": "A5.10.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should create an Acceptable Use Policy covering devices, email, internet, data handling, prohibited actions, and reporting requirements, and publish it to staff."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.10",
+        "questionId": "A5.10.Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement acknowledgement (signed or electronic) during onboarding and periodic refresh, and keep records for audit/compliance."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.4",
+        "questionId": "A5.4.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should make managers accountable for enforcing key security practices (training completion, acceptable use, access approvals, secure handling) and include this in routine team oversight."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.1",
+        "questionId": "A.6.1-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make screening consistent by applying the same role-based criteria for all relevant hires, documenting outcomes, handling exceptions with approval, and periodically reviewing the screening process for completeness."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.2",
+        "questionId": "A.6.2-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should ensure responsibilities are complete and consistently included for all staff and contractors, communicated during onboarding, and reviewed when roles or risks change."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.3",
+        "questionId": "A.6.3-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve training consistency by ensuring all staff are covered (including contractors), tailoring training by role, and checking understanding (short assessment) with recorded results."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.4",
+        "questionId": "A.6.4-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should ensure the process is applied consistently, decisions are documented, and repeated violations are analyzed to improve underlying controls and training."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.4",
+        "questionId": "A.6.4-Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve communication by making it easy to find, reinforcing it during training, and confirming staff understand escalation and consequences."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.6",
+        "questionId": "A.6.6-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should ensure coverage is complete (all relevant roles and suppliers), terms match current data handling needs, and exceptions are formally approved."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.5",
+        "questionId": "A.6.5-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make the process consistent across all systems by integrating it with human resources workflows, tracking completion for every case, and periodically checking for orphaned accounts or missed assets."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.6",
+        "questionId": "A.6.6-Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make reviews consistent by tracking agreement versions, refreshing older agreements when material changes occur, and confirming renewed acceptance where required."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.7",
+        "questionId": "A.6.7-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should strengthen remote working security by applying controls consistently to all remote users, improving monitoring and patching, and reinforcing expectations through training and periodic checks."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.8",
+        "questionId": "A.6.8-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve reporting by ensuring channels are always accessible, triage is timely, and outcomes are documented and tracked to closure."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.8",
+        "questionId": "A.6.8-Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve effectiveness by reinforcing training periodically, using short simulations or examples, and tracking completion and understanding."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.2",
+        "questionId": "A7.2_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement entry controls for premises (controlled doors, reception process, and visitor management) to prevent unauthorized entry."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.1",
+        "questionId": "A7.1_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should restrict access to secure areas (locks, access cards/keys, visitor controls) and implement monitoring appropriate to risk (for example logs or alarms)."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.1",
+        "questionId": "A7.1_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should identify areas containing sensitive information/systems and define physical security boundaries (rooms, cabinets, server areas), documenting what is “restricted” and what protections apply."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.3",
+        "questionId": "A7.3_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement basic facility protections (locks, controlled access to sensitive rooms, secure storage for sensitive materials) based on risk."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.2",
+        "questionId": "A7.2_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should record visitors (name, organization, host, time in/out, purpose) and require escorting where appropriate, retaining records for an agreed period."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.3",
+        "questionId": "A7.3_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should deploy suitable locks and barriers and, where necessary, monitoring systems to protect sensitive areas and equipment from unauthorized access."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.4",
+        "questionId": "A7.4_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement physical monitoring appropriate to risk (for example closed-circuit television (CCTV), intrusion alarms, or access logs) and define who reviews alerts and how response is handled."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.5",
+        "questionId": "A7.5_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should assess physical and environmental risks and implement protections such as fire detection/suppression, water leakage protection, temperature/humidity control, surge protection, and safe equipment placement."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.6",
+        "questionId": "A7.6_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should restrict secure areas to authorized personnel only, enforce visitor escorting, and ensure access permissions are approved and recorded."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.7",
+        "questionId": "A7.7_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement clear desk and screen requirements, including automatic screen locking and guidance for handling paper records and removable media."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.7",
+        "questionId": "A7.7_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should document clear screen requirements (lock when unattended, no shared unlocked workstations, secure viewing in public spaces) and communicate them to staff."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.8",
+        "questionId": "A7.8_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should site equipment securely (restricted areas, locked cabinets where needed), protect it from environmental damage, and prevent unauthorized handling."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.9",
+        "questionId": "A7.9_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should train staff on protecting devices and information during remote work (secure storage, safe printing, avoiding shared devices, and reporting loss)."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.9",
+        "questionId": "A7.9_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define controls for off-site assets (device encryption, secure transport/storage, reporting loss quickly, and restricting use in public places) and ensure staff follow them."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.10",
+        "questionId": "A7.10_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define procedures for storage media handling (use, labeling, secure storage, transport, reuse, and disposal) and ensure media containing sensitive data is protected and tracked."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.11",
+        "questionId": "A7.11_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement protections so utilities do not disrupt critical systems, such as backup power, surge protection, and safe shutdown procedures appropriate to risk."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.12",
+        "questionId": "A7.12_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should protect cabling (secure routing, protected conduits, restricted cable rooms) to reduce risks of tampering, interception, and accidental damage."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.13",
+        "questionId": "A7.13_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement planned maintenance for critical equipment and systems (including security updates where applicable), and keep records of maintenance activities."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.14",
+        "questionId": "A7.14_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement secure data removal before reuse/disposal (secure wiping or physical destruction appropriate to risk) and retain evidence of completion."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.1",
+        "questionId": "A8.1_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should make protections consistent across all devices, verify compliance (reporting), and improve controls for high-risk users and sensitive data access."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.2",
+        "questionId": "A8.2_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should strengthen by reviewing privileged accounts regularly, removing unnecessary privileges, and improving monitoring and approval evidence."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.3",
+        "questionId": "A8.3_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve consistency across systems and ensure access reviews result in timely removal of unnecessary access."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.4",
+        "questionId": "A8.4_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve by enforcing least privilege, reviewing access regularly, and ensuring changes are traceable through change history and approvals."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.5",
+        "questionId": "A8.5_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should expand coverage to all critical services and privileged accounts, and ensure authentication standards are consistently enforced."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.6",
+        "questionId": "A8.6_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC should improve by making monitoring consistent across critical services, reviewing trends regularly, and documenting capacity actions and outcomes."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.7",
+        "questionId": "A8.7_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement anti-malware protections, secure configuration, timely patching, and user awareness to reduce malicious software infections."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.8",
+        "questionId": "A8.8_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement a vulnerability management process: asset scope, vulnerability scanning, prioritization by risk, patching/remediation timelines, and verification of fixes; use testing such as vulnerability assessment and penetration testing (VAPT) where appropriate."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.9",
+        "questionId": "A8.9_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define secure configuration baselines, control changes through approvals, and document and review configuration changes for critical systems."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.10",
+        "questionId": "A8.10_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define retention and deletion rules and implement secure deletion methods for systems and storage, ensuring data is removed when no longer required."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.11",
+        "questionId": "A8.11_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement data masking for use cases such as reports, support tools, and testing, so only the minimum necessary data is visible."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.11",
+        "questionId": "A8.11_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should protect sensitive data with encryption in storage and in transfer, even when masked, and manage encryption keys securely with restricted access."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.12",
+        "questionId": "A8.12_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement controls to reduce leakage risk, such as labeling/classification, restrictions on external sharing, monitoring, and data loss prevention (DLP) rules where appropriate."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.13",
+        "questionId": "A8.13_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define backup frequency and retention based on business impact and data criticality, and ensure backups meet those targets."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.13",
+        "questionId": "A8.13_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement backups for critical systems and data, protect backups from unauthorized access and ransomware, and regularly test restoration."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.14",
+        "questionId": "A8.14_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should identify critical services and implement resilience measures (redundant components, failover, alternate processing) where needed to meet continuity requirements."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.16",
+        "questionId": "A8.16_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement monitoring for suspicious activity (authentication anomalies, privilege use, critical changes) and define alerting and response procedures."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.15",
+        "questionId": "A8.15_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should enable logging for critical systems and security events, restrict access to logs, protect logs from alteration, and define retention and review responsibilities."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.16",
+        "questionId": "A8.16_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should regularly review access logs and access permissions for critical systems to detect unusual access and remove unnecessary privileges."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.17",
+        "questionId": "A8.17_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should synchronize system clocks to a trusted common time source (for example network time protocol (NTP)) so logs are reliable for investigation and audit."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.17",
+        "questionId": "A8.17_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should explicitly require accurate time for logging and investigations, and ensure systems used for logging and monitoring maintain time accuracy."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.18",
+        "questionId": "A8.18_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should restrict high-risk administrative tools to authorized administrators only, require approvals for use where appropriate, and log and review usage."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.19",
+        "questionId": "A8.19_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement controlled software installation procedures for production systems, including approvals, testing, licensing checks, and change records."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.20",
+        "questionId": "A8.20_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement network security controls such as firewalls, secure configuration, segmentation where needed, and monitoring, with clear ownership and change control."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.23",
+        "questionId": "A8.23_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement controls to reduce web-borne threats, such as web content filtering, malicious site blocking, and safe browsing protections."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.24",
+        "questionId": "A8.24_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should define when encryption is required (in storage and in transfer), implement it for sensitive information, and manage encryption keys securely with restricted access and backup procedures."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.30",
+        "questionId": "A8.30_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should require outsourced development suppliers to meet defined security requirements through contracts (including confidentiality and secure development obligations), perform supplier risk assessment, and implement oversight such as code review, security testing, and access controls."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.32",
+        "questionId": "A8.32_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should implement formal change management requiring documented changes, risk assessment, testing, approval, and rollback planning for production changes."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.34",
+        "questionId": "A8.34_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC should plan and control audit testing to avoid disruption, including approval for testing scope, defined windows, monitoring during testing, and clear escalation/stop conditions if risk arises."
+      }
+    ]
   }
 ]
