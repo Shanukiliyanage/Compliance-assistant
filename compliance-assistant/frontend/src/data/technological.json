@@ -1,0 +1,415 @@
+{
+  "A8.1": {
+    "control": "User end point devices",
+    "questions": [
+      {
+        "id": "A8.1_Q1",
+        "question": "Do you have security measures to protect user devices (laptops, tablets, smartphones) that access sensitive information?",
+        "explanation": "This checks whether endpoint devices that access sensitive information are protected through appropriate security measures."
+      }
+    ]
+  },
+
+  "A8.2": {
+    "control": "Privileged access rights",
+    "questions": [
+      {
+        "id": "A8.2_Q1",
+        "question": "Is access to privileged accounts (such as admin or system accounts) restricted and controlled?",
+        "explanation": "This checks whether privileged access is limited to authorized individuals and managed through controls such as limited administrators, approvals, and monitoring."
+      }
+    ]
+  },
+
+  "A8.3": {
+    "control": "Information access restriction",
+    "questions": [
+      {
+        "id": "A8.3_Q1",
+        "question": "Is access to information restricted based on job roles and business need?",
+        "explanation": "This checks whether access is granted on a need-to-know basis aligned to job responsibilities and legitimate business requirements."
+      }
+    ]
+  },
+
+  "A8.4": {
+    "control": "Access to source code",
+    "questions": [
+      {
+        "id": "A8.4_Q1",
+        "question": "Is access to source code and development tools restricted to authorized personnel?",
+        "explanation": "This checks whether source code, repositories, and development tooling are restricted to approved individuals to prevent unauthorized access or changes."
+      }
+    ]
+  },
+
+  "A8.5": {
+    "control": "Secure authentication",
+    "questions": [
+      {
+        "id": "A8.5_Q1",
+        "question": "Are strong authentication methods used to protect access to critical systems and sensitive data?",
+        "explanation": "This checks whether strong authentication is in place (for example strong passwords and MFA). Multi-factor authentication (MFA) requires at least two verification factors, such as a password and a one-time code or authenticator app approval."
+      }
+    ]
+  },
+
+  "A8.6": {
+    "control": "Capacity management",
+    "questions": [
+      {
+        "id": "A8.6_Q1",
+        "question": "Does your organization monitor and adjust capacity for systems, technology, and people to ensure operations continue reliably as business needs grow?",
+        "explanation": "This checks whether you monitor and adjust capacity to meet business growth and reliability needs."
+      }
+    ]
+  },
+
+  "A8.7": {
+    "control": "Protection against malware",
+    "questions": [
+      {
+        "id": "A8.7_Q1",
+        "question": "Are systems protected against malware and other malicious software?",
+        "explanation": "This checks whether appropriate protections are in place, such as antivirus/anti-malware controls and user awareness to reduce the risk of malicious software infections."
+      }
+    ]
+  },
+
+  "A8.8": {
+    "control": "Management of technical vulnerabilities",
+    "questions": [
+      {
+        "id": "A8.8_Q1",
+        "question": "Does your organization identify and address technical vulnerabilities in systems in a timely manner, for example through vulnerability assessments or penetration testing (VAPT)?",
+        "explanation": "Vulnerability Assessment and Penetration Testing (VAPT) is a process used to identify security weaknesses in systems, applications, or networks.\nA vulnerability assessment looks for known security gaps, while penetration testing simulates real-world attacks to test whether those weaknesses can be exploited."
+      }
+    ]
+  },
+
+  "A8.9": {
+    "control": "Configuration management",
+    "questions": [
+      {
+        "id": "A8.9_Q1",
+        "question": "Are system configurations managed and controlled to maintain security?",
+        "explanation": "This checks whether system configurations are defined, maintained, and controlled so that security settings remain consistent and unauthorized or risky changes are prevented."
+      }
+    ]
+  },
+
+  "A8.10": {
+    "control": "Information deletion",
+    "questions": [
+      {
+        "id": "A8.10_Q1",
+        "question": "Is information securely deleted when it is no longer needed or required?",
+        "explanation": "This checks whether data is removed securely and in a timely manner once it is no longer required, to reduce exposure and support appropriate retention practices."
+      }
+    ]
+  },
+
+  "A8.11": {
+    "control": "Data masking",
+    "questions": [
+      {
+        "id": "A8.11_Q1",
+        "question": "Is sensitive data hidden or masked when full details are not required?",
+        "explanation": "For example, showing only part of a credit card number, hiding personal details in reports, or using fake or masked data in testing environments."
+      },
+      {
+        "id": "A8.11_Q2",
+        "question": "When sensitive data is masked, is encryption also used to further protect the data from unauthorized access?",
+        "explanation": "This checks whether encryption is used in addition to masking for stronger protection."
+      }
+    ]
+  },
+
+  "A8.12": {
+    "control": "Data leakage prevention",
+    "questions": [
+      {
+        "id": "A8.12_Q1",
+        "question": "Do you have measures in place to prevent sensitive information from being accidentally or intentionally shared with unauthorized people?",
+        "explanation": "Data Loss Prevention (DLP) refers to rules, settings, or tools that help protect sensitive information from being leaked or shared improperly. This can include controls such as firewalls, DLP solutions, or restrictions that prevent sensitive data from being sent through email, USB devices, cloud storage, or messaging applications without authorization."
+      }
+    ]
+  },
+
+  "A8.13": {
+    "control": "Information backup",
+    "questions": [
+      {
+        "id": "A8.13_Q1",
+        "question": "Are important systems and data backed up so they can be restored if needed?",
+        "explanation": "This checks whether backups and restores are in place."
+      },
+      {
+        "id": "A8.13_Q2",
+        "question": "Have you identified how often these backups should be performed based on your business needs?",
+        "explanation": "This checks whether backup frequency is defined based on business requirements."
+      }
+    ]
+  },
+
+  "A8.14": {
+    "control": "Redundancy of information processing facilities",
+    "questions": [
+      {
+        "id": "A8.14_Q1",
+        "question": "Do you have backup or redundant systems to maintain operations if primary systems fail?",
+        "explanation": "This checks whether redundancy supports availability."
+      }
+    ]
+  },
+
+  "A8.15": {
+    "control": "Logging",
+    "questions": [
+      {
+        "id": "A8.15_Q1",
+        "question": "Are system activities and security events logged and protected from tampering?",
+        "explanation": "This checks whether logs are collected and protected."
+      }
+    ]
+  },
+
+  "A8.16": {
+    "control": "Monitoring of activities",
+    "questions": [
+      {
+        "id": "A8.16_Q1",
+        "question": "Are systems monitored to detect suspicious or abnormal activity?",
+        "explanation": "This checks whether monitoring is in place."
+      },
+      {
+        "id": "A8.16_Q2",
+        "question": "Are access logs and user access rights reviewed regularly to identify unauthorized or unusual access?",
+        "explanation": "This checks whether reviews help detect unauthorized or unusual access."
+      }
+    ]
+  },
+
+  "A8.17": {
+    "control": "Clock synchronization",
+    "questions": [
+      {
+        "id": "A8.17_Q1",
+        "question": "Are all information processing systems synchronized to a common, approved time source (NTP)?",
+        "explanation": "This checks whether systems use an approved time source. NTP (Network Time Protocol) is a standard method used to keep computers and devices set to the correct time by syncing them with a trusted time server."
+      },
+      {
+        "id": "A8.17_Q2",
+        "question": "Is clock accuracy important for your incident investigations and forensic analysis?",
+        "explanation": "This checks whether accurate time is needed for investigations."
+      }
+    ]
+  },
+
+  "A8.18": {
+    "control": "Use of privileged utility programs",
+    "questions": [
+      {
+        "id": "A8.18_Q1",
+        "question": "Are utility programs that can override system and application controls restricted and tightly controlled?",
+        "explanation": "This checks whether privileged utilities are controlled."
+      }
+    ]
+  },
+
+  "A8.19": {
+    "control": "Installation of software on operational systems",
+    "questions": [
+      {
+        "id": "A8.19_Q1",
+        "question": "Are procedures in place to control and approve the installation of software on operational (production) systems, including licensed and open-source software?",
+        "explanation": "This checks whether production software installs are controlled."
+      }
+    ]
+  },
+
+  "A8.20": {
+    "control": "Network security",
+    "answerType": "YES_NO",
+    "questions": [
+      {
+        "id": "A8.20_Q1",
+        "question": "Are networks properly secured, managed, and controlled in the organization?",
+        "explanation": "Answer YES only if your organization manages internal or external networks."
+      }
+    ],
+    "gatewayFor": ["A8.21", "A8.22"]
+  },
+
+  "A8.21": {
+    "control": "Security of network services",
+    "questions": [
+      {
+        "id": "A8.21_Q1",
+        "question": "Are network services securely managed (firewalls, monitoring, configurations)?",
+        "explanation": "This checks whether network services are secured."
+      }
+    ]
+  },
+
+  "A8.22": {
+    "control": "Segregation of networks",
+    "questions": [
+      {
+        "id": "A8.22_Q1",
+        "question": "Are networks segregated to reduce risk?",
+        "explanation": "This checks whether network segmentation is applied."
+      }
+    ]
+  },
+
+  "A8.23": {
+    "control": "Web filtering",
+    "questions": [
+      {
+        "id": "A8.23_Q1",
+        "question": "Do you use web filtering or similar controls to reduce access to malicious or inappropriate websites and prevent web-based threats?",
+        "explanation": "This checks whether web access is managed to reduce the risk of malware, phishing, and exposure to harmful content."
+      }
+    ]
+  },
+
+  "A8.24": {
+    "control": "Use of cryptography",
+    "questions": [
+      {
+        "id": "A8.24_Q1",
+        "question": "Is cryptography (such as encryption) used appropriately to protect sensitive information at rest and in transit?",
+        "explanation": "This checks whether encryption is applied where needed (for example laptops, backups, databases, and data transfers)."
+      }
+    ]
+  },
+
+  "SDLC_Gateway": {
+    "control": "Software development within the organization",
+    "answerType": "YES_NO",
+    "questions": [
+      {
+        "id": "SDLC_GATE_Q1",
+        "question": "Do you develop any software within the organization?",
+        "explanation": "If NO, all secure development controls are skipped."
+      }
+    ],
+    "gatewayFor": ["A8.25", "A8.26", "A8.27", "A8.28", "A8.29", "A8.31", "A8.33"]
+  },
+
+  "A8.25": {
+    "control": "Secure development life cycle",
+    "questions": [
+      {
+        "id": "A8.25_Q1",
+        "question": "Is security considered throughout the software development life cycle?",
+        "explanation": "This checks whether security is integrated throughout each phase of the software development life cycle (planning, design, implementation, testing, deployment, and maintenance), rather than being addressed only at the end."
+      }
+    ]
+  },
+
+  "A8.26": {
+    "control": "Application security requirements",
+    "questions": [
+      {
+        "id": "A8.26_Q1",
+        "question": "Are security requirements defined before developing or acquiring applications?",
+        "explanation": "This checks whether clear security requirements are defined in advance, such as authentication, access control, encryption, logging, privacy, and relevant compliance obligations, before developing or acquiring an application."
+      }
+    ]
+  },
+
+  "A8.27": {
+    "control": "Secure system architecture and engineering principles",
+    "questions": [
+      {
+        "id": "A8.27_Q1",
+        "question": "Are secure design principles applied when building or modifying systems?",
+        "explanation": "This checks whether security considerations are applied during system design and changes, for example least privilege, secure defaults, network segmentation, threat modeling, and attack surface reduction."
+      }
+    ]
+  },
+
+  "A8.28": {
+    "control": "Secure coding",
+    "questions": [
+      {
+        "id": "A8.28_Q1",
+        "question": "Are secure coding practices followed during software development?",
+        "explanation": "This checks whether secure coding practices are followed, such as code review, use of approved libraries, input validation, secure handling of secrets, and remediation of common vulnerabilities (for example injection and broken access control)."
+      }
+    ]
+  },
+
+  "A8.29": {
+    "control": "Security testing in development and acceptance",
+    "questions": [
+      {
+        "id": "A8.29_Q1",
+        "question": "Are systems tested for security issues before being released into production?",
+        "explanation": "This checks whether security testing is performed prior to production release."
+      },
+      {
+        "id": "A8.29_Q2",
+        "question": "When testing is performed, is dummy or test data used, and if production data is used, is it properly protected?",
+        "explanation": "This checks whether testing uses appropriate data and that any production data used during testing is adequately protected."
+      }
+    ]
+  },
+
+  "A8.31": {
+    "control": "Separation of development, test and production environments",
+    "questions": [
+      {
+        "id": "A8.31_Q1",
+        "question": "Are development, testing, and production environments kept separate and secured?",
+        "explanation": "This checks whether development, test, and production environments are segregated and protected to reduce the risk of unauthorized access, data leakage, or unintended changes impacting production systems."
+      }
+    ]
+  },
+
+  "A8.30": {
+    "control": "Outsourced development",
+    "questions": [
+      {
+        "id": "A8.30_Q1",
+        "question": "When development is outsourced, are security requirements and oversight applied, for example through contracts, non-disclosure agreements (NDAs), and vendor risk assessments?",
+        "explanation": "This checks whether development is outsourced."
+      }
+    ]
+  },
+
+  "A8.32": {
+    "control": "Change management",
+    "questions": [
+      {
+        "id": "A8.32_Q1",
+        "question": "Are system changes reviewed, approved, and tested before implementation?",
+        "explanation": "This checks whether changes are controlled."
+      }
+    ]
+  },
+
+  "A8.33": {
+    "control": "Test information",
+    "questions": [
+      {
+        "id": "A8.33_Q1",
+        "question": "Is test data managed securely and protected from exposure, including when dummy or test data is used, and when production data is used for testing?",
+        "explanation": "This checks whether test data is protected, and whether any production data used for testing is appropriately safeguarded to prevent unauthorized access, leakage, or misuse."
+      }
+    ]
+  },
+
+  "A8.34": {
+    "control": "Protection of information systems during audit testing",
+    "questions": [
+      {
+        "id": "A8.34_Q1",
+        "question": "Are security audits conducted in a controlled way to avoid system disruption or risk?",
+        "explanation": "This checks whether audit activities are managed to minimize disruption and risk."
+      }
+    ]
+  }
+}

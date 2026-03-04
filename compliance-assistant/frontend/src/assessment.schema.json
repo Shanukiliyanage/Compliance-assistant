@@ -1,0 +1,25 @@
+{
+  "assessment": {
+    "smeProfile": {
+      "organizationName": "string",
+      "sector": "string",
+      "organizationSize": "string",
+      "dataSensitivity": "string"
+    },
+    "responses": {
+      "controlId": {
+        "controlName": "string",
+        "questions": {
+          "questionId": {
+            "answer": "Yes | No | Partial"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "status": "draft | submitted",
+      "createdAt": "timestamp",
+      "updatedAt": "timestamp"
+    }
+  }
+}

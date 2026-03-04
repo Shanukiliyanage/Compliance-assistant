@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "clause": "4.2",
+    "question": "Have you identified key stakeholders and their information-security expectations?",
+    "explanation": "e.g., shareholders, customers, regulators (ICO, GDPR supervisory authority), suppliers, and employees. For each, note what they expect — data protection, service availability, legal compliance, or contractual security obligations."
+  },
+  {
+    "id": 2,
+    "clause": "4.3",
+    "question": "Have you defined the scope of your ISMS (locations, systems, data, processes covered)?",
+    "explanation": "e.g., 'Our London head office, cloud-hosted CRM, and all customer personal data' — include every site, system, and process that handles sensitive information, and note anything purposely left out and why."
+  },
+  {
+    "id": 3,
+    "clause": "5.1",
+    "question": "Does top management actively demonstrate commitment to information security?",
+    "explanation": "e.g., the CEO has signed the security policy, a security budget is approved each year, a named manager owns security, and security is a standing agenda item at board/leadership meetings."
+  },
+  {
+    "id": 4,
+    "clause": "5.2",
+    "question": "Is there a formal, management-approved Information Security Policy communicated to employees?",
+    "explanation": "e.g., a written policy signed by the MD or CEO, shared with all staff via email and posted on the intranet, with a named owner and a review date — 'Information Security Policy v2, reviewed Jan 2025'."
+  },
+  {
+    "id": 5,
+    "clause": "6.1",
+    "question": "Do you have a formal, repeatable process to identify and assess security risks?",
+    "explanation": "e.g., a spreadsheet or tool listing key assets (laptops, databases, email), potential threats (ransomware, phishing, theft), vulnerabilities, and a consistent score for likelihood × impact — updated at least annually."
+  },
+  {
+    "id": 6,
+    "clause": "6.2",
+    "question": "Have you documented risk treatment decisions and mapped them to specific controls or actions?",
+    "explanation": "e.g., 'Risk: data breach via phishing — Decision: mitigate — Control: deploy MFA + run phishing simulation — Owner: IT Manager — Deadline: Q3 2025 — Status: complete, evidence: MFA deployment ticket #451'."
+  },
+  {
+    "id": 7,
+    "clause": "7.1",
+    "question": "Do you regularly provide security awareness and training to employees (onboarding + annual refresh)?",
+    "explanation": "e.g., a security induction on Day 1 covering acceptable use, passwords, and incident reporting, plus an annual refresher on phishing, social engineering, and data handling — with attendance records kept."
+  },
+  {
+    "id": 8,
+    "clause": "7.2",
+    "question": "Have you assigned and documented security roles and responsibilities?",
+    "explanation": "e.g., 'Information Security Manager: Jane Smith — owns policy, audits, and incident response. IT Admin: manages access and patching. All staff: report suspected incidents to security@company.com within 1 hour'."
+  },
+  {
+    "id": 9,
+    "clause": "8.1",
+    "question": "Do you have documented, implemented procedures for key security operations?",
+    "explanation": "e.g., written step-by-step procedures (SOPs or runbooks) for: granting and revoking user access, running daily backups, handling security incidents, and approving system changes — accessible to the relevant staff."
+  },
+  {
+    "id": 10,
+    "clause": "8.2",
+    "question": "Are these procedures followed day-to-day and supported by evidence?",
+    "explanation": "e.g., access review logs, automated backup confirmation emails, incident tickets with timestamps, and change-approval records — showing the procedures are consistently followed, not just written down."
+  },
+  {
+    "id": 11,
+    "clause": "9.1",
+    "question": "Do you perform regular internal reviews or audits and document findings?",
+    "explanation": "e.g., an annual internal audit using a checklist of controls (access management, backups, patch levels, policy compliance) — with documented findings, rated severity, and corrective actions tracked to completion."
+  },
+  {
+    "id": 12,
+    "clause": "9.2",
+    "question": "Does top management review security performance and decide on actions?",
+    "explanation": "e.g., a quarterly or annual management review covering: open incidents, audit findings, KPIs (patch completion rate, training attendance, access reviews) — with recorded minutes, actions, owners, and deadlines."
+  },
+  {
+    "id": 13,
+    "clause": "10.1",
+    "question": "Do you record incidents and findings and track corrective actions until completed?",
+    "explanation": "e.g., an incident/issue log or ticketing system recording: what happened, root cause, the fix applied, who owns it, target completion date, and evidence that it won't recur — reviewed monthly."
+  },
+  {
+    "id": 14,
+    "clause": "10.2",
+    "question": "Do you periodically review the ISMS and controls to identify and implement improvements?",
+    "explanation": "e.g., after every incident or audit, a lessons-learned session identifies improvements — updated policies, new controls, better training — with an improvement log, named owners, and completion dates tracked."
+  }
+]

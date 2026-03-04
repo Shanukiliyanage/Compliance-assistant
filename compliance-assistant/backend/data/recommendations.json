@@ -1,0 +1,52 @@
+{
+  "rules": [
+    {
+      "stageId": "stage1",
+      "severity": "high",
+      "scoreThreshold": 50,
+      "title": "Establish Basic Information Security Management",
+      "description": "You need to establish a basic framework for information security management. Start with documenting your information security policy and defining clear roles and responsibilities.",
+      "actions": ["Define information security policy", "Assign security roles", "Document security procedures"]
+    },
+    {
+      "stageId": "stage2",
+      "severity": "high",
+      "scoreThreshold": 60,
+      "title": "Strengthen Organizational Controls",
+      "description": "Improve your organizational governance around information security. Focus on supplier relationships and development security practices.",
+      "actions": ["Review supplier security requirements", "Document secure development guidelines", "Establish change management process"]
+    },
+    {
+      "stageId": "stage3",
+      "severity": "medium",
+      "scoreThreshold": 70,
+      "title": "Enhance People Security Awareness",
+      "description": "Invest in security awareness training and clear disciplinary processes for security violations.",
+      "actions": ["Implement mandatory security training", "Create disciplinary policy", "Establish incident reporting process"]
+    },
+    {
+      "stageId": "stage4",
+      "severity": "high",
+      "scoreThreshold": 60,
+      "title": "Improve Physical Security Controls",
+      "description": "Implement physical security measures to protect your facilities and critical infrastructure.",
+      "actions": ["Implement access control systems", "Secure server rooms", "Establish visitor management policy"]
+    },
+    {
+      "stageId": "stage5",
+      "severity": "high",
+      "scoreThreshold": 65,
+      "title": "Deploy Technical Security Controls",
+      "description": "Implement essential technical controls including access management, encryption, and monitoring.",
+      "actions": ["Implement access management system", "Deploy encryption for sensitive data", "Set up security monitoring and logging"]
+    },
+    {
+      "stageId": "overall",
+      "severity": "high",
+      "scoreThreshold": 70,
+      "title": "Create Comprehensive Information Security Program",
+      "description": "You need a holistic information security program. Consider implementing an integrated management system.",
+      "actions": ["Develop comprehensive security strategy", "Implement governance structure", "Establish continuous improvement process"]
+    }
+  ]
+}
