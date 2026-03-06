@@ -36,13 +36,29 @@ function isAnnexControlKey(key, prefix) {
   if (!key.startsWith(prefix + ".")) return false;
   const rest = key.slice(prefix.length + 1);
   if (!rest) return false;
-  if (rest.includes("_")) return false;
-  const n = Number(rest);
-  return Number.isInteger(n) && String(n) === rest;
+  // Strip optional _suffix (e.g. "A5.19_Gateway" → numPart "19")
+  const numPart = rest.split("_")[0];
+  const n = Number(numPart);
+  return Number.isInteger(n) && String(n) === numPart;
 }
 
 function countAnnexControls(stageObject, prefix) {
   return Object.keys(stageObject || {}).filter((k) => isAnnexControlKey(k, prefix)).length;
+}
+
+// Distributes counts as percentages that always sum to exactly 100
+// using the largest-remainder (Hamilton) method.
+function largestRemainderRound(counts, total) {
+  if (!total) return counts.map(() => 0);
+  const raws = counts.map((c) => (c / total) * 100);
+  const floors = raws.map(Math.floor);
+  const remainders = raws.map((r, i) => r - floors[i]);
+  let toDistribute = 100 - floors.reduce((a, b) => a + b, 0);
+  const order = remainders
+    .map((r, i) => [r, i])
+    .sort((a, b) => b[0] - a[0]);
+  for (let k = 0; k < toDistribute; k++) floors[order[k][1]] += 1;
+  return floors;
 }
 
 function getMaturityLevelFromPercent(overallPercent) {
@@ -68,14 +84,19 @@ function buildThreeWaySummary(counts, total) {
   const missing = Math.max(0, t - assessedTotal);
   const nonCount = nonAssessed + missing;
 
+  const [fullyPercent, partialPercent, nonPercent] = largestRemainderRound(
+    [fullyCount, partialCount, nonCount],
+    t
+  );
+
   return {
     total: t,
     fullyCount,
     partialCount,
     nonCount,
-    fullyPercent: t ? Math.round((fullyCount / t) * 100) : 0,
-    partialPercent: t ? Math.round((partialCount / t) * 100) : 0,
-    nonPercent: t ? Math.round((nonCount / t) * 100) : 0,
+    fullyPercent,
+    partialPercent,
+    nonPercent,
   };
 }
 
@@ -93,16 +114,19 @@ function buildAnnexSummaryWithNotApplicable(counts, total, notApplicableCount) {
   // "Not compliant" bucket against the full 93 total.
   const nonCount = Math.max(0, t - na - fullyCount - partialCount);
 
+  const [fullyPercent, partialPercent, nonPercent, notApplicablePercent] =
+    largestRemainderRound([fullyCount, partialCount, nonCount, na], t);
+
   return {
     total: t,
     fullyCount,
     partialCount,
     nonCount,
     notApplicableCount: na,
-    fullyPercent: t ? Math.round((fullyCount / t) * 100) : 0,
-    partialPercent: t ? Math.round((partialCount / t) * 100) : 0,
-    nonPercent: t ? Math.round((nonCount / t) * 100) : 0,
-    notApplicablePercent: t ? Math.round((na / t) * 100) : 0,
+    fullyPercent,
+    partialPercent,
+    nonPercent,
+    notApplicablePercent,
   };
 }
 
@@ -563,21 +587,25 @@ export default function Summary() {
                 const partialCount = Math.max(0, Number(stageScore?.breakdown?.counts?.partial ?? 0));
                 const nonCount = Math.max(0, stageTotalRaw - notApplicableCount - fullyCount - partialCount);
 
+                const [fullyPct, partialPct, nonPct, notApplicablePct] =
+                  largestRemainderRound(
+                    [fullyCount, partialCount, nonCount, notApplicableCount],
+                    stageTotalRaw
+                  );
+
                 const summary = stageTotalRaw
                   ? {
                       total: stageTotalRaw,
                       fullyCount,
                       partialCount,
                       nonCount,
-                      fullyPercent: Math.round((fullyCount / stageTotalRaw) * 100),
-                      partialPercent: Math.round((partialCount / stageTotalRaw) * 100),
-                      nonPercent: Math.round((nonCount / stageTotalRaw) * 100),
+                      fullyPercent: fullyPct,
+                      partialPercent: partialPct,
+                      nonPercent: nonPct,
                     }
                   : null;
 
-                const notApplicablePercent = stageTotalRaw
-                  ? Math.round((notApplicableCount / stageTotalRaw) * 100)
-                  : 0;
+                const notApplicablePercent = notApplicablePct;
 
                 return (
                   <div

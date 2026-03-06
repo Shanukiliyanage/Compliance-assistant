@@ -255,9 +255,7 @@ function parseAnnexControlOrder(controlId) {
 
 function parseMandatoryQuestionOrder(controlId) {
   // Matches: 4.1, 6.1.3, 10.2
-  const id = String(controlId || "")
-    .trim()
-    .replace(/[._-]Q\d+$/i, "");
+  const id = String(controlId || "").trim();
   const m = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/.exec(id);
   if (!m) return null;
   const parts = [Number(m[1])];
@@ -292,13 +290,6 @@ function compareBySeverity(a, b) {
   return rank(a) - rank(b);
 }
 
-function parseQuestionNumberFromId(value) {
-  // Matches suffixes like ".Q2", "_Q2", "-Q2".
-  const s = String(value || "").trim();
-  const m = /[._-]Q(\d+)$/i.exec(s);
-  return m ? Number(m[1]) : null;
-}
-
 function getStageIdFromRecommendation(rec) {
   if (!rec || typeof rec !== "object") return "";
 
@@ -331,7 +322,6 @@ function normalizeRecommendation(rec, textIndex) {
       controlId: "",
       complianceState: "",
       title: "Recommendation",
-      subtitle: "",
       description: "",
       stageLabel: "",
     };
@@ -344,8 +334,6 @@ function normalizeRecommendation(rec, textIndex) {
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
 
     const controlId = rec.controlId ? String(rec.controlId) : "";
-    // Skip stale/malformed recommendations with no real control identifier.
-    if (!controlId || controlId === "undefined") return null;
     const questionId = rec.questionId ? String(rec.questionId) : "";
     const clauseTitle = mandatoryClauseTitles[controlId];
 
@@ -355,114 +343,16 @@ function normalizeRecommendation(rec, textIndex) {
         ? String(textIndex.get(`${stageId}::${questionId}`) || "")
         : "";
 
-    const parseQuestionNumber = (qid) => {
-      const s = String(qid || "").trim();
-      const m = /(?:^|[._-])Q(\d+)$/i.exec(s);
-      return m ? Number(m[1]) : null;
-    };
-
-    // Stage 1 legacy ids like "6.1.Q2" need mapping to the real clause question text.
-    // We keep the *displayed control* as the base ("6.1"), but fetch the correct question
-    // from mandatory.json (e.g. 6.1.Q2 maps to clause 6.2).
-    const stage1LegacyMap = {
-      "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
-      "5.1": { 1: "5.1", 2: "5.2" },
-      "6.1": { 1: "6.1", 2: "6.2" },
-      "7.1": { 1: "7.1", 2: "7.2", 3: "7.3" },
-      "8.1": { 1: "8.1", 2: "8.2" },
-      "9.1": { 1: "9.1", 2: "9.2" },
-      "10.1": { 1: "10.1", 2: "10.2" },
-    };
-
-    // Stage 1: show full clause title (e.g. "Clause 5: Leadership"), not sub-numbers.
-    if (stageId === "stage1") {
-      const idStr = String(controlId || "").trim();
-
-      const clauseFullTitles = {
-        "4": "Clause 4: Context of the Organization",
-        "5": "Clause 5: Leadership",
-        "6": "Clause 6: Planning",
-        "7": "Clause 7: Support",
-        "8": "Clause 8: Operation",
-        "9": "Clause 9: Performance Evaluation",
-        "10": "Clause 10: Improvement",
-      };
-
-      // Build question ordinal map (clause id → 1-based position within its clause group)
-      // so that "4.2" shows as Q1, "4.3" as Q2, "5.1" as Q1, etc.
-      const clauseOrdinalMap = (() => {
-        const items = getMandatoryItems(mandatoryData);
-        const grouped = {};
-        for (const q of items) {
-          const cl = String(q?.clause ?? "").trim();
-          const maj = getMajorClause(cl);
-          if (!Number.isFinite(maj)) continue;
-          if (!grouped[maj]) grouped[maj] = [];
-          grouped[maj].push(cl);
-        }
-        const map = {};
-        for (const list of Object.values(grouped)) {
-          list.forEach((cl, idx) => { map[cl] = idx + 1; });
-        }
-        return map;
-      })();
-
-      // Path A: question-level ids like "5.1.Q2" or "6.1.Q1".
-      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/i.exec(idStr);
-      if (m) {
-        const majorClause = m[1];
-        const base = `${m[1]}.${m[2]}`;
-        const qn = Number(m[3]);
-        const mappedClause = stage1LegacyMap?.[base]?.[qn] || base;
-        const mappedQuestionText =
-          mappedClause && textIndex?.get
-            ? String(textIndex.get(`${stageId}::${mappedClause}`) || "")
-            : "";
-        const displayQn = clauseOrdinalMap[mappedClause] ?? qn;
-
-        return {
-          stageId,
-          controlId,
-          questionId: idStr,
-          complianceState,
-          priority,
-          title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
-          subtitle: mappedQuestionText ? `Q${displayQn} - ${mappedQuestionText}` : `Q${displayQn}`,
-          description: rec.recommendation,
-          stageLabel,
-        };
-      }
-
-      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3".
-      const n = /^(\d+)\.(\d+)$/.exec(idStr);
-      if (n) {
-        const majorClause = n[1];
-        const displayQn = clauseOrdinalMap[idStr] ?? Number(n[2]);
-        const qText = textIndex?.get ? String(textIndex.get(`${stageId}::${idStr}`) || "") : "";
-        return {
-          stageId,
-          controlId,
-          questionId: idStr,
-          complianceState,
-          priority,
-          title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
-          subtitle: qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`,
-          description: rec.recommendation,
-          stageLabel,
-        };
-      }
-    }
-
     return {
       stageId,
       controlId,
       questionId,
       complianceState,
       priority,
-      title: controlId ? `Control ${controlId}.` : clauseTitle || "Recommendation",
-      subtitle: questionTitle
-        ? `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`
-        : "",
+      title:
+        questionTitle ||
+        clauseTitle ||
+        (questionId ? `Question ${questionId}` : controlId ? `Control ${controlId}` : "Recommendation"),
       description: rec.recommendation,
       stageLabel,
     };
@@ -482,7 +372,6 @@ function normalizeRecommendation(rec, textIndex) {
     complianceState: inferredComplianceState,
     priority,
     title: rec.title || rec.message || "Recommendation",
-    subtitle: "",
     description: rec.description || "",
     stageLabel: stageId ? stageNames[stageId] || "" : (rec.stageLabel || rec.stage || rec.stageName || ""),
   };
@@ -562,24 +451,10 @@ export default function RecommendationsPage() {
           return;
         }
 
-        const [result, report] = await Promise.all([
-          getAssessmentResult(assessmentId),
-          getAssessmentReport(assessmentId).catch(() => null),
-        ]);
-
-        const merged = {
-          ...(result && typeof result === "object" ? result : {}),
-          ...(report && typeof report === "object" ? { report } : {}),
-        };
-
-        // Prefer live recommendations from the report endpoint.
-        if (report && Array.isArray(report?.recommendations)) {
-          merged.recommendations = report.recommendations;
-        }
-
-        setAssessment(merged);
+        const data = await getAssessmentResult(assessmentId);
+        setAssessment(data);
         try {
-          localStorage.setItem("assessmentResult", JSON.stringify(merged));
+          localStorage.setItem("assessmentResult", JSON.stringify(data));
         } catch {
           // Ignore storage failures (e.g., privacy mode)
         }
@@ -607,122 +482,6 @@ export default function RecommendationsPage() {
       const report = await getAssessmentReport(assessmentId);
       const controlsByStage = getAllStageControls();
       const answers = report?.answers || {};
-
-      // Use the same per-question recommendation source as the UI.
-      // The report endpoint returns controlStatuses, which may be aggregated by control.
-      // `report.recommendations` is computed live from answers (preferred).
-      const recommendationIndex = new Map();
-      let recommendationSource = Array.isArray(report?.recommendations)
-        ? report.recommendations
-        : Array.isArray(assessment?.recommendations)
-          ? assessment.recommendations
-          : [];
-      if (!recommendationSource.length) {
-        try {
-          const fresh = await getAssessmentResult(assessmentId);
-          recommendationSource = Array.isArray(fresh?.recommendations)
-            ? fresh.recommendations
-            : [];
-        } catch {
-          // Ignore: export will fall back to controlStatuses.
-        }
-      }
-
-      for (const r of recommendationSource) {
-        if (!r || typeof r !== "object") continue;
-        const stageId = String(r.stageId || "").trim();
-        if (!stageId) continue;
-
-        const recText = r.recommendation != null ? String(r.recommendation) : "";
-        if (!recText.trim()) continue;
-
-        // stage1: backend uses `controlId` as the question id (e.g. "6.1" or "6.1.Q2")
-        // stage2-5: backend sets `{ controlId: baseControlId, questionId: originalQuestionId }`
-        const qid = String((r.questionId || r.controlId) ?? "").trim();
-        if (!qid) continue;
-        recommendationIndex.set(`${stageId}::${qid}`, recText);
-      }
-
-      const parseQuestionNumberForReport = (qid) => {
-        const s = String(qid || "").trim();
-        const m = /(?:^|[._-])Q(\d+)$/i.exec(s) || /_Q(\d+)$/i.exec(s);
-        return m ? Number(m[1]) : null;
-      };
-
-      const badgeClassForLabel = (label) => {
-        switch (String(label || "").trim().toUpperCase()) {
-          case "YES":
-            return "badge badge-yes";
-          case "NO":
-            return "badge badge-no";
-          case "PARTIAL":
-            return "badge badge-partial";
-          case "N/A":
-            return "badge badge-na";
-          case "HIGH":
-            return "badge badge-no";
-          case "MEDIUM":
-            return "badge badge-partial";
-          case "LOW":
-            return "badge badge-low";
-          default:
-            return "badge";
-        }
-      };
-
-      const getRecommendationForQuestionRow = ({ stageId, qidStr }) => {
-        const keyStage = String(stageId || "").trim();
-        const qKey = String(qidStr || "").trim();
-        if (!keyStage || !qKey) return "";
-
-        const direct = recommendationIndex.get(`${keyStage}::${qKey}`);
-        if (direct) return direct;
-
-        // Gateway questions (e.g. A5.19.GW1) typically correspond to the control's Q1.
-        const gwAlias = qKey.replace(/\.GW\d+$/i, ".Q1");
-        if (gwAlias !== qKey) {
-          const hit = recommendationIndex.get(`${keyStage}::${gwAlias}`);
-          if (hit) return hit;
-        }
-
-        if (keyStage === "stage1") {
-          const clause = extractClause(qKey) || qKey;
-          if (clause !== qKey) {
-            const clauseHit = recommendationIndex.get(`${keyStage}::${clause}`);
-            if (clauseHit) return clauseHit;
-          }
-
-          // Legacy variants some data used.
-          const q1 = recommendationIndex.get(`${keyStage}::${clause}.Q1`);
-          if (q1) return q1;
-          const q2 = recommendationIndex.get(`${keyStage}::${clause}.Q2`);
-          if (q2) return q2;
-          const q3 = recommendationIndex.get(`${keyStage}::${clause}.Q3`);
-          if (q3) return q3;
-        }
-
-        return "";
-      };
-
-      const formatQuestionCellHtml = ({ stageId, control, qid, questionText }) => {
-        // Match the on-screen “written way”:
-        // Control X.
-        // Qn - <question>
-        const qidStr = String(qid || "").trim();
-        const qText = String(questionText || "").trim();
-
-        if (stageId === "stage1") {
-          const clauseId = extractClause(qidStr) || qidStr;
-          const label = clauseId ? `Control ${clauseId}.` : "Control";
-          return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(`Q1 - ${qText || clauseId || ""}`)}</span>`;
-        }
-
-        const controlId = String(control?.controlId || "").trim();
-        const qn = parseQuestionNumberForReport(qidStr);
-        const label = controlId ? `Control ${controlId}.` : "Control";
-        const qLine = qText ? `${qn ? `Q${qn} - ` : ""}${qText}` : qidStr;
-        return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(qLine)}</span>`;
-      };
 
       const statusIndex = new Map(
         (report?.controlStatuses || []).map((s) => [`${s.stageId}::${s.controlId}`, s])
@@ -788,12 +547,11 @@ export default function RecommendationsPage() {
           const isStage1Clause = stageId === "stage1" && /^CL\d+_/i.test(String(control.controlId));
           const heading = isStage1Clause
             ? `${escapeHtml(control.controlName || "")}`
-            : `${escapeHtml(control.controlId)} - ${escapeHtml(control.controlName || "")}`;
+            : `${escapeHtml(control.controlId)} — ${escapeHtml(control.controlName || "")}`;
           body += `<h3>${heading}</h3>`;
-          const statusLabel = complianceLabel(status?.complianceState) || "";
-          body += `<p><strong>Status:</strong> <span class="${badgeClassForLabel(statusLabel)}">${escapeHtml(statusLabel)}</span></p>`;
+          body += `<p><strong>Status:</strong> ${escapeHtml(complianceLabel(status?.complianceState) || "")}</p>`;
           if (priorityLabel && priorityLabel !== "NONE") {
-            body += `<p><strong>Priority:</strong> <span class="${badgeClassForLabel(priorityLabel)}">${escapeHtml(priorityLabel)}</span></p>`;
+            body += `<p><strong>Priority:</strong> ${escapeHtml(priorityLabel)}</p>`;
           }
 
           const qs = Array.isArray(control.questions) ? control.questions : [];
@@ -801,14 +559,9 @@ export default function RecommendationsPage() {
             body += `<table><thead><tr><th style="width:55%">Question</th><th style="width:15%">Answer</th><th>Recommendation</th></tr></thead><tbody>`;
             for (const q of qs) {
               const qid = q?.id;
-              const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
-              let answerValue = answers?.[stageId]?.[qid];
-              // If a question was hidden by a gateway/showIf rule, treat it as NOT APPLICABLE
-              // in the exported report (so we don't show irrelevant recommendations).
-              if ((answerValue == null || answerValue === "") && !applicableByRules) {
-                answerValue = "na";
-              }
+              const answerValue = answers?.[stageId]?.[qid];
               const questionText = q?.question || q?.text || "";
+              const applicable = isQuestionApplicable(stageId, control.controlId, q, answers);
               const answerLabel = normalizeAnswerLabel(answerValue);
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
               const isNotApplicableAnswer = answerLabel === "N/A";
@@ -822,17 +575,14 @@ export default function RecommendationsPage() {
                     (qidClause !== qidStr ? statusIndex.get(`${stageId}::${qidClause}`) : null) ||
                     status
                   : status;
-              // Prefer per-question recommendation; fallback to backend controlStatus.
-              let rowRecommendationText = getRecommendationForQuestionRow({
-                stageId,
-                qidStr: qidStr || qidClause,
-              });
-              if (!rowRecommendationText) rowRecommendationText = rowStatus?.recommendation ? String(rowStatus.recommendation) : "";
+              const rowRecommendationText = rowStatus?.recommendation
+                ? String(rowStatus.recommendation)
+                : "";
 
               body += `<tr>`;
-              body += `<td>${formatQuestionCellHtml({ stageId, control, qid, questionText })}</td>`;
-              body += `<td><span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span></td>`;
-              body += `<td>${escapeHtml(isNotApplicableAnswer ? "-" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
+              body += `<td>${escapeHtml(questionText)}</td>`;
+              body += `<td>${escapeHtml(answerLabel)}</td>`;
+              body += `<td>${escapeHtml(!applicable || isNotApplicableAnswer ? "N/A" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
@@ -860,18 +610,7 @@ export default function RecommendationsPage() {
       table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; }
       th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
       th { background: #f5f5f5; text-align: left; }
-      .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; line-height: 1.4; border: 2px solid #e5e7eb; background: #f9fafb; color: #111827; white-space: nowrap; }
-      /* Strong, print-friendly color coding for YES/NO/PARTIAL */
-      .badge-yes { background: #dcfce7; border-color: #166534; color: #166534; box-shadow: inset 6px 0 0 #16a34a; }
-      .badge-no { background: #fee2e2; border-color: #991b1b; color: #991b1b; box-shadow: inset 6px 0 0 #dc2626; }
-      .badge-partial { background: #fef9c3; border-color: #854d0e; color: #854d0e; box-shadow: inset 6px 0 0 #ca8a04; }
-      .badge-na { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
-      .badge-low { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
-      @media print {
-        body { margin: 12mm; }
-        /* Ask the browser to preserve colors when printing to PDF */
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      }
+      @media print { body { margin: 12mm; } }
     </style>
   </head>
   <body>
@@ -887,6 +626,8 @@ export default function RecommendationsPage() {
       <ul>
         <li><strong>ISO alignment:</strong> Questions are grouped by ISO clauses (Stage 1) and Annex A controls (Stages 2–5).</li>
         <li><strong>Rule checks:</strong> Control compliance is computed consistently from YES/PARTIAL/NO answers, then scoring/recommendations use that output.</li>
+        <li><strong>Test cases:</strong> We manually tested sample answer sets (e.g., all YES, mixed, gateway exclusions) to confirm expected scores and recommendations.</li>
+        <li><strong>Repeatability:</strong> The same inputs always produce the same outputs (deterministic rules).</li>
       </ul>
     </div>
     ${body}
@@ -911,7 +652,7 @@ export default function RecommendationsPage() {
 
   const controlNameIndex = useMemo(() => {
     // Lookup table: (stageId + controlId) -> controlName.
-    // Used to show nicer titles like: "Control A.5.1 - Policies for information security".
+    // Used to show nicer titles like: "Control A.5.1 — Policies for information security".
     const index = new Map();
     const controlsByStage = getAllStageControls();
 
@@ -939,7 +680,31 @@ export default function RecommendationsPage() {
   const normalizedRecommendations = useMemo(() => {
     // Convert raw backend recommendations into a stable UI shape.
     const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
-    return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
+    return recs.map((r) => {
+      const normalized = normalizeRecommendation(r, controlNameIndex);
+      const name =
+        normalized.stageId && normalized.controlId
+          ? controlNameIndex.get(`${normalized.stageId}::${normalized.controlId}`)
+          : "";
+
+      if (name && normalized.controlId) {
+        const baseTitle = `Control ${normalized.controlId}`;
+        const shouldReplaceTitle =
+          !normalized.title ||
+          normalized.title === baseTitle ||
+          normalized.title === "Recommendation" ||
+          normalized.title.startsWith(baseTitle);
+
+        if (shouldReplaceTitle) {
+          return {
+            ...normalized,
+            title: `${baseTitle} — ${name}`,
+          };
+        }
+      }
+
+      return normalized;
+    });
   }, [assessment, controlNameIndex]);
 
   const stageCounts = useMemo(() => {
@@ -986,17 +751,6 @@ export default function RecommendationsPage() {
         }
         const sev = compareBySeverity(a, b);
         if (sev !== 0) return sev;
-
-        // If multiple questions exist under the same clause (legacy ids like "6.1.Q1"),
-        // keep them in Q1, Q2, Q3 order.
-        const aq = parseQuestionNumberFromId(a?.questionId || a?.controlId);
-        const bq = parseQuestionNumberFromId(b?.questionId || b?.controlId);
-        if (aq != null || bq != null) {
-          const ao = aq ?? 999;
-          const bo = bq ?? 999;
-          if (ao !== bo) return ao - bo;
-        }
-
         return String(a?.title || "").localeCompare(String(b?.title || ""));
       }
 
@@ -1009,16 +763,6 @@ export default function RecommendationsPage() {
         return -1;
       } else if (!aParts && bParts) {
         return 1;
-      }
-
-      // Secondary: within the same Annex A control, order by question number (Q1, Q2, ...)
-      // so that e.g. A5.1.Q1 appears before A5.1.Q2.
-      const aq = parseQuestionNumberFromId(a?.questionId || a?.controlId);
-      const bq = parseQuestionNumberFromId(b?.questionId || b?.controlId);
-      if (aq != null || bq != null) {
-        const ao = aq ?? 999;
-        const bo = bq ?? 999;
-        if (ao !== bo) return ao - bo;
       }
 
       const sev = compareBySeverity(a, b);
@@ -1064,7 +808,7 @@ export default function RecommendationsPage() {
         width: "100%",
         display: "flex",
         justifyContent: "center",
-        backgroundColor: "#07090f",
+        backgroundColor: "#FAF5EF",
         minHeight: "100vh",
       }}
     >
@@ -1086,7 +830,7 @@ export default function RecommendationsPage() {
             Back
           </button>
 
-          <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: "1.1rem" }}>
+          <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "1.1rem" }}>
             Recommendations
           </div>
 
@@ -1167,7 +911,7 @@ export default function RecommendationsPage() {
                   background: "white",
                   padding: "20px",
                   borderRadius: "12px",
-                  borderLeft: `4px solid ${normalized.stageId === "stage1" ? "#dc2626" : getCompliancePill(normalized.complianceState).borderColor}`,
+                  borderLeft: `4px solid ${getCompliancePill(normalized.complianceState).borderColor}`,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                 }}
               >
@@ -1194,7 +938,7 @@ export default function RecommendationsPage() {
                     {getCompliancePill(normalized.complianceState).label}
                   </span>
 
-                  {getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).label && (
+                  {getPriorityPill(normalized.priority).label && (
                     <span
                       style={{
                         display: "inline-block",
@@ -1202,11 +946,11 @@ export default function RecommendationsPage() {
                         borderRadius: "999px",
                         fontSize: "0.8rem",
                         fontWeight: 600,
-                        backgroundColor: getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).bgColor,
-                        color: getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).textColor,
+                        backgroundColor: getPriorityPill(normalized.priority).bgColor,
+                        color: getPriorityPill(normalized.priority).textColor,
                       }}
                     >
-                      {getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).label}
+                      {getPriorityPill(normalized.priority).label}
                     </span>
                   )}
 
@@ -1237,19 +981,6 @@ export default function RecommendationsPage() {
                 >
                   {normalized.title}
                 </p>
-
-                {normalized.subtitle && (
-                  <p
-                    style={{
-                      color: "#0F172A",
-                      fontSize: "0.95rem",
-                      marginBottom: "8px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {normalized.subtitle}
-                  </p>
-                )}
 
                 {normalized.description && (
                   <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>

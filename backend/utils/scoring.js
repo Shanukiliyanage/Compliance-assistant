@@ -107,8 +107,11 @@ function groupStageAnswersByControl(stageId, stageAnswers) {
     if (isSuppressedByStage2Gates(key, stageAnswers)) continue;
 
     // Stage 1 is clauses 4–10 (not Annex A).
-    // For Stage 1 we score each question id as its own “item”.
-    const controlId = stageId === "stage1" ? String(key || "").trim() : normalizeControlId(key);
+    // Group by major clause number so both questions in a clause (e.g. "4.2" and "4.3")
+    // are averaged into one clause score — giving 7 controls, not 14.
+    const controlId = stageId === "stage1"
+      ? String(key || "").trim().split(".")[0]  // "4.2" -> "4", "4.3" -> "4"
+      : normalizeControlId(key);
     if (!grouped[controlId]) grouped[controlId] = [];
     grouped[controlId].push(value);
   }
