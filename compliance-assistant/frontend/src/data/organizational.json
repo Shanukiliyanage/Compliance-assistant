@@ -4,7 +4,7 @@
     "questions": [
       {
         "id": "A5.1.Q1",
-        "question": "Does your organization have a formal, written information security policy approved by management and available to employees?",
+        "question": "Does your organization have a formal, written information security policy (or set of policies) that is approved by management and available to employees?",
         "explanation": "This checks whether a documented information security policy exists, is approved by management, and is communicated to employees."
       },
       {
@@ -24,7 +24,7 @@
       },
       {
         "id": "A5.2.Q2",
-        "question": "Are responsibilities documented and communicated to relevant people?",
+        "question": "Are responsibilities clearly documented and communicated to relevant people?",
         "explanation": "Documented responsibilities help staff understand what is expected from them."
       }
     ]
@@ -34,13 +34,8 @@
     "questions": [
       {
         "id": "A5.3.Q1",
-        "question": "Are key steps shared between different people so no single person can approve and execute the same critical action?",
+        "question": "In important business processes, are key steps shared between different people so no single person can both approve and execute the same critical action?",
         "explanation": "This means making sure no single person has sole control over a critical task from start to finish. For example, the person who requests a payment should not also be the person who approves it. This reduces the risk of mistakes going unnoticed or someone acting dishonestly."
-      },
-      {
-        "id": "A5.3.Q2",
-        "question": "Are employees aware of roles/responsibilities related to Information Security?",
-        "explanation": "Awareness helps ensure people understand who does what and how to raise issues or requests securely."
       }
     ]
   },
@@ -64,7 +59,7 @@
     "questions": [
       {
         "id": "A5.5.Q1",
-        "question": "Do you keep a list of external authorities to contact in a serious security incident?",
+        "question": "Does your organization keep a list of external authorities to contact in case of a serious security incident?",
         "explanation": "These are official bodies you may need to notify or call on during a serious incident, such as the police, fire brigade, emergency services, a national cybersecurity agency, or a data protection regulator."
       }
     ]
@@ -74,7 +69,7 @@
     "questions": [
       {
         "id": "A5.6.Q1",
-        "question": "Is your organization in contact with external groups sharing security/regulatory best practices?",
+        "question": "Is your organization in contact with external groups sharing information about security, regulations or best practices?",
         "explanation": "These are industry groups and cybersecurity communities that share threat intelligence, best practices and regulatory guidance, such as OWASP, ISACA, NCSC, or sector-specific information sharing groups."
       }
     ]
@@ -94,13 +89,8 @@
     "questions": [
       {
         "id": "A5.8.Q1",
-        "question": "Do you include information security in planning/decision making for projects?",
+        "question": "When running business or IT projects, do you include information security as part of planning and decisions?",
         "explanation": "This means thinking about security from the very start of any new project, not just at the end. For example, when building a new website or changing a business process, security questions should be asked upfront: who needs access, what data is involved, and what could go wrong."
-      },
-      {
-        "id": "A5.8.Q2",
-        "question": "Are security risk assessments performed for projects before starting?",
-        "explanation": "Risk assessments help identify and address security risks before changes are implemented."
       }
     ]
   },
@@ -109,13 +99,8 @@
     "questions": [
       {
         "id": "A5.9.Q1",
-        "question": "Do you keep an inventory of important information and related assets?",
+        "question": "Do you keep a list (inventory) of important information and related assets that your organization uses?",
         "explanation": "Knowing what information and systems your business relies on is the first step to protecting them. You cannot secure something you do not know exists. Examples include laptops, databases, software, customer records, and shared drives."
-      },
-      {
-        "id": "A5.9.Q2",
-        "question": "Is the inventory reviewed and updated regularly?",
-        "explanation": "Regular review keeps the inventory accurate as systems, devices, and information change."
       }
     ]
   },
@@ -124,13 +109,9 @@
     "questions": [
       {
         "id": "A5.10.Q1",
-        "question": "Do you have written acceptable-use rules (AUP)?",
+        "question": "Do you have written rules explaining how employees are allowed to use organization's information and assets?",
         "explanation": "An Acceptable Use Policy (AUP) defines how employees and contractors are allowed to use the organization’s information, systems, and assets. It explains acceptable and unacceptable actions, such as how devices, email, internet access, and data should be used, to help protect the organization and reduce security risks."
-      },
-      {
-        "id": "A5.10.Q2",
-        "question": "Do employees formally acknowledge acceptable-use rules?",
-        "explanation": "Formal acknowledgement helps ensure people understand and agree to follow the acceptable use rules."
+
       }
     ]
   },
@@ -139,13 +120,8 @@
     "questions": [
       {
         "id": "A5.11.Q1",
-        "question": "When people leave/change role, do you collect assets and remove access?",
+        "question": "When employees or contractors leave or change role, do you collect back all organization assets or remove their access?",
         "explanation": "A defined offboarding process ensures devices and access rights are revoked on time."
-      },
-      {
-        "id": "A5.11.Q2",
-        "question": "Is return/removal formally recorded and tracked?",
-        "explanation": "Recording and tracking helps prove offboarding steps were completed and reduces the risk of missed accounts or devices."
       }
     ]
   },
@@ -154,7 +130,7 @@
     "questions": [
       {
         "id": "A5.12.Q1",
-        "question": "Is information classified by sensitivity?",
+        "question": "Are different types of information sorted according to how sensitive they are?",
         "explanation": "Information classification means grouping information by how sensitive it is, for example Public, Internal, Confidential or Restricted. This helps people know how carefully they need to handle it and what protections should be applied."
       },
       {
@@ -169,7 +145,7 @@
     "questions": [
       {
         "id": "A5.13.Q1",
-        "question": "Is sensitive information labelled so people know how to handle it?",
+        "question": "Is sensitive information clearly marked or labelled so that people are aware of how it should be handled?",
         "explanation": "Labelling means adding a visible marker to documents or files such as Confidential, Internal Use Only, or Public. This makes it immediately clear to anyone who sees the information how it should be handled, stored, or shared."
       }
     ]
@@ -179,13 +155,8 @@
     "questions": [
       {
         "id": "A5.14.Q1",
-        "question": "Do you have rules/methods to prevent leaks during transfers (incl. DLP)?",
+        "question": "When important information is sent outside or inside the organization, do you have rules and methods implemented to prevent data leaks? (Is there a DLP system in place within the organization?)",
         "explanation": "This checks whether you have defined rules and technical controls (such as Data Loss Prevention (DLP), encryption, or secure transfer tools) to reduce the risk of sensitive data being leaked during transfer."
-      },
-      {
-        "id": "A5.14.Q2",
-        "question": "Are controls in place for sensitive info shared through email?",
-        "explanation": "Email is a common channel for accidental leaks. Controls can include classification labels, warnings, approval workflows, encryption, or blocking certain recipients/attachments."
       }
     ]
   },
@@ -194,7 +165,7 @@
     "questions": [
       {
         "id": "A5.15.Q1",
-        "question": "Do you ensure people only have access needed for their job?",
+        "question": "Do you control access to systems and information so people only have access to systems and information needed for their particular job?",
         "explanation": "This means giving people only the access they need to do their job, and nothing more. For example, someone in finance should be able to access financial data but not HR records. Limiting access reduces the risk of accidental or deliberate misuse."
       }
     ]
@@ -204,7 +175,7 @@
     "questions": [
       {
         "id": "A5.16.Q1",
-        "question": "Do you have a process to create/update/remove accounts for join/change/leave?",
+        "question": "Do you have a process to create, update, and remove user accounts when people join, change roles, or leave?",
         "explanation": "This means having a process to create, update, and close user accounts when people join, change role, or leave the organisation. For example, when someone starts they get the accounts they need, and when they leave those accounts are disabled promptly."
       }
     ]
@@ -214,7 +185,7 @@
     "questions": [
       {
         "id": "A5.17.Q1",
-        "question": "Do you have rules for passwords/PINs/MFA (created/used/protected)?",
+        "question": "Do you have rules for how authentication information (passwords, PINs, MFA) is created, used, and protected?",
         "explanation": "Clear rules for passwords and multi-factor authentication (MFA) reduce risks from weak authentication and credential misuse."
       }
     ]
@@ -224,7 +195,7 @@
     "questions": [
       {
         "id": "A5.18.Q1",
-        "question": "Are access rights reviewed regularly?",
+        "question": "Are user access rights reviewed regularly to ensure they are still appropriate?",
         "explanation": "Over time, people change roles, take on new responsibilities, or leave the business. Regular access reviews check that everyone still has the right level of access and that nothing unnecessary has built up over time."
       }
     ]
@@ -234,30 +205,23 @@
     "questions": [
       {
         "id": "A5.19.GW1",
-        "question": "Do you use external suppliers who can access your info/systems?",
+        "question": "Do you use external suppliers who provide IT services or can access your information or systems?",
         "explanation": ""
-      }
-    ],
-    "gatewayFor": [
-      "A5.19",
-      "A5.20",
-      "A5.21",
-      "A5.22"
-    ]
-  },
-  "A5.19": {
-    "control": "Information security in supplier relationships",
-    "questions": [
-      {
-        "id": "A5.19.Q1",
-        "question": "Do you use external suppliers who can access your info/systems?",
-        "explanation": "Suppliers with access introduce security risks that must be controlled."
       },
       {
         "id": "A5.19.Q2",
-        "question": "Do you have processes to manage supplier security risks?",
-        "explanation": "Supplier risk processes can include due diligence, onboarding checks, access limitations, monitoring, and periodic reviews."
+        "question": "Do you have processes to manage security risks related to these suppliers?",
+        "explanation": "Supplier risk processes can include due diligence, onboarding checks, access limitations, monitoring, and periodic reviews.",
+        "showIf": {
+          "questionId": "A5.19.GW1",
+          "equals": "yes"
+        }
       }
+    ],
+    "gatewayFor": [
+      "A5.20",
+      "A5.21",
+      "A5.22"
     ]
   },
   "A5.20": {
@@ -265,7 +229,7 @@
     "questions": [
       {
         "id": "A5.20.Q1",
-        "question": "Do supplier agreements include security requirements/clauses/NDAs?",
+        "question": "Do agreements with suppliers include information security requirements?",
         "explanation": "Supplier agreements should cover information security expectations such as confidentiality, access controls, incident reporting, and protection requirements."
       }
     ]
@@ -275,17 +239,17 @@
     "questions": [
       {
         "id": "A5.21.Q1",
-        "question": "Do you assess whether IT suppliers have suitable security measures (vendor risk assessments)?",
+        "question": "When it comes to IT suppliers, do you check if they have suitable security in place to protect your information?",
         "explanation": "Assessing supplier security (e.g., vendor risk assessments, certifications, questionnaires, or audits) helps reduce ICT supply chain risks."
       }
     ]
   },
   "A5.22": {
-    "control": "Monitoring and reviewing supplier services",
+    "control": "Monitoring, review and change management of supplier services",
     "questions": [
       {
         "id": "A5.22.Q1",
-        "question": "Do you regularly review supplier performance and security?",
+        "question": "Do you regularly review third party suppliers' performance and security?",
         "explanation": "Supplier risks and performance change over time, so periodic reviews help ensure requirements are still met."
       }
     ]
@@ -295,13 +259,13 @@
     "questions": [
       {
         "id": "A5.23.Q1",
-        "question": "Do you use cloud services?",
+        "question": "Do you use cloud services for your information or systems?",
         "explanation": "",
         "isGateway": true
       },
       {
         "id": "A5.23.Q2",
-        "question": "Do you assess and manage cloud security risks?",
+        "question": "Do you assess and manage security risks of cloud services?",
         "explanation": "Assessing cloud risks helps address shared responsibility, supplier risks, access control, and data protection requirements.",
         "showIf": {
           "questionId": "A5.23.Q1",
@@ -315,18 +279,9 @@
     "questions": [
       {
         "id": "A5.24.Q1",
-        "question": "Do you have a planned approach for handling incidents?",
+        "question": "Do you have a planned approach for handling information security incidents?",
         "explanation": "An incident plan means having a clear, agreed process for what to do when something goes wrong, such as a data breach, a ransomware attack, or a lost device. It covers who to contact, what steps to take, and how to contain the damage quickly.",
         "isGateway": true
-      },
-      {
-        "id": "A5.24.Q2",
-        "question": "Are incidents recorded and documented consistently?",
-        "explanation": "Consistent recording supports investigation, reporting, and continual improvement.",
-        "showIf": {
-          "questionId": "A5.24.Q1",
-          "equals": "yes"
-        }
       }
     ]
   },
@@ -335,7 +290,7 @@
     "questions": [
       {
         "id": "A5.25.Q1",
-        "question": "Are events checked/classified to decide if they are real incidents?",
+        "question": "When a security event happens, is it checked and classified to decide if it is a real incident?",
         "explanation": "Not every alert or unusual event is a real security incident. This question asks whether you have a way to review and decide whether something is a genuine problem or a false alarm, so the right response can be applied."
       }
     ]
@@ -345,7 +300,7 @@
     "questions": [
       {
         "id": "A5.26.Q1",
-        "question": "Do you follow defined steps to respond and limit damage?",
+        "question": "When an incident is confirmed, do you follow defined steps to respond and limit damage?",
         "explanation": "Defined response steps support containment, recovery, and reducing impact."
       }
     ]
@@ -355,7 +310,7 @@
     "questions": [
       {
         "id": "A5.27.Q1",
-        "question": "After incidents, do you review what happened and update controls?",
+        "question": "After incidents, do you review what happened and update controls to prevent similar incidents?",
         "explanation": "After an incident is resolved, it is worth asking what happened, why it happened, and whether it could happen again. A short review or debrief helps identify what went wrong and whether changes need to be made to stop it recurring."
       }
     ]
@@ -365,12 +320,7 @@
     "questions": [
       {
         "id": "A5.28.Q1",
-        "question": "Do you perform root cause analysis after serious incidents?",
-        "explanation": "Root cause analysis is the process of identifying the underlying cause of an incident, not just the immediate issue, so that similar incidents can be prevented in the future."
-      },
-      {
-        "id": "A5.28.Q2",
-        "question": "Do you collect/keep evidence in a way that supports investigations?",
+        "question": "Do you collect and keep evidence from serious incidents in a way that supports investigations?",
         "explanation": "Evidence collection supports investigations, audits, and (where relevant) legal or regulatory requirements."
       }
     ]
@@ -380,7 +330,7 @@
     "questions": [
       {
         "id": "A5.29.Q1",
-        "question": "During incidents/disruptions, are mechanisms in place to keep information safe?",
+        "question": "During incidents or disruptions, does your organization have mechanisms in place to keep information safe?",
         "explanation": "This checks whether you maintain appropriate information security protections during disruptions (for example, access controls, backup procedures, and secure communication)."
       }
     ]
@@ -390,13 +340,8 @@
     "questions": [
       {
         "id": "A5.30.Q1",
-        "question": "Do you have mechanisms to continue operations during IT disruption?",
+        "question": "If there is an IT disruption, does your organization have mechanisms to continue business operations?",
         "explanation": "This checks whether critical operations can continue during IT failures, cyber incidents, or other disruptions."
-      },
-      {
-        "id": "A5.30.Q2",
-        "question": "Do you have a documented BCP covering IT disruptions?",
-        "explanation": "A Business Continuity Plan (BCP) describes how an organization will continue its critical operations during and after disruptions such as IT failures, cyber incidents, or other emergencies."
       }
     ]
   },
@@ -405,7 +350,7 @@
     "questions": [
       {
         "id": "A5.31.Q1",
-        "question": "Do you maintain a list of applicable requirements?",
+        "question": "Do you maintain a list of legal, regulatory and contractual requirements for information security that apply to your organization?",
         "explanation": "Keeping an up-to-date list helps ensure compliance obligations are identified, tracked, and addressed."
       }
     ]
@@ -415,7 +360,7 @@
     "questions": [
       {
         "id": "A5.32.Q1",
-        "question": "Do you have rules to protect IP (software/docs/designs)?",
+        "question": "Do you have rules to protect intellectual property, like software, documents, or designs used by your organization?",
         "explanation": "Controls help protect intellectual property and ensure proper use of licensed materials and internally created assets."
       }
     ]
@@ -425,7 +370,7 @@
     "questions": [
       {
         "id": "A5.33.Q1",
-        "question": "Do you protect important records against loss/unauthorized change/destruction?",
+        "question": "Do you ensure important records are protected against loss, unauthorized change or destruction?",
         "explanation": "This checks whether records are stored, backed up, and protected with appropriate integrity and retention controls."
       }
     ]
@@ -435,7 +380,7 @@
     "questions": [
       {
         "id": "A5.34.Q1",
-        "question": "Do you protect personal data in line with privacy laws?",
+        "question": "Do you have measures to protect personal data you handle, in line with privacy and data protection laws?",
         "explanation": "This checks whether privacy requirements are addressed through policies, access controls, retention, and secure processing practices."
       }
     ]
@@ -445,7 +390,7 @@
     "questions": [
       {
         "id": "A5.35.Q1",
-        "question": "Is there an independent review regularly and on major changes?",
+        "question": "Is there an independent review of how people, processes, and technology handle information security on a regular basis, and when major changes occur?",
         "explanation": "Independent reviews (e.g., audits or third-party assessments) help validate effectiveness and identify improvement actions."
       }
     ]
@@ -455,7 +400,7 @@
     "questions": [
       {
         "id": "A5.36.Q1",
-        "question": "Do you regularly review whether staff/processes follow security policies?",
+        "question": "Does your organization regularly review whether staff and processes follow information security policies?",
         "explanation": "Regular compliance checks help ensure policies are followed and gaps are identified and corrected."
       }
     ]
@@ -465,7 +410,7 @@
     "questions": [
       {
         "id": "A5.37.Q1",
-        "question": "Do you have written instructions for important systems/processes that staff can access?",
+        "question": "Does your organization have written instructions for important systems or processes that staff can easily access?",
         "explanation": "Documented procedures improve consistency, reduce errors, and support continuity when staff change or are unavailable."
       }
     ]

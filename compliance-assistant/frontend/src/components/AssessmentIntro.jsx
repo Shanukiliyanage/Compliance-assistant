@@ -291,7 +291,7 @@ export default function AssessmentIntro() {
       <section id="controls" className="lp__section lp__section--alt">
         <div className="lp__sectionInner">
           <span className="lp__sectionBadge">Controls</span>
-          <h2 className="lp__sectionTitle">100 controls across 5 domains</h2>
+          <h2 className="lp__sectionTitle">Controls across 5 domains</h2>
           <p className="lp__sectionSub">
             ISO 27001:2022 organises its requirements into 7 mandatory management clauses and
             93 Annex A controls across four categories. The Compliance Assessment tool evaluates
@@ -409,7 +409,7 @@ export default function AssessmentIntro() {
             onMouseDown={(e) => e.stopPropagation()}>
 
             <button className="modal__close" onClick={handleCloseModal} aria-label="Close">✕</button>
-            <h2 className="modal__title">{isSignUp ? "Create account" : "Log in to ShieldPoint"}</h2>
+            <h2 className="modal__title">{isSignUp ? "Create account" : "Log in"}</h2>
             <p className="modal__sub">
               {isSignUp ? "Start your ISO 27001 assessment." : "Continue your compliance assessment."}
             </p>

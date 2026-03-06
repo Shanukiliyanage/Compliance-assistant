@@ -98,7 +98,7 @@ function groupStageAnswersByControl(stageId, stageAnswers) {
 
     // Stage 1 is clauses 4–10 (not Annex A).
     // Group by clause number so both questions in a clause (e.g. "4.2" and "4.3")
-    // are averaged into one clause score — giving each clause equal weight.
+    // are averaged into one clause score - giving each clause equal weight.
     const controlId = stageId === "stage1"
       ? String(key || "").trim().split(".")[0]  // "4.2" -> "4", "4.3" -> "4"
       : normalizeControlId(key);

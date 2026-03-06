@@ -553,15 +553,27 @@ export default function Summary() {
                   stageScore?.breakdown?.counts?.total ??
                   0;
 
-                const notApplicableCount = Number(stageScore?.notApplicableCount ?? 0);
-                const stageTotalApplicable = isMandatoryStage
-                  ? stageTotalRaw
-                  : Math.max(0, stageTotalRaw - notApplicableCount);
+                const notApplicableCount = isMandatoryStage
+                  ? 0
+                  : Number(stageScore?.notApplicableCount ?? 0);
 
-                const summary = buildThreeWaySummary(
-                  stageScore?.breakdown?.counts,
-                  stageTotalApplicable
-                );
+                // Use stageTotalRaw as the single denominator for all categories
+                // so that Yes + Partial + No + Not applicable = 100%.
+                const fullyCount = Math.max(0, Number(stageScore?.breakdown?.counts?.yes ?? 0));
+                const partialCount = Math.max(0, Number(stageScore?.breakdown?.counts?.partial ?? 0));
+                const nonCount = Math.max(0, stageTotalRaw - notApplicableCount - fullyCount - partialCount);
+
+                const summary = stageTotalRaw
+                  ? {
+                      total: stageTotalRaw,
+                      fullyCount,
+                      partialCount,
+                      nonCount,
+                      fullyPercent: Math.round((fullyCount / stageTotalRaw) * 100),
+                      partialPercent: Math.round((partialCount / stageTotalRaw) * 100),
+                      nonPercent: Math.round((nonCount / stageTotalRaw) * 100),
+                    }
+                  : null;
 
                 const notApplicablePercent = stageTotalRaw
                   ? Math.round((notApplicableCount / stageTotalRaw) * 100)

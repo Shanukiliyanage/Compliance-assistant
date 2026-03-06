@@ -17,7 +17,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.error) {
       return (
         <div style={{ padding: "2rem", fontFamily: "monospace", color: "red", background: "#fff" }}>
-          <h2>Runtime Error — check this:</h2>
+          <h2>Runtime Error - check this:</h2>
           <pre style={{ whiteSpace: "pre-wrap" }}>{String(this.state.error)}</pre>
           <pre style={{ whiteSpace: "pre-wrap", fontSize:"0.85rem", color:"#555" }}>
             {this.state.error?.stack}

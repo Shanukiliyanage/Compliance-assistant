@@ -291,32 +291,32 @@ export function getRecommendationForControl(
     // CL8_OPERATION, CL9_EVALUATION, CL10_IMPROVEMENT
     
     CL4_CONTEXT: {
-      NOT_COMPLIANT: `${orgName} could formally identify and document its business purpose, strategic direction, relevant internal and external issues, interested parties, and the scope of the ISMS to ensure information security requirements are clearly defined and aligned with organizational objectives, as required by ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could review and enhance its documentation of organizational context, interested parties, and ISMS scope to ensure completeness, consistency, and alignment with current business and security requirements, in line with ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could identify all key stakeholders and their information-security expectations, and document the scope of the ISMS (what is included and excluded, with clear reasons). Keep both updated as the business changes.`,
+      PARTIALLY_COMPLIANT: `${orgName} could complete the stakeholder list with any missing expectations, and make the ISMS scope clearer (what's in/out, key systems and data, third parties). Keep both updated regularly.`,
     },
     CL5_LEADERSHIP: {
-      NOT_COMPLIANT: `${orgName} could ensure top management demonstrates active commitment to information security by approving and supporting an information security policy, allocating necessary resources, and establishing clear direction and accountability, in accordance with ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could strengthen leadership involvement in information security by improving policy communication, management oversight, and ongoing review of security performance, as recommended by ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could have top management actively support information security by approving a clear Information Security Policy, assigning responsibility, providing necessary resources, and reviewing security performance regularly.`,
+      PARTIALLY_COMPLIANT: `${orgName} could make management support more consistent and ensure the Information Security Policy fully reflects how the organization operates, with employees receiving, acknowledging, and having access to it.`,
     },
     CL6_PLANNING: {
-      NOT_COMPLIANT: `${orgName} could establish a formal and repeatable information security risk assessment and risk treatment process, including documented decisions and mapped security controls, to systematically manage security risks in line with ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could enhance its existing risk assessment and treatment processes by ensuring they are consistently applied, properly documented, and regularly reviewed, as required by ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could create a repeatable risk assessment method to identify and score risks, and document how each will be handled (accept/mitigate/transfer/avoid), with an owner and deadline for each treatment action.`,
+      PARTIALLY_COMPLIANT: `${orgName} could make risk assessments consistent across all areas using one method, and ensure every risk has a clear treatment decision, mapped controls, tracked progress, and evidence of completion.`,
     },
     CL7_SUPPORT: {
-      NOT_COMPLIANT: `${orgName} could provide adequate resources, assign and document information security roles and responsibilities, and implement structured security awareness and training programs to ensure personnel are competent to support the ISMS, in accordance with ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could improve its security support mechanisms by formalizing role assignments, maintaining competency records, and strengthening security awareness activities to ensure consistent staff capability, as recommended by ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could provide basic security training for all staff at onboarding and at least annually, and clearly define and document security roles and responsibilities so everyone knows what they are responsible for.`,
+      PARTIALLY_COMPLIANT: `${orgName} could improve training coverage and frequency for all staff, and remove any role confusion by documenting security ownership, escalation paths, and responsibilities clearly.`,
     },
     CL8_OPERATION: {
-      NOT_COMPLIANT: `${orgName} could define, document, and implement operational procedures for key security activities such as access management, backup, incident handling, and change management to ensure effective operation of information security controls, in line with ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could strengthen operational security by ensuring documented procedures are consistently followed in day-to-day activities and supported by appropriate evidence, as required by ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could document and implement procedures for key security operations (access control, backups, incident handling, and change management) and ensure they are followed day-to-day with supporting evidence.`,
+      PARTIALLY_COMPLIANT: `${orgName} could complete missing operational procedures and improve consistency in how they are followed across teams, collecting evidence every time and fixing repeated gaps such as missing approvals or untested restores.`,
     },
     CL9_EVALUATION: {
-      NOT_COMPLIANT: `${orgName} could establish regular monitoring, internal audit, and management review activities to evaluate the effectiveness of information security controls and ISMS performance, as required by ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could enhance its performance evaluation processes by improving the frequency, documentation, and management review of security metrics, audit findings, and incidents, in line with ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could run internal reviews or audits at least annually, document findings, and hold regular management reviews of security performance, with recorded decisions, action owners, and deadlines.`,
+      PARTIALLY_COMPLIANT: `${orgName} could make internal reviews more systematic and improve management reviews by recording decisions, tracking actions to completion, and reviewing trends to prevent recurring issues.`,
     },
     CL10_IMPROVEMENT: {
-      NOT_COMPLIANT: `${orgName} could establish a formal process to record security incidents, audit findings, and non-conformities, track corrective actions to completion, and drive continual improvement of the ISMS, as required by ISO/IEC 27001.`,
-      PARTIALLY_COMPLIANT: `${orgName} could strengthen its improvement processes by consistently tracking corrective actions and proactively identifying opportunities to enhance information security controls and ISMS effectiveness, in line with ISO/IEC 27001.`,
+      NOT_COMPLIANT: `${orgName} could log all incidents and audit findings, assign corrective actions with an owner and due date, and track them until they are completed and checked for effectiveness.`,
+      PARTIALLY_COMPLIANT: `${orgName} could improve corrective actions with basic root-cause checks, keep a structured improvement list with owners and dates, and confirm that fixes prevent issues from happening again.`,
     },
 
     "A.5.1": {
@@ -512,7 +512,7 @@ export function getRecommendationForControl(
       NOT_COMPLIANT:
         `${orgName} could emphasize proper evidence collection in accordance with ISO/IEC 27001:2022 control A.5.28, ensuring that evidence is securely gathered, preserved, and handled during incident management. This could support effective investigation, maintain legal defensibility, and enhance the organization's overall forensic readiness.`,
       PARTIALLY_COMPLIANT:
-        `${orgName} could improve RCA (Root Cause Analysis) consistency and ensure actions are tracked to closure and validated for effectiveness. ${orgName} could strengthen evidence handling by making procedures consistent, protecting evidence from tampering, and defining retention and ownership clearly.`,
+        `${orgName} could strengthen evidence handling by making procedures consistent, protecting evidence from tampering, and defining retention and ownership clearly.`,
     },
 
     "A.5.29": {
@@ -524,9 +524,9 @@ export function getRecommendationForControl(
 
     "A.5.30": {
       NOT_COMPLIANT:
-        `${orgName} could identify critical services, define recovery targets (RTO/RPO), implement recovery mechanisms (backups, redundancy where needed), and assign continuity ownership. ${orgName} could document a BCP (Business Continuity Plan)/ITDR plan covering disruption scenarios, roles, communication, recovery steps, and dependencies (including suppliers/cloud).`,
+        `${orgName} could identify critical services, define recovery targets (RTO/RPO), implement recovery mechanisms (backups, redundancy where needed), and assign continuity ownership.`,
       PARTIALLY_COMPLIANT:
-        `${orgName} could improve coverage for all critical services and regularly test recovery (including restores) with documented results and follow-up actions. ${orgName} could keep the plan current, improve test frequency and quality, and track improvements identified during tests to completion.`,
+        `${orgName} could improve coverage for all critical services and regularly test recovery (including restores) with documented results and follow-up actions.`,
     },
 
     "A.5.31": {
@@ -1228,12 +1228,6 @@ export function getRecommendationForControl(
       PARTIALLY_COMPLIANT:
         `${orgName} could formalize and test the approach (tabletop exercises), clarify roles, and ensure procedures are followed consistently.`,
     },
-    "A.5.24.Q2": {
-      NOT_COMPLIANT:
-        `${orgName} could implement an incident log/register capturing what happened, impact, timeline, actions, evidence, and closure approvals; keep it consistently for every incident.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve completeness by standardizing templates, enforcing consistent recording, and reviewing records for quality and trends.`,
-    },
 
     "A.5.25.Q1": {
       NOT_COMPLIANT:
@@ -1260,13 +1254,7 @@ export function getRecommendationForControl(
       NOT_COMPLIANT:
         `${orgName} could emphasize proper evidence collection in accordance with ISO/IEC 27001:2022 control A.5.28, ensuring that evidence is securely gathered, preserved, and handled during incident management. This could support effective investigation, maintain legal defensibility, and enhance the organization's overall forensic readiness.`,
       PARTIALLY_COMPLIANT:
-        `${orgName} could improve RCA (Root Cause Analysis) consistency and ensure actions are tracked to closure and validated for effectiveness.`,
-    },
-    "A.5.28.Q2": {
-      NOT_COMPLIANT:
-        `${orgName} could emphasize proper evidence collection in accordance with ISO/IEC 27001:2022 control A.5.28, ensuring that evidence is securely gathered, preserved, and handled during incident management. This could support effective investigation, maintain legal defensibility, and enhance the organization's overall forensic readiness.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could strengthen evidence handling by making procedures consistent, protecting evidence from tampering, and defining retention/ownership clearly.`,
+        `${orgName} could strengthen evidence handling by making procedures consistent, protecting evidence from tampering, and defining retention and ownership clearly.`,
     },
 
     "A.5.29.Q1": {
@@ -1281,12 +1269,6 @@ export function getRecommendationForControl(
         `${orgName} could identify critical services, define recovery targets (RTO/RPO), implement recovery mechanisms (backups, redundancy where needed), and assign continuity ownership.`,
       PARTIALLY_COMPLIANT:
         `${orgName} could improve coverage for all critical services and regularly test recovery (including restores) with documented results and follow-up actions.`,
-    },
-    "A.5.30.Q2": {
-      NOT_COMPLIANT:
-        `${orgName} could document a BCP (Business Continuity Plan)/ITDR plan covering disruption scenarios, roles, communication, recovery steps, and dependencies (including suppliers/cloud). Test it periodically.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could keep the plan current, improve test frequency/quality, and track improvements identified during tests to completion.`,
     },
 
     "A.5.31.Q1": {

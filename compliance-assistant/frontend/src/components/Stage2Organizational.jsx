@@ -23,7 +23,6 @@ function Stage2Organizational() {
   const supplierControlIds = gatewayControl ? gatewayControl.gatewayFor : [];
 
   const incidentIntroQ1Id = "A5.24.Q1";
-  const incidentIntroQ2Id = "A5.24.Q2";
   const incidentFollowUpControlIds = ["A5.25", "A5.26", "A5.27", "A5.28"];
 
   // Load saved answers from localStorage.
@@ -82,7 +81,7 @@ function Stage2Organizational() {
         clearAnswersForControls(supplierControlIds, next);
       }
 
-      // Gateway: incident management — if "no", auto-set follow-ups to "no" so they score as not compliant.
+      // Gateway: incident management - if "no", auto-set follow-ups to "no" so they score as not compliant.
       // If "yes", clear them so the user can answer fresh.
       if (questionId === incidentIntroQ1Id && prev[questionId] !== value) {
         if (value === "yes") {
@@ -259,7 +258,7 @@ function Stage2Organizational() {
                 {control.questions.map((q, qIdx) => {
                   if (!isQuestionVisible(q, answers)) return null;
 
-                  const isGatewayQuestion = Boolean(isGateway || q?.isGateway);
+                  const isGatewayQuestion = q.id === gatewayQuestionId || Boolean(q?.isGateway);
                   const selected = answers[q.id];
                   const isMissing = missingIds.includes(q.id);
                   const questionLabel = `${String.fromCharCode(97 + qIdx)})`;
