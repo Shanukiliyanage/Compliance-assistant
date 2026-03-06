@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "scripts": {
+    "start": "concurrently -k \"npm --prefix backend start\" \"npm --prefix frontend start\"",
+    "dev": "concurrently -k \"npm --prefix backend start\" \"npm --prefix frontend run dev\"",
+    "start:backend": "npm --prefix backend start",
+    "start:frontend": "npm --prefix frontend start"
+  },
+  "dependencies": {
+    "firebase": "^12.7.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

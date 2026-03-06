@@ -1,0 +1,93 @@
+{
+  "stage1": {
+    "name": "Mandatory Clauses (Clauses 4-10)",
+    "maxScore": 50,
+    "controls": {
+      "1": { "clause": "4.1", "title": "Context of the Organization" },
+      "2": { "clause": "4.2", "title": "Stakeholders" },
+      "3": { "clause": "4.3", "title": "Scope" },
+      "4": { "clause": "4.4", "title": "Information Security System" },
+      "5": { "clause": "5.1", "title": "Leadership Commitment" },
+      "6": { "clause": "5.2", "title": "Information Security Policy" },
+      "7": { "clause": "5.3", "title": "Roles and Responsibilities" },
+      "8": { "clause": "6.1", "title": "Planning" },
+      "9": { "clause": "6.2", "title": "Information Security Objectives" },
+      "10": { "clause": "7.1", "title": "Resources" },
+      "11": { "clause": "7.2", "title": "Competence" },
+      "12": { "clause": "7.3", "title": "Awareness" },
+      "13": { "clause": "7.4", "title": "Communication" },
+      "14": { "clause": "7.5", "title": "Documented Information" },
+      "15": { "clause": "8.1", "title": "Operational Planning" },
+      "16": { "clause": "8.2", "title": "Change Management" },
+      "17": { "clause": "8.3", "title": "External Provision" },
+      "18": { "clause": "9.1", "title": "Monitoring and Measurement" },
+      "19": { "clause": "9.2", "title": "Internal Audits" },
+      "20": { "clause": "9.3", "title": "Management Review" },
+      "21": { "clause": "10.1", "title": "General" },
+      "22": { "clause": "10.2", "title": "Nonconformity and Corrective Action" },
+      "23": { "clause": "10.3", "title": "Continual Improvement" },
+      "24": { "clause": "A.1", "title": "Annex A Overview" },
+      "25": { "clause": "A.2", "title": "Selection Guidance" }
+    }
+  },
+  "stage2": {
+    "name": "Organizational Controls (Annex A.5)",
+    "maxScore": 40,
+    "controls": {
+      "ORG-GOV-1": { "control": "A.5.1", "title": "Information security policy" },
+      "ORG-GOV-2": { "control": "A.5.1", "title": "Communication of policy" },
+      "ORG-ROLES-1": { "control": "A.5.2", "title": "Information security roles and responsibilities" },
+      "ORG-ROLES-2": { "control": "A.5.2", "title": "Formal notification of responsibilities" },
+      "ORG-PROJ-1": { "control": "A.5.3", "title": "Security in project management" },
+      "ORG-THIRD-1": { "control": "A.5.4", "title": "Information security requirements for supplier relationships" },
+      "ORG-THIRD-2": { "control": "A.5.4", "title": "Supplier assessment" },
+      "ORG-THIRD-3": { "control": "A.5.4", "title": "Supplier contracts with security clauses" },
+      "ORG-DEV-1": { "control": "A.5.5", "title": "Information security in development" },
+      "ORG-DEV-2": { "control": "A.5.5", "title": "Secure development lifecycle" }
+    }
+  },
+  "stage3": {
+    "name": "People Controls (Annex A.6)",
+    "maxScore": 18,
+    "controls": {
+      "PEO-1": { "control": "A.6.1", "title": "Screening" },
+      "PEO-2": { "control": "A.6.2", "title": "Terms and conditions of employment" },
+      "PEO-3": { "control": "A.6.3", "title": "Information security awareness, education and training" },
+      "PEO-4": { "control": "A.6.4", "title": "Disciplinary process" },
+      "PEO-5": { "control": "A.6.5", "title": "Responsibilities after termination" },
+      "PEO-6": { "control": "A.6.6", "title": "Confidentiality agreements" },
+      "PEO-7": { "control": "A.6.7", "title": "Remote working" },
+      "PEO-8": { "control": "A.6.8", "title": "Information security event reporting" }
+    }
+  },
+  "stage4": {
+    "name": "Physical Controls (Annex A.7)",
+    "maxScore": 16,
+    "controls": {
+      "PHY-1": { "control": "A.7.1", "title": "Physical access control" },
+      "PHY-2": { "control": "A.7.2", "title": "Secure areas" },
+      "PHY-3": { "control": "A.7.3", "title": "Monitoring" },
+      "PHY-4": { "control": "A.7.4", "title": "Physical entry" },
+      "PHY-5": { "control": "A.7.5", "title": "Visitors" },
+      "PHY-6": { "control": "A.7.6", "title": "Asset management" },
+      "PHY-7": { "control": "A.7.7", "title": "Cleaning" },
+      "PHY-8": { "control": "A.7.8", "title": "Equipment disposal" }
+    }
+  },
+  "stage5": {
+    "name": "Technological Controls (Annex A.8)",
+    "maxScore": 20,
+    "controls": {
+      "TECH-1": { "control": "A.8.1", "title": "User access management" },
+      "TECH-2": { "control": "A.8.2", "title": "Privileged access rights" },
+      "TECH-3": { "control": "A.8.3", "title": "Information access restriction" },
+      "TECH-4": { "control": "A.8.4", "title": "Access to cryptographic keys" },
+      "TECH-5": { "control": "A.8.5", "title": "Information systems user authentication" },
+      "TECH-6": { "control": "A.8.6", "title": "Capacity management" },
+      "TECH-7": { "control": "A.8.7", "title": "Protection against malware" },
+      "TECH-8": { "control": "A.8.8", "title": "Management of removable media" },
+      "TECH-9": { "control": "A.8.9", "title": "Information and other assets disposal" },
+      "TECH-10": { "control": "A.8.10", "title": "Cabling security" }
+    }
+  }
+}
