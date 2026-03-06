@@ -581,6 +581,19 @@ export default function RecommendationsPage() {
       const controlsByStage = getAllStageControls();
       const answers = report?.answers || {};
 
+      const badgeClassForLabel = (label) => {
+        switch (String(label || "").trim().toUpperCase()) {
+          case "YES": return "badge badge-yes";
+          case "NO": return "badge badge-no";
+          case "PARTIAL": return "badge badge-partial";
+          case "N/A": return "badge badge-na";
+          case "HIGH": return "badge badge-no";
+          case "MEDIUM": return "badge badge-partial";
+          case "LOW": return "badge badge-low";
+          default: return "badge";
+        }
+      };
+
       const statusIndex = new Map(
         (report?.controlStatuses || []).map((s) => [`${s.stageId}::${s.controlId}`, s])
       );
@@ -645,11 +658,11 @@ export default function RecommendationsPage() {
           const isStage1Clause = stageId === "stage1" && /^CL\d+_/i.test(String(control.controlId));
           const heading = isStage1Clause
             ? `${escapeHtml(control.controlName || "")}`
-            : `${escapeHtml(control.controlId)} — ${escapeHtml(control.controlName || "")}`;
+            : `${escapeHtml(control.controlId)} - ${escapeHtml(control.controlName || "")}`;
           body += `<h3>${heading}</h3>`;
-          body += `<p><strong>Status:</strong> ${escapeHtml(complianceLabel(status?.complianceState) || "")}</p>`;
+          body += `<p><strong>Status:</strong> <span class="${badgeClassForLabel(complianceLabel(status?.complianceState) || "")}">${escapeHtml(complianceLabel(status?.complianceState) || "")}</span></p>`;
           if (priorityLabel && priorityLabel !== "NONE") {
-            body += `<p><strong>Priority:</strong> ${escapeHtml(priorityLabel)}</p>`;
+            body += `<p><strong>Priority:</strong> <span class="${badgeClassForLabel(priorityLabel)}">${escapeHtml(priorityLabel)}</span></p>`;
           }
 
           const qs = Array.isArray(control.questions) ? control.questions : [];
@@ -679,7 +692,7 @@ export default function RecommendationsPage() {
 
               body += `<tr>`;
               body += `<td>${escapeHtml(questionText)}</td>`;
-              body += `<td>${escapeHtml(answerLabel)}</td>`;
+              body += `<td><span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span></td>`;
               body += `<td>${escapeHtml(!applicable || isNotApplicableAnswer ? "N/A" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
               body += `</tr>`;
             }
@@ -708,7 +721,16 @@ export default function RecommendationsPage() {
       table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; }
       th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
       th { background: #f5f5f5; text-align: left; }
-      @media print { body { margin: 12mm; } }
+      .badge { display: inline-block; padding: 3px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.5; border: 2px solid; white-space: nowrap; }
+      .badge-yes { background: #dcfce7; border-color: #16a34a; color: #166534; }
+      .badge-no { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+      .badge-partial { background: #fef9c3; border-color: #ca8a04; color: #854d0e; }
+      .badge-na { background: #f3f4f6; border-color: #d1d5db; color: #6b7280; }
+      .badge-low { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+      @media print {
+        body { margin: 12mm; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      }
     </style>
   </head>
   <body>
@@ -717,16 +739,6 @@ export default function RecommendationsPage() {
       <div><strong>Assessment ID:</strong> ${escapeHtml(assessmentId)}</div>
       <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
-    </div>
-
-    <h2>Validation (How we checked it)</h2>
-    <div class="meta">
-      <ul>
-        <li><strong>ISO alignment:</strong> Questions are grouped by ISO clauses (Stage 1) and Annex A controls (Stages 2–5).</li>
-        <li><strong>Rule checks:</strong> Control compliance is computed consistently from YES/PARTIAL/NO answers, then scoring/recommendations use that output.</li>
-        <li><strong>Test cases:</strong> We manually tested sample answer sets (e.g., all YES, mixed, gateway exclusions) to confirm expected scores and recommendations.</li>
-        <li><strong>Repeatability:</strong> The same inputs always produce the same outputs (deterministic rules).</li>
-      </ul>
     </div>
     ${body}
     <script>
