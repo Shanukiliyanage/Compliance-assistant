@@ -400,18 +400,18 @@ export default function Summary() {
         {mandatorySummary && mandatoryPieData && (
           <div
             style={{
-              background: "#0e1117",
+              background: "white",
               padding: "28px",
               borderRadius: "20px",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.4)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.10)",
+              border: "1px solid #e5e7eb",
               marginBottom: "30px",
             }}
           >
-            <h2 style={{ fontSize: "1.5rem", marginBottom: "6px", color: "#f1f5f9" }}>
+            <h2 style={{ fontSize: "1.5rem", marginBottom: "6px", color: "#0F172A" }}>
               Overall ISO 27001 Mandatory Clauses Compliance
             </h2>
-            <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "18px" }}>
+            <p style={{ color: "#6b7280", marginBottom: "18px" }}>
               Based on {totals.stage1Total} mandatory clauses
             </p>
 
@@ -425,22 +425,22 @@ export default function Summary() {
             >
               <div>
                 <div style={{ display: "grid", gap: "10px" }}>
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Fully compliant</p>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Fully compliant</p>
                     <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#16a34a" }}>
                       {mandatorySummary.fullyCount} / {mandatorySummary.total} ({mandatorySummary.fullyPercent}%)
                     </div>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Partially compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#facc15" }}>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Partially compliant</p>
+                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#d97706" }}>
                       {mandatorySummary.partialCount} / {mandatorySummary.total} ({mandatorySummary.partialPercent}%)
                     </div>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Not compliant</p>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Not compliant</p>
                     <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#dc2626" }}>
                       {mandatorySummary.nonCount} / {mandatorySummary.total} ({mandatorySummary.nonPercent}%)
                     </div>
@@ -449,7 +449,7 @@ export default function Summary() {
               </div>
 
               <div style={{ width: "100%", maxWidth: "360px", margin: "0 auto" }}>
-                <Pie data={mandatoryPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#f1f5f9" } } } }} />
+                <Pie data={mandatoryPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#0F172A" } } } }} />
               </div>
             </div>
           </div>
@@ -459,21 +459,21 @@ export default function Summary() {
         {annexSummary && annexPieData && (
           <div
             style={{
-              background: "#0e1117",
+              background: "white",
               padding: "28px",
               borderRadius: "20px",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.4)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.10)",
+              border: "1px solid #e5e7eb",
               marginBottom: "30px",
             }}
           >
-            <h2 style={{ fontSize: "1.5rem", marginBottom: "6px", color: "#f1f5f9" }}>
+            <h2 style={{ fontSize: "1.5rem", marginBottom: "6px", color: "#0F172A" }}>
               Overall ISO 27001 Annex A Compliance
             </h2>
-            <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "18px" }}>
+            <p style={{ color: "#6b7280", marginBottom: "18px" }}>
               Based on {totals.annexATotal} total controls
             </p>
-            <p style={{ color: "#f1f5f9", fontWeight: 700, marginBottom: "18px" }}>
+            <p style={{ color: "#0F172A", fontWeight: 700, marginBottom: "18px" }}>
               Maturity: {annexAMaturityLevel}
             </p>
 
@@ -487,30 +487,30 @@ export default function Summary() {
             >
               <div>
                 <div style={{ display: "grid", gap: "10px" }}>
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Fully compliant</p>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Fully compliant</p>
                     <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#16a34a" }}>
                       {annexSummary.fullyCount} / {annexSummary.total} ({annexSummary.fullyPercent}%)
                     </div>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Partially compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#facc15" }}>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Partially compliant</p>
+                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#d97706" }}>
                       {annexSummary.partialCount} / {annexSummary.total} ({annexSummary.partialPercent}%)
                     </div>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Not compliant</p>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Not compliant</p>
                     <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#dc2626" }}>
                       {annexSummary.nonCount} / {annexSummary.total} ({annexSummary.nonPercent}%)
                     </div>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "16px", background: "rgba(255,255,255,0.03)" }}>
-                    <p style={{ color: "rgba(241,245,249,0.5)", marginBottom: "6px" }}>Not applicable</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "rgba(241,245,249,0.4)" }}>
+                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
+                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Not applicable</p>
+                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#9ca3af" }}>
                       {annexSummary.notApplicableCount} / {annexSummary.total} ({annexSummary.notApplicablePercent}%)
                     </div>
                   </div>
@@ -518,7 +518,7 @@ export default function Summary() {
               </div>
 
               <div style={{ width: "100%", maxWidth: "360px", margin: "0 auto" }}>
-                <Pie data={annexPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#f1f5f9" } } } }} />
+                <Pie data={annexPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#0F172A" } } } }} />
               </div>
             </div>
           </div>
@@ -571,15 +571,16 @@ export default function Summary() {
                   <div
                     key={stageKey}
                     style={{
-                      background: "#0e1117",
+                      background: "white",
                       padding: "24px",
                       borderRadius: "16px",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      border: "1px solid #e5e7eb",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                     }}
                   >
                     <div
                       style={{
-                        color: "#f1f5f9",
+                        color: "#0F172A",
                         marginBottom: "12px",
                         fontSize: "0.95rem",
                         fontWeight: 800,
@@ -590,19 +591,19 @@ export default function Summary() {
 
                     <div style={{ display: "grid", gap: "10px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: "rgba(241,245,249,0.5)" }}>Yes</span>
+                        <span style={{ color: "#6b7280" }}>Yes</span>
                         <span style={{ fontWeight: 800, color: "#16a34a" }}>
                           {Number(summary?.fullyPercent ?? 0)}%
                         </span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: "rgba(241,245,249,0.5)" }}>Partial</span>
-                        <span style={{ fontWeight: 800, color: "#facc15" }}>
+                        <span style={{ color: "#6b7280" }}>Partial</span>
+                        <span style={{ fontWeight: 800, color: "#d97706" }}>
                           {Number(summary?.partialPercent ?? 0)}%
                         </span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: "rgba(241,245,249,0.5)" }}>No</span>
+                        <span style={{ color: "#6b7280" }}>No</span>
                         <span style={{ fontWeight: 800, color: "#dc2626" }}>
                           {Number(summary?.nonPercent ?? 0)}%
                         </span>
@@ -616,8 +617,8 @@ export default function Summary() {
                             alignItems: "center",
                           }}
                         >
-                          <span style={{ color: "rgba(241,245,249,0.5)" }}>Not applicable</span>
-                          <span style={{ fontWeight: 800, color: "rgba(241,245,249,0.4)" }}>
+                          <span style={{ color: "#6b7280" }}>Not applicable</span>
+                          <span style={{ fontWeight: 800, color: "#9ca3af" }}>
                             {Number(notApplicablePercent ?? 0)}%
                           </span>
                         </div>

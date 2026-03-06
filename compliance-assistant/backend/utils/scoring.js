@@ -59,11 +59,6 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
     return !isYesAnswer(stage["A5.23.Q1"]);
   }
 
-  // Only score incident follow-up if incident intro was "yes".
-  if (/^A5\.(25|26|27|28)\./i.test(k)) {
-    return !isYesAnswer(stage["A5.24.Q1"]);
-  }
-
   // Stage 5: secure development controls only apply if SDLC gateway is "yes".
   if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
     return !isYesAnswer(stage["SDLC_GATE_Q1"]);

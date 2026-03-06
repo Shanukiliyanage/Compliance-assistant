@@ -60,10 +60,6 @@ export function getNotApplicableControlIds(stageId, stageAnswers) {
       notApplicable.add("A.5.23");
     }
 
-    // Incident follow-up controls apply only if incident management is in scope.
-    if (!isYesAnswer(stage["A5.24.Q1"])) {
-      addRange(notApplicable, "A.5.", 25, 28);
-    }
   }
 
   if (stageId === "stage5") {

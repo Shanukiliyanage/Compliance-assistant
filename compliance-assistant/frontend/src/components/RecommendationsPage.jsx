@@ -344,6 +344,8 @@ function normalizeRecommendation(rec, textIndex) {
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
 
     const controlId = rec.controlId ? String(rec.controlId) : "";
+    // Skip stale/malformed recommendations with no real control identifier.
+    if (!controlId || controlId === "undefined") return null;
     const questionId = rec.questionId ? String(rec.questionId) : "";
     const clauseTitle = mandatoryClauseTitles[controlId];
 
@@ -852,8 +854,6 @@ export default function RecommendationsPage() {
       <ul>
         <li><strong>ISO alignment:</strong> Questions are grouped by ISO clauses (Stage 1) and Annex A controls (Stages 2–5).</li>
         <li><strong>Rule checks:</strong> Control compliance is computed consistently from YES/PARTIAL/NO answers, then scoring/recommendations use that output.</li>
-        <li><strong>Test cases:</strong> We manually tested sample answer sets (e.g., all YES, mixed, gateway exclusions) to confirm expected scores and recommendations.</li>
-        <li><strong>Repeatability:</strong> The same inputs always produce the same outputs (deterministic rules).</li>
       </ul>
     </div>
     ${body}
@@ -906,7 +906,7 @@ export default function RecommendationsPage() {
   const normalizedRecommendations = useMemo(() => {
     // Convert raw backend recommendations into a stable UI shape.
     const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
-    return recs.map((r) => normalizeRecommendation(r, controlNameIndex));
+    return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
 
   const stageCounts = useMemo(() => {
@@ -1031,7 +1031,7 @@ export default function RecommendationsPage() {
         width: "100%",
         display: "flex",
         justifyContent: "center",
-        backgroundColor: "#FAF5EF",
+        backgroundColor: "#07090f",
         minHeight: "100vh",
       }}
     >
@@ -1053,7 +1053,7 @@ export default function RecommendationsPage() {
             Back
           </button>
 
-          <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "1.1rem" }}>
+          <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: "1.1rem" }}>
             Recommendations
           </div>
 

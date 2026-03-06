@@ -48,6 +48,15 @@ function Stage2Organizational() {
     });
   };
 
+  const setAnswersNoForControls = (controlIds, nextAnswers) => {
+    controls.forEach((c) => {
+      if (!controlIds.includes(c.id)) return;
+      (c.questions || []).forEach((q) => {
+        nextAnswers[q.id] = "no";
+      });
+    });
+  };
+
   const isQuestionVisible = (q, nextAnswers) => {
     const cond = q?.showIf;
     if (!cond) return true;
@@ -73,9 +82,14 @@ function Stage2Organizational() {
         clearAnswersForControls(supplierControlIds, next);
       }
 
-      // Gateway: if incident management is not in scope, clear follow-up answers.
-      if (questionId === incidentIntroQ1Id && prev[questionId] !== value && value !== "yes") {
-        clearAnswersForControls(incidentFollowUpControlIds, next);
+      // Gateway: incident management — if "no", auto-set follow-ups to "no" so they score as not compliant.
+      // If "yes", clear them so the user can answer fresh.
+      if (questionId === incidentIntroQ1Id && prev[questionId] !== value) {
+        if (value === "yes") {
+          clearAnswersForControls(incidentFollowUpControlIds, next);
+        } else {
+          setAnswersNoForControls(incidentFollowUpControlIds, next);
+        }
       }
 
       // Clear any answers that became hidden due to conditional visibility.

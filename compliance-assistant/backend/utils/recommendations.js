@@ -62,11 +62,6 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
     return !isYesAnswer(stage["A5.23.Q1"]);
   }
 
-  // Only consider incident follow-up if incident intro was "yes".
-  if (/^A5\.(25|26|27|28)\./i.test(k)) {
-    return !isYesAnswer(stage["A5.24.Q1"]);
-  }
-
   return false;
 }
 
@@ -179,6 +174,8 @@ export function generateRecommendations(answers, options = {}) {
 
       // For Annex A stages, normalize question IDs to the canonical controlId used by rules and N/A.
       const controlId = normalizeForStage(stageId, questionId);
+      // Skip unrecognizable keys (e.g. stale "undefined" keys from old localStorage data).
+      if (!controlId || controlId === "undefined") continue;
       if (stageId !== "stage1" && notApplicableControlIds.has(controlId)) continue;
 
       // Only emit a question-level recommendation when an explicit rule exists.
@@ -201,6 +198,7 @@ export function generateRecommendations(answers, options = {}) {
     // 2) Fallback: one aggregated recommendation per control where no question-level rules exist.
     const grouped = groupStageAnswers(stageId, stage);
     Object.entries(grouped).forEach(([controlId, questionAnswers]) => {
+      if (!controlId || controlId === "undefined") return;
       if (notApplicableControlIds.has(controlId)) return;
       if (controlsWithQuestionRecs.has(controlId)) return;
 
