@@ -21,7 +21,7 @@
         {
           "id": "A.6.2-Q1",
           "text": "Do employment contracts clearly define information security responsibilities for employees?",
-          "helpText": "Contracts should clearly define security obligations, acceptable behavior, and responsibilities for protecting information."
+          "helpText": "Employment terms should make clear what employees are and are not allowed to do. For example, they must not share customer information with unauthorised people, reveal confidential business information to outsiders, use company systems for illegal activity, or disclose sensitive data such as financial records, passwords, or personal details."
         }
       ]
     },

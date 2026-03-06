@@ -26,6 +26,7 @@ function StageIncidentManagement() {
 
   const [answers, setAnswers] = useState({});
   const [missingIds, setMissingIds] = useState([]);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   const clearAnswersForControls = (controlIds, nextAnswers) => {
     controls.forEach((c) => {
@@ -54,6 +55,7 @@ function StageIncidentManagement() {
     if (missingIds.includes(questionId)) {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
+    setShowValidationError(false);
   };
 
   const validateAndNext = () => {
@@ -79,7 +81,7 @@ function StageIncidentManagement() {
 
     if (newMissing.length > 0) {
       setMissingIds(newMissing);
-      window.alert("Please answer all required questions before continuing.");
+      setShowValidationError(true);
       return;
     }
 
@@ -136,7 +138,7 @@ function StageIncidentManagement() {
         <h1 style={{ fontSize: "2rem", marginBottom: "12px" }}>
           Incident management
         </h1>
-        <p style={{ color: "#6b7280" }}>
+        <p style={{ color: "#94a3b8" }}>
           No incident management controls found. Please check incident.json.
         </p>
       </div>
@@ -151,11 +153,11 @@ function StageIncidentManagement() {
         margin: "0 auto"
       }}
     >
-      <h1 style={{ fontSize: "2.2rem", marginBottom: "8px" }}>
+      <h1 style={{ fontSize: "2.2rem", marginBottom: "8px", color: "#f1f5f9" }}>
         Stage, Information security incident management
       </h1>
 
-      <p style={{ color: "#6b7280", marginBottom: "24px", fontSize: "1rem" }}>
+      <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "1rem" }}>
         Answer all questions related to how your organization prepares for,
         handles, and learns from information security incidents.
       </p>
@@ -174,7 +176,7 @@ function StageIncidentManagement() {
             justifyContent: "space-between",
             fontSize: "0.95rem",
             marginBottom: "6px",
-            color: "#4b5563"
+            color: "#94a3b8"
           }}
         >
           <span>
@@ -236,7 +238,7 @@ function StageIncidentManagement() {
                 paddingBottom: "24px"
               }}
             >
-              <h2 style={{ fontSize: "1.2rem", marginBottom: "12px" }}>
+              <h2 style={{ fontSize: "1.2rem", marginBottom: "12px", color: "#0F172A" }}>
                 {control.control}
               </h2>
 
@@ -355,11 +357,18 @@ function StageIncidentManagement() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "column",
           maxWidth: "900px",
-          margin: "20px auto 0 auto"
+          margin: "20px auto 0 auto",
+          gap: "10px",
         }}
       >
+        {showValidationError && (
+          <p style={{ margin: 0, padding: "10px 14px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "8px", color: "#b91c1c", fontSize: "0.875rem", fontWeight: 500 }}>
+            Please answer all questions before continuing. Unanswered questions are highlighted.
+          </p>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
         <button
           onClick={handleBack}
           style={{
@@ -391,6 +400,7 @@ function StageIncidentManagement() {
         >
           Next
         </button>
+        </div>
       </div>
     </div>
   );

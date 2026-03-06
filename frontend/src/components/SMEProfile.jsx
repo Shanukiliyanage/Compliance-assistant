@@ -92,12 +92,12 @@ const SMEProfilePage = () => {
           style={{
             fontSize: "2rem",
             marginBottom: "12px",
-            color: "#0F172A",
+            color: "#f1f5f9",
           }}
         >
           About Your Organization
         </h1>
-        <p style={{ color: "#6b7280", fontSize: "1rem", lineHeight: "1.5" }}>
+        <p style={{ color: "#94a3b8", fontSize: "1rem", lineHeight: "1.5" }}>
           Help us understand your organization better so we can give you the most relevant recommendations.
         </p>
       </div>

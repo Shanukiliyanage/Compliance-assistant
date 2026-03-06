@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-    strictPort: true,
+    strictPort: false,
     proxy: {
       // Allows the frontend to call `/api/...` without hardcoding a backend origin.
       // In dev, Vite proxies these requests to the backend server.

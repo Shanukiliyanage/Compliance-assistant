@@ -60,7 +60,7 @@
       {
         "id": "A8.6_Q1",
         "question": "Does your organization monitor and adjust capacity for systems, technology, and people to ensure operations continue reliably as business needs grow?",
-        "explanation": "This checks whether you monitor and adjust capacity to meet business growth and reliability needs."
+        "explanation": "Capacity means the ability of your systems to handle the workload placed on them. This question checks whether you monitor whether your systems have enough space, processing power, and bandwidth to keep working reliably, and whether you plan ahead when growth is expected."
       }
     ]
   },
@@ -142,7 +142,7 @@
       {
         "id": "A8.13_Q1",
         "question": "Are important systems and data backed up so they can be restored if needed?",
-        "explanation": "This checks whether backups and restores are in place."
+        "explanation": "This checks whether important data and systems are regularly backed up so they can be restored if something goes wrong, such as a cyberattack, hardware failure, or accidental deletion."
       },
       {
         "id": "A8.13_Q2",
@@ -158,7 +158,7 @@
       {
         "id": "A8.14_Q1",
         "question": "Do you have backup or redundant systems to maintain operations if primary systems fail?",
-        "explanation": "This checks whether redundancy supports availability."
+        "explanation": "Redundancy means having a backup or spare system that can take over if the main one fails, so that operations can continue with minimal disruption. For example, a backup server, a secondary internet connection, or a failover system."
       }
     ]
   },
@@ -169,7 +169,7 @@
       {
         "id": "A8.15_Q1",
         "question": "Are system activities and security events logged and protected from tampering?",
-        "explanation": "This checks whether logs are collected and protected."
+        "explanation": "Logs are automatic records of what happens on your systems, such as who logged in, what files were accessed, or what changes were made. This question asks whether those records are being kept and protected so they can be used to investigate incidents or unusual activity."
       }
     ]
   },
@@ -180,7 +180,7 @@
       {
         "id": "A8.16_Q1",
         "question": "Are systems monitored to detect suspicious or abnormal activity?",
-        "explanation": "This checks whether monitoring is in place."
+        "explanation": "Monitoring means watching your systems for unusual or suspicious activity. For example, detecting multiple failed login attempts, large amounts of data being downloaded, or access happening outside normal working hours."
       },
       {
         "id": "A8.16_Q2",
@@ -197,11 +197,6 @@
         "id": "A8.17_Q1",
         "question": "Are all information processing systems synchronized to a common, approved time source (NTP)?",
         "explanation": "This checks whether systems use an approved time source. NTP (Network Time Protocol) is a standard method used to keep computers and devices set to the correct time by syncing them with a trusted time server."
-      },
-      {
-        "id": "A8.17_Q2",
-        "question": "Is clock accuracy important for your incident investigations and forensic analysis?",
-        "explanation": "This checks whether accurate time is needed for investigations."
       }
     ]
   },
@@ -212,7 +207,7 @@
       {
         "id": "A8.18_Q1",
         "question": "Are utility programs that can override system and application controls restricted and tightly controlled?",
-        "explanation": "This checks whether privileged utilities are controlled."
+        "explanation": "Some software tools have the power to bypass or override normal security settings on a system. This question asks whether those powerful tools are restricted to only the people who genuinely need them, and whether their use is tracked."
       }
     ]
   },
@@ -223,7 +218,7 @@
       {
         "id": "A8.19_Q1",
         "question": "Are procedures in place to control and approve the installation of software on operational (production) systems, including licensed and open-source software?",
-        "explanation": "This checks whether production software installs are controlled."
+        "explanation": "Installing unauthorized or untested software on business systems can introduce security risks such as malware or vulnerabilities. This question asks whether there is an approval process before software can be installed on systems used in the live business environment."
       }
     ]
   },
@@ -235,7 +230,7 @@
       {
         "id": "A8.20_Q1",
         "question": "Are networks properly secured, managed, and controlled in the organization?",
-        "explanation": "Answer YES only if your organization manages internal or external networks."
+        "explanation": "This question asks whether your network is actively protected and monitored. Example: firewalls blocking unauthorised traffic, intrusion detection alerting on suspicious activity, and network segmentation separating sensitive systems from general use."
       }
     ],
     "gatewayFor": ["A8.21", "A8.22"]
@@ -247,7 +242,7 @@
       {
         "id": "A8.21_Q1",
         "question": "Are network services securely managed (firewalls, monitoring, configurations)?",
-        "explanation": "This checks whether network services are secured."
+        "explanation": "Network services include things like firewalls, routers, Wi-Fi, and VPNs. This question asks whether those services are properly set up, monitored, and controlled to prevent unauthorized access or misuse."
       }
     ]
   },
@@ -258,7 +253,7 @@
       {
         "id": "A8.22_Q1",
         "question": "Are networks segregated to reduce risk?",
-        "explanation": "This checks whether network segmentation is applied."
+        "explanation": "Network segmentation means dividing your network into separate sections so that if one part is compromised, the rest is not automatically at risk. For example, keeping guest Wi-Fi separate from internal systems, or isolating payment systems from general office computers."
       }
     ]
   },
@@ -292,7 +287,7 @@
       {
         "id": "SDLC_GATE_Q1",
         "question": "Do you develop any software within the organization?",
-        "explanation": "If NO, all secure development controls are skipped."
+        "explanation": ""
       }
     ],
     "gatewayFor": ["A8.25", "A8.26", "A8.27", "A8.28", "A8.29", "A8.31", "A8.33"]
@@ -348,7 +343,7 @@
       {
         "id": "A8.29_Q1",
         "question": "Are systems tested for security issues before being released into production?",
-        "explanation": "This checks whether security testing is performed prior to production release."
+        "explanation": "Before releasing software into the live environment, it should be tested specifically for security weaknesses. This reduces the chance of vulnerabilities being present when real users and data are involved."
       },
       {
         "id": "A8.29_Q2",
@@ -375,7 +370,7 @@
       {
         "id": "A8.30_Q1",
         "question": "When development is outsourced, are security requirements and oversight applied, for example through contracts, non-disclosure agreements (NDAs), and vendor risk assessments?",
-        "explanation": "This checks whether development is outsourced."
+        "explanation": "This checks whether development work is done by an external company or contractor rather than in-house, which requires additional contractual and security oversight."
       }
     ]
   },
@@ -386,7 +381,12 @@
       {
         "id": "A8.32_Q1",
         "question": "Are system changes reviewed, approved, and tested before implementation?",
-        "explanation": "This checks whether changes are controlled."
+        "explanation": "Any change to a live system, even a small one, carries some risk. This question asks whether changes go through a review and approval step before being applied, to prevent accidental outages or security issues."
+      },
+      {
+        "id": "A8.32_Q2",
+        "question": "Is there a change management procedure in place?",
+        "explanation": "A change management procedure is a documented process that sets out how changes to systems, software, or infrastructure are requested, assessed, approved, and recorded. It ensures changes are made in a controlled, traceable way rather than informally or without oversight."
       }
     ]
   },

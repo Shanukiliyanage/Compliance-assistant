@@ -5,7 +5,7 @@
       {
         "id": "SD.GW1",
         "question": "Does your organization develop or significantly customize software, either internally or using third party developers?",
-        "explanation": "This determines whether secure software development and related controls apply to your organization."
+        "explanation": ""
       }
     ],
     "gatewayFor": ["SD_SecureLifecycle"]

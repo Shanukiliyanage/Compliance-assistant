@@ -23,7 +23,6 @@ function Stage2Organizational() {
   const supplierControlIds = gatewayControl ? gatewayControl.gatewayFor : [];
 
   const incidentIntroQ1Id = "A5.24.Q1";
-  const incidentIntroQ2Id = "A5.24.Q2";
   const incidentFollowUpControlIds = ["A5.25", "A5.26", "A5.27", "A5.28"];
 
   // Load saved answers from localStorage.
@@ -32,6 +31,7 @@ function Stage2Organizational() {
     return saved ? JSON.parse(saved) : {};
   });
   const [missingIds, setMissingIds] = useState([]);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   // Persist answers to localStorage.
   useEffect(() => {
@@ -43,6 +43,15 @@ function Stage2Organizational() {
       if (!controlIds.includes(c.id)) return;
       (c.questions || []).forEach((q) => {
         delete nextAnswers[q.id];
+      });
+    });
+  };
+
+  const setAnswersNoForControls = (controlIds, nextAnswers) => {
+    controls.forEach((c) => {
+      if (!controlIds.includes(c.id)) return;
+      (c.questions || []).forEach((q) => {
+        nextAnswers[q.id] = "no";
       });
     });
   };
@@ -72,9 +81,14 @@ function Stage2Organizational() {
         clearAnswersForControls(supplierControlIds, next);
       }
 
-      // Gateway: if incident management is not in scope, clear follow-up answers.
-      if (questionId === incidentIntroQ1Id && prev[questionId] !== value && value !== "yes") {
-        clearAnswersForControls(incidentFollowUpControlIds, next);
+      // Gateway: incident management - if "no", auto-set follow-ups to "no" so they score as not compliant.
+      // If "yes", clear them so the user can answer fresh.
+      if (questionId === incidentIntroQ1Id && prev[questionId] !== value) {
+        if (value === "yes") {
+          clearAnswersForControls(incidentFollowUpControlIds, next);
+        } else {
+          setAnswersNoForControls(incidentFollowUpControlIds, next);
+        }
       }
 
       // Clear any answers that became hidden due to conditional visibility.
@@ -86,6 +100,7 @@ function Stage2Organizational() {
     if (missingIds.includes(questionId)) {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
+    setShowValidationError(false);
   };
 
   const validateAndNext = () => {
@@ -112,7 +127,7 @@ function Stage2Organizational() {
 
     if (newMissing.length > 0) {
       setMissingIds(newMissing);
-      window.alert("Please answer all required questions before continuing.");
+      setShowValidationError(true);
       return;
     }
 
@@ -160,11 +175,11 @@ function Stage2Organizational() {
   return (
     <div style={{ padding: "40px 20px", width: "100%", display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: "900px" }}>
-        <h1 style={{ fontSize: "2.2rem", marginBottom: "8px" }}>
+        <h1 style={{ fontSize: "2.2rem", marginBottom: "8px", color: "#f1f5f9" }}>
           Stage 2, Organizational Controls
         </h1>
 
-        <p style={{ color: "#6b7280", marginBottom: "24px", fontSize: "1rem" }}>
+        <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "1rem" }}>
           Answer all required questions on this page.
         </p>
 
@@ -175,7 +190,7 @@ function Stage2Organizational() {
               justifyContent: "space-between",
               fontSize: "0.95rem",
               marginBottom: "6px",
-              color: "#4b5563",
+              color: "#94a3b8",
             }}
           >
             <span>
@@ -236,14 +251,14 @@ function Stage2Organizational() {
                   paddingBottom: "24px",
                 }}
               >
-                <h2 style={{ fontSize: "1.2rem", marginBottom: "12px" }}>
+                <h2 style={{ fontSize: "1.2rem", marginBottom: "12px", color: "#0F172A" }}>
                   {controlIdx + 1}. {control.control}
                 </h2>
 
                 {control.questions.map((q, qIdx) => {
                   if (!isQuestionVisible(q, answers)) return null;
 
-                  const isGatewayQuestion = Boolean(isGateway || q?.isGateway);
+                  const isGatewayQuestion = q.id === gatewayQuestionId || Boolean(q?.isGateway);
                   const selected = answers[q.id];
                   const isMissing = missingIds.includes(q.id);
                   const questionLabel = `${String.fromCharCode(97 + qIdx)})`;
@@ -276,7 +291,7 @@ function Stage2Organizational() {
                     >
                       <p style={{ fontSize: "0.98rem", marginBottom: "8px", fontWeight: 600, color: "#0F172A" }}>
                         <span style={{ marginRight: "8px" }}>{questionLabel}</span>
-                        {q.question}{q?.optional ? " (optional)" : ""}
+                        {q.question}
                       </p>
                       <p style={{ fontSize: "0.85rem", marginBottom: "14px", color: "#6b7280", lineHeight: "1.4" }}>
                         {q.explanation}
@@ -353,7 +368,13 @@ function Stage2Organizational() {
           })}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: "20px", gap: "10px" }}>
+          {showValidationError && (
+            <p style={{ margin: 0, padding: "10px 14px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "8px", color: "#b91c1c", fontSize: "0.875rem", fontWeight: 500 }}>
+              Please answer all questions before continuing. Unanswered questions are highlighted.
+            </p>
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button
             onClick={handleBack}
             style={{
@@ -385,6 +406,7 @@ function Stage2Organizational() {
           >
             Continue to Stage 3 →
           </button>
+          </div>
         </div>
       </div>
     </div>
