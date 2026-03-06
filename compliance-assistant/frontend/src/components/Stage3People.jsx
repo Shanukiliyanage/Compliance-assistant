@@ -75,6 +75,7 @@ function Stage3People() {
     return saved ? JSON.parse(saved) : {};
   });
   const [missingIds, setMissingIds] = useState([]);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   // Persist answers to localStorage.
   useEffect(() => {
@@ -86,6 +87,7 @@ function Stage3People() {
     if (missingIds.includes(questionId)) {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
+    setShowValidationError(false);
   };
 
   const { answeredCount, totalRequired } = useMemo(() => {
@@ -115,7 +117,7 @@ function Stage3People() {
 
     if (newMissing.length) {
       setMissingIds(newMissing);
-      window.alert("Please answer all required questions before continuing.");
+      setShowValidationError(true);
       return;
     }
 
@@ -333,7 +335,13 @@ function Stage3People() {
         </div>
 
         {/* bottom buttons match organizational */}
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: "20px", gap: "10px" }}>
+          {showValidationError && (
+            <p style={{ margin: 0, padding: "10px 14px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "8px", color: "#b91c1c", fontSize: "0.875rem", fontWeight: 500 }}>
+              Please answer all questions before continuing. Unanswered questions are highlighted.
+            </p>
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button
             onClick={handleBack}
             style={{
@@ -365,6 +373,7 @@ function Stage3People() {
           >
             Continue to Stage 4 →
           </button>
+          </div>
         </div>
       </div>
     </div>

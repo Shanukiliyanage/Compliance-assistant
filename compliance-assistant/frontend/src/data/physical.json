@@ -21,12 +21,12 @@
       {
         "id": "A7.2_Q1",
         "question": "Are access points to secure areas controlled (for example through doors, gates, reception areas)?",
-        "explanation": "Controlled entry points reduce unauthorized access risks."
+        "explanation": "This means making sure that only people who are supposed to be in certain areas can actually get in. For example, having a locked door, a keycard reader, or a staffed reception desk that checks who is entering."
       },
       {
         "id": "A7.2_Q2",
         "question": "Do you keep a record of who enters the premises other than employees?",
-        "explanation": "Visitor logs help with accountability and investigations."
+        "explanation": "Keeping a record of visitors, such as a sign-in sheet or digital log, means you always know who has been on your premises. If something goes missing or an incident occurs, you can check who was there and when."
       }
     ]
   },
@@ -86,7 +86,7 @@
       {
         "id": "A7.7_Q1",
         "question": "Do you have a clear desk policy requiring monitors to be locked or screens turned off when not in use?",
-        "explanation": "Clear desk practices reduce information exposure."
+        "explanation": "A clear desk policy means sensitive documents should not be left out unattended, and computer screens should be locked when you step away from your desk. This prevents others from seeing or accessing information they should not."
       },
       {
         "id": "A7.7_Q2",

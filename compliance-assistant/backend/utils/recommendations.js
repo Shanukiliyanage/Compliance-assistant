@@ -74,11 +74,6 @@ function isSuppressedByStage5Gates(key, stageAnswers) {
   const k = String(key || "").trim();
   const stage = stageAnswers || {};
 
-  // Network security follow-up controls apply only if networking is in scope.
-  if (/^A8\.(21|22)[._-]/i.test(k)) {
-    return !isYesAnswer(stage["A8.20_Q1"]);
-  }
-
   // Secure development controls apply only if SDLC/software development is in scope.
   if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
     return !isYesAnswer(stage["SDLC_GATE_Q1"]);

@@ -64,11 +64,6 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
     return !isYesAnswer(stage["A5.24.Q1"]);
   }
 
-  // Stage 5: network controls only apply if network gateway is "yes".
-  if (/^A8\.(21|22)[._-]/i.test(k)) {
-    return !isYesAnswer(stage["A8.20_Q1"]);
-  }
-
   // Stage 5: secure development controls only apply if SDLC gateway is "yes".
   if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
     return !isYesAnswer(stage["SDLC_GATE_Q1"]);

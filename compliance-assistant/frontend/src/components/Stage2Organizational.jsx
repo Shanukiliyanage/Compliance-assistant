@@ -32,6 +32,7 @@ function Stage2Organizational() {
     return saved ? JSON.parse(saved) : {};
   });
   const [missingIds, setMissingIds] = useState([]);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   // Persist answers to localStorage.
   useEffect(() => {
@@ -86,6 +87,7 @@ function Stage2Organizational() {
     if (missingIds.includes(questionId)) {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
+    setShowValidationError(false);
   };
 
   const validateAndNext = () => {
@@ -112,7 +114,7 @@ function Stage2Organizational() {
 
     if (newMissing.length > 0) {
       setMissingIds(newMissing);
-      window.alert("Please answer all required questions before continuing.");
+      setShowValidationError(true);
       return;
     }
 
@@ -353,7 +355,13 @@ function Stage2Organizational() {
           })}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: "20px", gap: "10px" }}>
+          {showValidationError && (
+            <p style={{ margin: 0, padding: "10px 14px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "8px", color: "#b91c1c", fontSize: "0.875rem", fontWeight: 500 }}>
+              Please answer all questions before continuing. Unanswered questions are highlighted.
+            </p>
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
           <button
             onClick={handleBack}
             style={{
@@ -385,6 +393,7 @@ function Stage2Organizational() {
           >
             Continue to Stage 3 →
           </button>
+          </div>
         </div>
       </div>
     </div>

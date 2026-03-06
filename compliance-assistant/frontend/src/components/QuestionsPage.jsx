@@ -111,6 +111,7 @@ function QuestionsPage() {
 
   // Used to highlight questions the user skipped.
   const [missingIds, setMissingIds] = useState([]);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   // Save answers automatically.
   // Note: scoring/recommendations happen elsewhere; this page only collects answers.
@@ -125,6 +126,7 @@ function QuestionsPage() {
     if (missingIds.includes(questionId)) {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
+    setShowValidationError(false);
   };
 
   // Block “Continue” until every question has an answer.
@@ -139,7 +141,7 @@ function QuestionsPage() {
 
     if (newMissing.length) {
       setMissingIds(newMissing);
-      window.alert("Please answer all mandatory questions.");
+      setShowValidationError(true);
       return;
     }
 
@@ -229,15 +231,15 @@ function QuestionsPage() {
       >
         <div style={{ marginBottom: "8px" }}>
           <strong style={{ color: "#e2e8f0" }}>Yes:</strong>{" "}
-          <span style={{ color: "#94a3b8" }}>Fully implemented and consistently followed.</span>
+          <span style={{ color: "#94a3b8" }}>This is in place and everyone in the organisation follows it.</span>
         </div>
         <div style={{ marginBottom: "8px" }}>
           <strong style={{ color: "#e2e8f0" }}>Partial:</strong>{" "}
-          <span style={{ color: "#94a3b8" }}>Implemented in some areas or informally.</span>
+          <span style={{ color: "#94a3b8" }}>This exists but is not fully done, not always followed, or only applies to some parts of the business.</span>
         </div>
         <div>
           <strong style={{ color: "#e2e8f0" }}>No:</strong>{" "}
-          <span style={{ color: "#94a3b8" }}>Not implemented or only planned.</span>
+          <span style={{ color: "#94a3b8" }}>This is not in place yet, even if you are planning to do it in the future.</span>
         </div>
       </div>
 
@@ -363,6 +365,91 @@ function QuestionsPage() {
                     );
                   })()}
 
+                  {q.id === "4.2" && q.explanation && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#6b7280",
+                        marginBottom: "12px",
+                        lineHeight: "1.55",
+                        background: "#f3f4f6",
+                        borderLeft: "3px solid #cbd5e1",
+                        borderRadius: "4px",
+                        padding: "8px 10px",
+                      }}
+                    >
+                      {q.explanation}
+                    </p>
+                  )}
+
+                  {q.id === "4.3" && q.explanation && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#6b7280",
+                        marginBottom: "12px",
+                        lineHeight: "1.55",
+                        background: "#f3f4f6",
+                        borderLeft: "3px solid #cbd5e1",
+                        borderRadius: "4px",
+                        padding: "8px 10px",
+                      }}
+                    >
+                      {q.explanation}
+                    </p>
+                  )}
+
+                  {q.id === "6.1" && q.explanation && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#6b7280",
+                        marginBottom: "12px",
+                        lineHeight: "1.55",
+                        background: "#f3f4f6",
+                        borderLeft: "3px solid #cbd5e1",
+                        borderRadius: "4px",
+                        padding: "8px 10px",
+                      }}
+                    >
+                      {q.explanation}
+                    </p>
+                  )}
+
+                  {q.id === "6.2" && q.explanation && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#6b7280",
+                        marginBottom: "12px",
+                        lineHeight: "1.55",
+                        background: "#f3f4f6",
+                        borderLeft: "3px solid #cbd5e1",
+                        borderRadius: "4px",
+                        padding: "8px 10px",
+                      }}
+                    >
+                      {q.explanation}
+                    </p>
+                  )}
+
+                  {q.id === "9.1" && q.explanation && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#6b7280",
+                        marginBottom: "12px",
+                        lineHeight: "1.55",
+                        background: "#f3f4f6",
+                        borderLeft: "3px solid #cbd5e1",
+                        borderRadius: "4px",
+                        padding: "8px 10px",
+                      }}
+                    >
+                      {q.explanation}
+                    </p>
+                  )}
+
                   <div style={{ display: "flex", gap: "10px" }}>
                     {/* YES */}
                     <button
@@ -444,11 +531,26 @@ function QuestionsPage() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "column",
           marginTop: "28px",
           gap: "12px",
         }}
       >
+        {showValidationError && (
+          <p style={{
+            margin: 0,
+            padding: "10px 14px",
+            background: "#fef2f2",
+            border: "1px solid #fca5a5",
+            borderRadius: "8px",
+            color: "#b91c1c",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+          }}>
+            Please answer all questions before continuing. Unanswered questions are highlighted.
+          </p>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
         <button
           onClick={() => navigate("/assessment/profile")}
           style={{
@@ -496,6 +598,7 @@ function QuestionsPage() {
         >
           Continue to Stage 2 →
         </button>
+        </div>
       </div>
     </div>
     );

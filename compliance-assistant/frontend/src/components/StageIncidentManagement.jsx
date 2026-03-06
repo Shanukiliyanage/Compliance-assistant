@@ -26,6 +26,7 @@ function StageIncidentManagement() {
 
   const [answers, setAnswers] = useState({});
   const [missingIds, setMissingIds] = useState([]);
+  const [showValidationError, setShowValidationError] = useState(false);
 
   const clearAnswersForControls = (controlIds, nextAnswers) => {
     controls.forEach((c) => {
@@ -54,6 +55,7 @@ function StageIncidentManagement() {
     if (missingIds.includes(questionId)) {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
+    setShowValidationError(false);
   };
 
   const validateAndNext = () => {
@@ -79,7 +81,7 @@ function StageIncidentManagement() {
 
     if (newMissing.length > 0) {
       setMissingIds(newMissing);
-      window.alert("Please answer all required questions before continuing.");
+      setShowValidationError(true);
       return;
     }
 
@@ -355,11 +357,18 @@ function StageIncidentManagement() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "column",
           maxWidth: "900px",
-          margin: "20px auto 0 auto"
+          margin: "20px auto 0 auto",
+          gap: "10px",
         }}
       >
+        {showValidationError && (
+          <p style={{ margin: 0, padding: "10px 14px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "8px", color: "#b91c1c", fontSize: "0.875rem", fontWeight: 500 }}>
+            Please answer all questions before continuing. Unanswered questions are highlighted.
+          </p>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
         <button
           onClick={handleBack}
           style={{
@@ -391,6 +400,7 @@ function StageIncidentManagement() {
         >
           Next
         </button>
+        </div>
       </div>
     </div>
   );

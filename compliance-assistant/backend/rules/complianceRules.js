@@ -50,6 +50,6 @@ export function getControlComplianceState(questionAnswers) {
   const avg = sum / scores.length;
 
   if (avg === 1) return "FULLY_COMPLIANT";
-  if (avg >= 0.5) return "PARTIALLY_COMPLIANT";
+  if (avg > 0) return "PARTIALLY_COMPLIANT";
   return "NOT_COMPLIANT";
 }

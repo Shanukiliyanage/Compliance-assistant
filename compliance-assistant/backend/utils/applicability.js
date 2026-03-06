@@ -67,12 +67,6 @@ export function getNotApplicableControlIds(stageId, stageAnswers) {
   }
 
   if (stageId === "stage5") {
-    // Network security follow-up controls apply only if networking is in scope.
-    if (!isYesAnswer(stage["A8.20_Q1"])) {
-      notApplicable.add("A.8.21");
-      notApplicable.add("A.8.22");
-    }
-
     // Secure development controls apply only if SDLC/software development is in scope.
     if (!isYesAnswer(stage["SDLC_GATE_Q1"])) {
       // Exclude the SDLC-dependent controls.

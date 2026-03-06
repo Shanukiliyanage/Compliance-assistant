@@ -35,7 +35,7 @@
       {
         "id": "A5.3.Q1",
         "question": "Are key steps shared between different people so no single person can approve and execute the same critical action?",
-        "explanation": "Segregation of duties reduces risks of misuse or fraud."
+        "explanation": "This means making sure no single person has sole control over a critical task from start to finish. For example, the person who requests a payment should not also be the person who approves it. This reduces the risk of mistakes going unnoticed or someone acting dishonestly."
       },
       {
         "id": "A5.3.Q2",
@@ -50,12 +50,12 @@
       {
         "id": "A5.4.Q1",
         "question": "Do managers ensure people in their teams follow information security rules?",
-        "explanation": "Managers are responsible for promoting security behaviours within their teams."
+        "explanation": ""
       },
       {
         "id": "A5.4.Q2",
         "question": "When security issues are reported, do managers investigate and correct them?",
-        "explanation": "Managers must take timely action on reported weaknesses or incidents."
+        "explanation": ""
       }
     ]
   },
@@ -65,7 +65,7 @@
       {
         "id": "A5.5.Q1",
         "question": "Do you keep a list of external authorities to contact in a serious security incident?",
-        "explanation": "Having updated contact information speeds up response during major incidents."
+        "explanation": "These are official bodies you may need to notify or call on during a serious incident, such as the police, fire brigade, emergency services, a national cybersecurity agency, or a data protection regulator."
       }
     ]
   },
@@ -75,7 +75,7 @@
       {
         "id": "A5.6.Q1",
         "question": "Is your organization in contact with external groups sharing security/regulatory best practices?",
-        "explanation": "Security communities help organizations stay aware of emerging threats."
+        "explanation": "These are industry groups and cybersecurity communities that share threat intelligence, best practices and regulatory guidance, such as OWASP, ISACA, NCSC, or sector-specific information sharing groups."
       }
     ]
   },
@@ -85,7 +85,7 @@
       {
         "id": "A5.7.Q1",
         "question": "Do you regularly receive and review information about new security threats affecting your organization?",
-        "explanation": "Threat intelligence helps organizations react proactively to new risks."
+        "explanation": "Threat intelligence means staying informed about the latest cyber threats and attack methods that could affect your type of business. For example, subscribing to security alerts, reading advisories from agencies like the NCSC, or joining an industry group that shares information about new and emerging risks."
       }
     ]
   },
@@ -95,7 +95,7 @@
       {
         "id": "A5.8.Q1",
         "question": "Do you include information security in planning/decision making for projects?",
-        "explanation": "Security should be included early in all project lifecycles."
+        "explanation": "This means thinking about security from the very start of any new project, not just at the end. For example, when building a new website or changing a business process, security questions should be asked upfront: who needs access, what data is involved, and what could go wrong."
       },
       {
         "id": "A5.8.Q2",
@@ -110,7 +110,7 @@
       {
         "id": "A5.9.Q1",
         "question": "Do you keep an inventory of important information and related assets?",
-        "explanation": "Asset inventories help organizations identify what needs to be protected."
+        "explanation": "Knowing what information and systems your business relies on is the first step to protecting them. You cannot secure something you do not know exists. Examples include laptops, databases, software, customer records, and shared drives."
       },
       {
         "id": "A5.9.Q2",
@@ -155,12 +155,12 @@
       {
         "id": "A5.12.Q1",
         "question": "Is information classified by sensitivity?",
-        "explanation": "Classification helps determine appropriate protection levels."
+        "explanation": "Information classification means grouping information by how sensitive it is, for example Public, Internal, Confidential or Restricted. This helps people know how carefully they need to handle it and what protections should be applied."
       },
       {
         "id": "A5.12.Q2",
         "question": "Are emails classified according to sensitivity?",
-        "explanation": "Classifying emails helps users handle sensitive content properly."
+        "explanation": "Classifying emails by sensitivity, for example marking them as Confidential or Internal, helps the sender and recipient know how carefully the content should be treated and whether it can be forwarded or stored freely."
       }
     ]
   },
@@ -170,7 +170,7 @@
       {
         "id": "A5.13.Q1",
         "question": "Is sensitive information labelled so people know how to handle it?",
-        "explanation": "Labels guide users on how to store and share information securely."
+        "explanation": "Labelling means adding a visible marker to documents or files such as Confidential, Internal Use Only, or Public. This makes it immediately clear to anyone who sees the information how it should be handled, stored, or shared."
       }
     ]
   },
@@ -195,7 +195,7 @@
       {
         "id": "A5.15.Q1",
         "question": "Do you ensure people only have access needed for their job?",
-        "explanation": "Least privilege reduces risk from internal misuse or errors."
+        "explanation": "This means giving people only the access they need to do their job, and nothing more. For example, someone in finance should be able to access financial data but not HR records. Limiting access reduces the risk of accidental or deliberate misuse."
       }
     ]
   },
@@ -205,7 +205,7 @@
       {
         "id": "A5.16.Q1",
         "question": "Do you have a process to create/update/remove accounts for join/change/leave?",
-        "explanation": "Lifecycle management ensures only authorized users have active accounts."
+        "explanation": "This means having a process to create, update, and close user accounts when people join, change role, or leave the organisation. For example, when someone starts they get the accounts they need, and when they leave those accounts are disabled promptly."
       }
     ]
   },
@@ -225,7 +225,7 @@
       {
         "id": "A5.18.Q1",
         "question": "Are access rights reviewed regularly?",
-        "explanation": "Regular access reviews prevent accumulation of unnecessary privileges."
+        "explanation": "Over time, people change roles, take on new responsibilities, or leave the business. Regular access reviews check that everyone still has the right level of access and that nothing unnecessary has built up over time."
       }
     ]
   },
@@ -235,7 +235,7 @@
       {
         "id": "A5.19.GW1",
         "question": "Do you use external suppliers who can access your info/systems?",
-        "explanation": "This determines whether supplier related controls apply."
+        "explanation": ""
       }
     ],
     "gatewayFor": [
@@ -296,7 +296,7 @@
       {
         "id": "A5.23.Q1",
         "question": "Do you use cloud services?",
-        "explanation": "This determines whether cloud security controls apply.",
+        "explanation": "",
         "isGateway": true
       },
       {
@@ -316,7 +316,7 @@
       {
         "id": "A5.24.Q1",
         "question": "Do you have a planned approach for handling incidents?",
-        "explanation": "This checks whether you have defined incident handling plans, roles, and procedures.",
+        "explanation": "An incident plan means having a clear, agreed process for what to do when something goes wrong, such as a data breach, a ransomware attack, or a lost device. It covers who to contact, what steps to take, and how to contain the damage quickly.",
         "isGateway": true
       },
       {
@@ -336,7 +336,7 @@
       {
         "id": "A5.25.Q1",
         "question": "Are events checked/classified to decide if they are real incidents?",
-        "explanation": "Triage and classification help ensure the right response is applied and false alarms are handled appropriately."
+        "explanation": "Not every alert or unusual event is a real security incident. This question asks whether you have a way to review and decide whether something is a genuine problem or a false alarm, so the right response can be applied."
       }
     ]
   },
@@ -356,7 +356,7 @@
       {
         "id": "A5.27.Q1",
         "question": "After incidents, do you review what happened and update controls?",
-        "explanation": "Post-incident reviews help improve processes and reduce recurrence."
+        "explanation": "After an incident is resolved, it is worth asking what happened, why it happened, and whether it could happen again. A short review or debrief helps identify what went wrong and whether changes need to be made to stop it recurring."
       }
     ]
   },
