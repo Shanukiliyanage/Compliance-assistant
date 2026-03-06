@@ -23,8 +23,8 @@ export function getComplianceState(answer) {
 // Threshold-based rule (numeric average):
 // - YES = 1.0, PARTIAL = 0.5, NO = 0.0
 // - avg == 1.0                  -> FULLY_COMPLIANT
-// - avg >= 0.5 and avg < 1.0     -> PARTIALLY_COMPLIANT
-// - avg < 0.5                    -> NOT_COMPLIANT
+// - avg > 0 and avg < 1.0        -> PARTIALLY_COMPLIANT
+// - avg == 0                     -> NOT_COMPLIANT
 // - nothing answered             -> UNANSWERED
 export function getControlComplianceState(questionAnswers) {
   // Reduce multiple question answers for one control into one final compliance label.

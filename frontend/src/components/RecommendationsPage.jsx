@@ -770,7 +770,7 @@ export default function RecommendationsPage() {
 
             if (scores.length) {
               const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-              const complianceState = avg === 1 ? "FULLY_COMPLIANT" : avg >= 0.5 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
+              const complianceState = avg === 1 ? "FULLY_COMPLIANT" : avg > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
               status = {
                 stageId,
                 controlId: control.controlId,
