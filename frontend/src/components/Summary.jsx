@@ -158,7 +158,13 @@ export default function Summary() {
   const [downloading, setDownloading] = useState(false);
 
   const totals = useMemo(() => {
-    const stage1Total = getMandatoryItems(mandatoryData).length;
+    // Count unique clause groups (e.g. 4.2 + 4.3 both belong to clause "4")
+    // so 14 questions -> 7 clauses, matching how the backend scores stage1.
+    const stage1Total = new Set(
+      getMandatoryItems(mandatoryData).map((item) =>
+        String(item.clause || "").split(".")[0]
+      )
+    ).size;
 
     // ISO/IEC 27001:2022 Annex A totals are expected to be 93 in total.
     const stage2Total = countAnnexControls(organizationalData, "A5");
