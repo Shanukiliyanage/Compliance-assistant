@@ -322,6 +322,7 @@ function normalizeRecommendation(rec, textIndex) {
       controlId: "",
       complianceState: "",
       title: "Recommendation",
+      subtitle: "",
       description: "",
       stageLabel: "",
     };
@@ -334,6 +335,8 @@ function normalizeRecommendation(rec, textIndex) {
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
 
     const controlId = rec.controlId ? String(rec.controlId) : "";
+    // Skip stale/malformed recommendations with no real control identifier.
+    if (!controlId || controlId === "undefined") return null;
     const questionId = rec.questionId ? String(rec.questionId) : "";
     const clauseTitle = mandatoryClauseTitles[controlId];
 
@@ -343,16 +346,111 @@ function normalizeRecommendation(rec, textIndex) {
         ? String(textIndex.get(`${stageId}::${questionId}`) || "")
         : "";
 
+    const parseQuestionNumber = (qid) => {
+      const s = String(qid || "").trim();
+      const m = /(?:^|[._-])Q(\d+)$/i.exec(s);
+      return m ? Number(m[1]) : null;
+    };
+
+    // Stage 1 legacy ids like "6.1.Q2" need mapping to the real clause question text.
+    const stage1LegacyMap = {
+      "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
+      "5.1": { 1: "5.1", 2: "5.2" },
+      "6.1": { 1: "6.1", 2: "6.2" },
+      "7.1": { 1: "7.1", 2: "7.2", 3: "7.3" },
+      "8.1": { 1: "8.1", 2: "8.2" },
+      "9.1": { 1: "9.1", 2: "9.2" },
+      "10.1": { 1: "10.1", 2: "10.2" },
+    };
+
+    // Stage 1: show full clause title (e.g. "Clause 5: Leadership"), not sub-numbers.
+    if (stageId === "stage1") {
+      const idStr = String(controlId || "").trim();
+
+      const clauseFullTitles = {
+        "4": "Clause 4: Context of the Organization",
+        "5": "Clause 5: Leadership",
+        "6": "Clause 6: Planning",
+        "7": "Clause 7: Support",
+        "8": "Clause 8: Operation",
+        "9": "Clause 9: Performance Evaluation",
+        "10": "Clause 10: Improvement",
+      };
+
+      // Build question ordinal map (clause id → 1-based position within its clause group)
+      const clauseOrdinalMap = (() => {
+        const items = getMandatoryItems(mandatoryData);
+        const grouped = {};
+        for (const q of items) {
+          const cl = String(q?.clause ?? "").trim();
+          const maj = getMajorClause(cl);
+          if (!Number.isFinite(maj)) continue;
+          if (!grouped[maj]) grouped[maj] = [];
+          grouped[maj].push(cl);
+        }
+        const map = {};
+        for (const list of Object.values(grouped)) {
+          list.forEach((cl, idx) => { map[cl] = idx + 1; });
+        }
+        return map;
+      })();
+
+      // Path A: question-level ids like "5.1.Q2" or "6.1.Q1".
+      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/i.exec(idStr);
+      if (m) {
+        const majorClause = m[1];
+        const base = `${m[1]}.${m[2]}`;
+        const qn = Number(m[3]);
+        const mappedClause = stage1LegacyMap?.[base]?.[qn] || base;
+        const mappedQuestionText =
+          mappedClause && textIndex?.get
+            ? String(textIndex.get(`${stageId}::${mappedClause}`) || "")
+            : "";
+        const displayQn = clauseOrdinalMap[mappedClause] ?? qn;
+
+        return {
+          stageId,
+          controlId,
+          questionId: idStr,
+          complianceState,
+          priority,
+          title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
+          subtitle: mappedQuestionText ? `Q${displayQn} - ${mappedQuestionText}` : `Q${displayQn}`,
+          description: rec.recommendation,
+          stageLabel,
+        };
+      }
+
+      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3".
+      const n = /^(\d+)\.(\d+)$/.exec(idStr);
+      if (n) {
+        const majorClause = n[1];
+        const displayQn = clauseOrdinalMap[idStr] ?? Number(n[2]);
+        const qText = textIndex?.get ? String(textIndex.get(`${stageId}::${idStr}`) || "") : "";
+        return {
+          stageId,
+          controlId,
+          questionId: idStr,
+          complianceState,
+          priority,
+          title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
+          subtitle: qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`,
+          description: rec.recommendation,
+          stageLabel,
+        };
+      }
+    }
+
     return {
       stageId,
       controlId,
       questionId,
       complianceState,
       priority,
-      title:
-        questionTitle ||
-        clauseTitle ||
-        (questionId ? `Question ${questionId}` : controlId ? `Control ${controlId}` : "Recommendation"),
+      title: controlId ? `Control ${controlId}.` : clauseTitle || "Recommendation",
+      subtitle: questionTitle
+        ? `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`
+        : "",
       description: rec.recommendation,
       stageLabel,
     };
@@ -680,31 +778,7 @@ export default function RecommendationsPage() {
   const normalizedRecommendations = useMemo(() => {
     // Convert raw backend recommendations into a stable UI shape.
     const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
-    return recs.map((r) => {
-      const normalized = normalizeRecommendation(r, controlNameIndex);
-      const name =
-        normalized.stageId && normalized.controlId
-          ? controlNameIndex.get(`${normalized.stageId}::${normalized.controlId}`)
-          : "";
-
-      if (name && normalized.controlId) {
-        const baseTitle = `Control ${normalized.controlId}`;
-        const shouldReplaceTitle =
-          !normalized.title ||
-          normalized.title === baseTitle ||
-          normalized.title === "Recommendation" ||
-          normalized.title.startsWith(baseTitle);
-
-        if (shouldReplaceTitle) {
-          return {
-            ...normalized,
-            title: `${baseTitle} — ${name}`,
-          };
-        }
-      }
-
-      return normalized;
-    });
+    return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
 
   const stageCounts = useMemo(() => {
@@ -808,7 +882,7 @@ export default function RecommendationsPage() {
         width: "100%",
         display: "flex",
         justifyContent: "center",
-        backgroundColor: "#FAF5EF",
+        backgroundColor: "#07090f",
         minHeight: "100vh",
       }}
     >
@@ -830,7 +904,7 @@ export default function RecommendationsPage() {
             Back
           </button>
 
-          <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "1.1rem" }}>
+          <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: "1.1rem" }}>
             Recommendations
           </div>
 
@@ -911,7 +985,7 @@ export default function RecommendationsPage() {
                   background: "white",
                   padding: "20px",
                   borderRadius: "12px",
-                  borderLeft: `4px solid ${getCompliancePill(normalized.complianceState).borderColor}`,
+                  borderLeft: `4px solid ${normalized.stageId === "stage1" ? "#dc2626" : getCompliancePill(normalized.complianceState).borderColor}`,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                 }}
               >
@@ -938,7 +1012,7 @@ export default function RecommendationsPage() {
                     {getCompliancePill(normalized.complianceState).label}
                   </span>
 
-                  {getPriorityPill(normalized.priority).label && (
+                  {getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).label && (
                     <span
                       style={{
                         display: "inline-block",
@@ -946,11 +1020,11 @@ export default function RecommendationsPage() {
                         borderRadius: "999px",
                         fontSize: "0.8rem",
                         fontWeight: 600,
-                        backgroundColor: getPriorityPill(normalized.priority).bgColor,
-                        color: getPriorityPill(normalized.priority).textColor,
+                        backgroundColor: getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).bgColor,
+                        color: getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).textColor,
                       }}
                     >
-                      {getPriorityPill(normalized.priority).label}
+                      {getPriorityPill(normalized.stageId === "stage1" ? "HIGH" : normalized.priority).label}
                     </span>
                   )}
 
@@ -981,6 +1055,19 @@ export default function RecommendationsPage() {
                 >
                   {normalized.title}
                 </p>
+
+                {normalized.subtitle && (
+                  <p
+                    style={{
+                      color: "#0F172A",
+                      fontSize: "0.95rem",
+                      marginBottom: "8px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {normalized.subtitle}
+                  </p>
+                )}
 
                 {normalized.description && (
                   <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>
