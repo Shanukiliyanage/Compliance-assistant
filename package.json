@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "build": "npm run build --prefix frontend",
     "start": "concurrently -k \"npm --prefix backend start\" \"npm --prefix frontend start\"",
     "dev": "concurrently -k \"npm --prefix backend start\" \"npm --prefix frontend run dev\"",
     "start:backend": "npm --prefix backend start",
