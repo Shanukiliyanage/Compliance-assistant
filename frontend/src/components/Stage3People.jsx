@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import peopleData from "../data/people.json";
+import { getRecommendation } from "../utils/getRecommendation";
 
 // Stage 3 (People) questionnaire.
 // Normalizes the JSON shape, persists answers in localStorage, and validates completion.
@@ -341,6 +342,14 @@ function Stage3People() {
 
                       {(selected === "no" || selected === "partial") && (
                         <div style={{ marginTop: "12px" }}>
+                          {(() => {
+                            const rec = getRecommendation(q.id, selected);
+                            return rec ? (
+                              <div style={{ marginBottom: "10px", padding: "10px 14px", background: selected === "no" ? "#fff7f7" : "#fffdf0", border: `1px solid ${selected === "no" ? "#fca5a5" : "#fcd34d"}`, borderLeft: `3px solid ${selected === "no" ? "#dc2626" : "#d97706"}`, borderRadius: "8px", fontSize: "0.85rem", color: "#374151", lineHeight: "1.55" }}>
+                                <strong style={{ color: selected === "no" ? "#dc2626" : "#d97706" }}>💡 Recommendation:</strong>{" "}{rec}
+                              </div>
+                            ) : null;
+                          })()}
                           <p style={{ fontSize: "0.8rem", color: "#6b7280", marginBottom: "6px", fontWeight: 600 }}>
                             {selected === "partial" ? "What is currently in place? (optional)" : "What is preventing implementation? (optional)"}
                           </p>
