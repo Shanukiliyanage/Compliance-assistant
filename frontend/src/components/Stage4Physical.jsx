@@ -66,11 +66,23 @@ function Stage4Physical() {
   });
   const [missingIds, setMissingIds] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem("stage4_notes");
+    return saved ? JSON.parse(saved) : {};
+  });
 
-  // Persist answers to localStorage.
+  // Persist answers and notes to localStorage.
   useEffect(() => {
     localStorage.setItem("stage4", JSON.stringify(answers));
   }, [answers]);
+
+  useEffect(() => {
+    localStorage.setItem("stage4_notes", JSON.stringify(notes));
+  }, [notes]);
+
+  const handleNote = (questionId, value) => {
+    setNotes(prev => ({ ...prev, [questionId]: value }));
+  };
 
   const handleAnswer = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -315,6 +327,21 @@ function Stage4Physical() {
                         <p style={{ fontSize: "0.8rem", color: "#b91c1c", marginTop: "10px" }}>
                           This question is required.
                         </p>
+                      )}
+
+                      {(selected === "no" || selected === "partial") && (
+                        <div style={{ marginTop: "12px" }}>
+                          <p style={{ fontSize: "0.8rem", color: "#6b7280", marginBottom: "6px", fontWeight: 600 }}>
+                            {selected === "partial" ? "What is currently in place? (optional)" : "What is preventing implementation? (optional)"}
+                          </p>
+                          <textarea
+                            rows={2}
+                            value={notes[q.id] || ""}
+                            onChange={e => handleNote(q.id, e.target.value)}
+                            placeholder={selected === "partial" ? "Describe what you have implemented so far..." : "Describe the reason or any plans to address this..."}
+                            style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.88rem", resize: "vertical", fontFamily: "inherit", color: "#374151", background: "#fff", boxSizing: "border-box" }}
+                          />
+                        </div>
                       )}
                     </div>
                   );
