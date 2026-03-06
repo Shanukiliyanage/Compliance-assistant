@@ -38,3 +38,6 @@ Thumbs.db
 
 # Test coverage
 coverage/
+
+# Reports (not for repo)
+reports/
