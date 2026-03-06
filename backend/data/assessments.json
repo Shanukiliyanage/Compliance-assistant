@@ -10775,5 +10775,18 @@
         "A8.24_Q1": "partial"
       }
     }
+  },
+  {
+    "assessmentId": "1cf131fd-6ac8-4ff2-a61a-a19390a5f694",
+    "userId": "test",
+    "timestamp": "2026-03-06T21:02:46.897Z",
+    "smeProfile": {},
+    "answers": {
+      "stage1": {},
+      "stage2": {},
+      "stage3": {},
+      "stage4": {},
+      "stage5": {}
+    }
   }
 ]

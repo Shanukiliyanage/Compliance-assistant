@@ -53523,5 +53523,462 @@
         "recommendation": "ABC Company could improve by reducing overly broad access between segments, documenting segmentation design, and reviewing segmentation effectiveness periodically."
       }
     ]
+  },
+  {
+    "assessmentId": "ff454e99-09ba-40c8-8622-68d810cff6b6",
+    "userId": "kdo1d1y9AsX97e5u5CxTiaeo5sr1",
+    "timestamp": "2026-03-06T21:04:02.247Z",
+    "smeProfile": {
+      "organizationName": "ABC",
+      "sector": "Education",
+      "size": "11–50",
+      "dataType": "Personal data"
+    },
+    "scores": {
+      "stageScores": {
+        "stage1": {
+          "totalScore": 3,
+          "maxPossibleScore": 7,
+          "averageScore": 0.42857142857142855,
+          "percent": 43,
+          "breakdown": {
+            "counts": {
+              "yes": 1,
+              "partial": 4,
+              "no": 2,
+              "unanswered": 0,
+              "total": 7
+            },
+            "percent": {
+              "fullyCompliant": 14,
+              "partiallyCompliant": 57,
+              "nonCompliant": 29,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 3,
+          "max": 7
+        },
+        "stage2": {
+          "totalScore": 26.5,
+          "maxPossibleScore": 32,
+          "averageScore": 0.828125,
+          "percent": 83,
+          "breakdown": {
+            "counts": {
+              "yes": 26,
+              "partial": 1,
+              "no": 5,
+              "unanswered": 0,
+              "total": 32
+            },
+            "percent": {
+              "fullyCompliant": 81,
+              "partiallyCompliant": 3,
+              "nonCompliant": 16,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 5,
+          "raw": 26.5,
+          "max": 32
+        },
+        "stage3": {
+          "totalScore": 3.5,
+          "maxPossibleScore": 8,
+          "averageScore": 0.4375,
+          "percent": 44,
+          "breakdown": {
+            "counts": {
+              "yes": 2,
+              "partial": 3,
+              "no": 3,
+              "unanswered": 0,
+              "total": 8
+            },
+            "percent": {
+              "fullyCompliant": 25,
+              "partiallyCompliant": 38,
+              "nonCompliant": 38,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 3.5,
+          "max": 8
+        },
+        "stage4": {
+          "totalScore": 12.5,
+          "maxPossibleScore": 14,
+          "averageScore": 0.8928571428571429,
+          "percent": 89,
+          "breakdown": {
+            "counts": {
+              "yes": 12,
+              "partial": 1,
+              "no": 1,
+              "unanswered": 0,
+              "total": 14
+            },
+            "percent": {
+              "fullyCompliant": 86,
+              "partiallyCompliant": 7,
+              "nonCompliant": 7,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 12.5,
+          "max": 14
+        },
+        "stage5": {
+          "totalScore": 26,
+          "maxPossibleScore": 27,
+          "averageScore": 0.9629629629629629,
+          "percent": 96,
+          "breakdown": {
+            "counts": {
+              "yes": 25,
+              "partial": 2,
+              "no": 1,
+              "unanswered": 0,
+              "total": 28
+            },
+            "percent": {
+              "fullyCompliant": 89,
+              "partiallyCompliant": 7,
+              "nonCompliant": 4,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 7,
+          "raw": 26,
+          "max": 27
+        }
+      },
+      "overall": {
+        "totalScore": 68.5,
+        "maxPossibleScore": 81,
+        "averageScore": 0.845679012345679,
+        "percent": 85,
+        "maturityLevel": "Optimized",
+        "raw": 68.5,
+        "max": 81
+      },
+      "complianceBreakdown": {
+        "counts": {
+          "yes": 65,
+          "partial": 7,
+          "no": 10,
+          "unanswered": 0,
+          "total": 82
+        },
+        "percent": {
+          "fullyCompliant": 79,
+          "partiallyCompliant": 9,
+          "nonCompliant": 12,
+          "unanswered": 0
+        }
+      },
+      "overallMandatory": {
+        "totalScore": 3,
+        "maxPossibleScore": 7,
+        "averageScore": 0.42857142857142855,
+        "percent": 43,
+        "maturityLevel": "Developing",
+        "raw": 3,
+        "max": 7
+      },
+      "overallAnnexA": {
+        "totalScore": 68.5,
+        "maxPossibleScore": 81,
+        "averageScore": 0.845679012345679,
+        "percent": 85,
+        "maturityLevel": "Optimized",
+        "raw": 68.5,
+        "max": 81
+      },
+      "complianceBreakdownMandatory": {
+        "counts": {
+          "yes": 1,
+          "partial": 4,
+          "no": 2,
+          "unanswered": 0,
+          "total": 7
+        },
+        "percent": {
+          "fullyCompliant": 14,
+          "partiallyCompliant": 57,
+          "nonCompliant": 29,
+          "unanswered": 0
+        }
+      },
+      "complianceBreakdownAnnexA": {
+        "counts": {
+          "yes": 65,
+          "partial": 7,
+          "no": 10,
+          "unanswered": 0,
+          "total": 82
+        },
+        "percent": {
+          "fullyCompliant": 79,
+          "partiallyCompliant": 9,
+          "nonCompliant": 12,
+          "unanswered": 0
+        }
+      }
+    },
+    "recommendations": [
+      {
+        "stageId": "stage1",
+        "controlId": "4.2",
+        "questionId": "4.2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could complete the stakeholder list and fill missing expectations. Make sure the requirements are clear, owned by someone, and reviewed regularly (and when things change)."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "4.3",
+        "questionId": "4.3",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could make the scope clearer and more complete (what’s in/out, key systems and data, third parties). Keep it controlled and updated when the business or IT changes."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "5.1",
+        "questionId": "5.1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could have top management actively support security by approving the security direction, assigning clear responsibility, providing budget/time/tools, and reviewing security performance regularly."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "5.2",
+        "questionId": "5.2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could create a simple Information Security Policy, get it approved by management, and share it with all employees (including new joiners). Keep one owner and a review date."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "6.1",
+        "questionId": "6.1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could make risk assessments consistent by using one method across all areas, keeping records, and reassessing when major changes happen (new systems, suppliers, incidents)."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "6.2",
+        "questionId": "6.2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could improve risk treatment by ensuring every risk has a clear decision, mapped actions/controls, tracked progress, and evidence when actions are completed (including approvals for accepted risks)."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "7.1",
+        "questionId": "7.1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could improve training by covering all staff consistently, refreshing it regularly, and checking understanding (short quiz or phishing simulation). Keep records."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "7.2",
+        "questionId": "7.2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could clearly define who owns security, who manages access, and who handles incidents. Document these responsibilities and tell the relevant people."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "9.1",
+        "questionId": "9.1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could make reviews more effective by using a plan, covering all key areas, documenting evidence, and verifying corrective actions are completed and working."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "9.2",
+        "questionId": "9.2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could improve management review by recording decisions, tracking actions to completion, and reviewing trends (repeat incidents/issues) to prevent recurrence."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "10.1",
+        "questionId": "10.1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could log incidents and audit findings, assign corrective actions (owner + due date), and track them until they are completed and checked for effectiveness."
+      },
+      {
+        "stageId": "stage1",
+        "controlId": "10.2",
+        "questionId": "10.2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could set a regular improvement review (e.g., quarterly) to identify what to improve based on incidents, audits, risks, and feedback, then implement and track those improvements."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.1",
+        "questionId": "A5.1.Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could update the policy to match how the organization operates, ensure everyone receives it and acknowledges it, and confirm it is consistently applied across teams."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.1",
+        "questionId": "A5.1.Q2",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could make reviews consistent by using a schedule, recording review outcomes/actions, and tracking updates to completion."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.24",
+        "questionId": "A5.24.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could define and document an incident management approach (roles, reporting, review and prioritise, escalation, communications, and response steps) and ensure staff know how to report incidents."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.25",
+        "questionId": "A5.25.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could implement comprehensive event and incident logging, monitoring, and tracking mechanisms as part of the organization's security controls to support an effective incident management lifecycle. These mechanisms could ensure that all relevant security events and incidents are properly recorded, monitored, and analyzed to enable timely detection, response, and resolution."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.26",
+        "questionId": "A5.26.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could define incident response steps (containment, removal, recovery, communications), assign owners, and keep evidence of actions taken for each incident."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.27",
+        "questionId": "A5.27.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could establish a post-incident review process that includes systematic recording, documentation, and knowledge-management practices. This process could help capture lessons learned from incidents and use them to strengthen future detection, response, and prevention strategies."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.28",
+        "questionId": "A5.28.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could emphasize proper evidence collection in accordance with ISO/IEC 27001:2022 control A.5.28, ensuring that evidence is securely gathered, preserved, and handled during incident management. This could support effective investigation, maintain legal defensibility, and enhance the organization's overall forensic readiness."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.28",
+        "questionId": "A5.28.Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could emphasize proper evidence collection in accordance with ISO/IEC 27001:2022 control A.5.28, ensuring that evidence is securely gathered, preserved, and handled during incident management. This could support effective investigation, maintain legal defensibility, and enhance the organization's overall forensic readiness."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.1",
+        "questionId": "A.6.1-Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could define pre-employment screening requirements by role (identity, employment history, education/qualifications, and other checks allowed by local law), obtain consent where required, and keep evidence that checks were completed before access is granted."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.2",
+        "questionId": "A.6.2-Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could update employment and contractor terms to clearly include information security responsibilities (confidentiality, acceptable use, protection of credentials, incident reporting, and consequences for violations)."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.3",
+        "questionId": "A.6.3-Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could deliver onboarding and at least annual security awareness training covering phishing, passwords, safe data handling, secure remote work, and incident reporting, and track attendance and completion."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.4",
+        "questionId": "A.6.4-Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could define a disciplinary process for information security violations (reporting, investigation, decision-making, proportional actions, and documentation) aligned with human resources and legal requirements."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.5",
+        "questionId": "A.6.5-Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could make the process consistent across all systems by integrating it with human resources workflows, tracking completion for every case, and periodically checking for orphaned accounts or missed assets."
+      },
+      {
+        "stageId": "stage3",
+        "controlId": "A.6.6",
+        "questionId": "A.6.6-Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could require confidentiality agreements for employees and relevant third parties before they access sensitive information, and store signed evidence securely."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.1",
+        "questionId": "A7.1_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could identify areas containing sensitive information/systems and define physical security boundaries (rooms, cabinets, server areas), documenting what is “restricted” and what protections apply."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.1",
+        "questionId": "A7.1_Q2",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could restrict access to secure areas (locks, access cards/keys, visitor controls) and implement monitoring appropriate to risk (for example logs or alarms)."
+      },
+      {
+        "stageId": "stage4",
+        "controlId": "A.7.2",
+        "questionId": "A7.2_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "ABC could implement entry controls for premises (controlled doors, reception process, and visitor management) to prevent unauthorized entry."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.21",
+        "questionId": "A8.21_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could strengthen by improving monitoring coverage and periodically reviewing service configurations and access controls."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.22",
+        "questionId": "A8.22_Q1",
+        "complianceState": "PARTIALLY_COMPLIANT",
+        "priority": "MEDIUM",
+        "recommendation": "ABC could improve by reducing overly broad access between segments, documenting segmentation design, and reviewing segmentation effectiveness periodically."
+      }
+    ]
   }
 ]

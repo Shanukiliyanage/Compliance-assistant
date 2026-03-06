@@ -38122,5 +38122,208 @@
         "recommendation": "ABC Company should improve by ensuring encryption is consistently applied across systems and suppliers and by strengthening key management practices."
       }
     ]
+  },
+  {
+    "assessmentId": "1cf131fd-6ac8-4ff2-a61a-a19390a5f694",
+    "userId": "test",
+    "timestamp": "2026-03-06T21:02:46.897Z",
+    "smeProfile": {},
+    "scores": {
+      "stageScores": {
+        "stage1": {
+          "totalScore": 0,
+          "maxPossibleScore": 0,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 0,
+              "unanswered": 0,
+              "total": 0
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 0,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 0,
+          "max": 0
+        },
+        "stage2": {
+          "totalScore": 0,
+          "maxPossibleScore": 28,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 28,
+              "unanswered": 0,
+              "total": 28
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 9,
+          "raw": 0,
+          "max": 28
+        },
+        "stage3": {
+          "totalScore": 0,
+          "maxPossibleScore": 8,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 8,
+              "unanswered": 0,
+              "total": 8
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 0,
+          "max": 8
+        },
+        "stage4": {
+          "totalScore": 0,
+          "maxPossibleScore": 14,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 14,
+              "unanswered": 0,
+              "total": 14
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 0,
+          "max": 14
+        },
+        "stage5": {
+          "totalScore": 0,
+          "maxPossibleScore": 25,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 25,
+              "unanswered": 0,
+              "total": 25
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 9,
+          "raw": 0,
+          "max": 25
+        }
+      },
+      "overall": {
+        "totalScore": 0,
+        "maxPossibleScore": 75,
+        "averageScore": 0,
+        "percent": 0,
+        "maturityLevel": "Initial",
+        "raw": 0,
+        "max": 75
+      },
+      "complianceBreakdown": {
+        "counts": {
+          "yes": 0,
+          "partial": 0,
+          "no": 75,
+          "unanswered": 0,
+          "total": 75
+        },
+        "percent": {
+          "fullyCompliant": 0,
+          "partiallyCompliant": 0,
+          "nonCompliant": 100,
+          "unanswered": 0
+        }
+      },
+      "overallMandatory": {
+        "totalScore": 0,
+        "maxPossibleScore": 0,
+        "averageScore": 0,
+        "percent": 0,
+        "maturityLevel": "Initial",
+        "raw": 0,
+        "max": 0
+      },
+      "overallAnnexA": {
+        "totalScore": 0,
+        "maxPossibleScore": 75,
+        "averageScore": 0,
+        "percent": 0,
+        "maturityLevel": "Initial",
+        "raw": 0,
+        "max": 75
+      },
+      "complianceBreakdownMandatory": {
+        "counts": {
+          "yes": 0,
+          "partial": 0,
+          "no": 0,
+          "unanswered": 0,
+          "total": 0
+        },
+        "percent": {
+          "fullyCompliant": 0,
+          "partiallyCompliant": 0,
+          "nonCompliant": 0,
+          "unanswered": 0
+        }
+      },
+      "complianceBreakdownAnnexA": {
+        "counts": {
+          "yes": 0,
+          "partial": 0,
+          "no": 75,
+          "unanswered": 0,
+          "total": 75
+        },
+        "percent": {
+          "fullyCompliant": 0,
+          "partiallyCompliant": 0,
+          "nonCompliant": 100,
+          "unanswered": 0
+        }
+      }
+    },
+    "recommendations": []
   }
 ]
