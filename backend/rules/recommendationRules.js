@@ -36,6 +36,7 @@ export function getRecommendationForControl(
 
     // legacy stage 1 mapping - older UIs saved as 4.1.Q1/Q2/Q3, but the rulebook uses ISO clause keys 4.1, 4.2, 4.3
     // clause 4 is a special case: Q1->4.2 (stakeholders), Q2->4.3 (scope)
+    const map = {
       "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
       "5.1": { 1: "5.1", 2: "5.2" },
       "6.1": { 1: "6.1", 2: "6.2" },
