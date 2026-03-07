@@ -111,7 +111,7 @@ function Stage4Physical() {
       return;
     }
 
-    // ✅ Stage 5
+    // Stage 5
     navigate("/assessment/technological");
   };
 
