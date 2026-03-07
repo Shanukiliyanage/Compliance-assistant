@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// SME profile form collected before the assessment questions.
+// profile form that runs before the questions start
 const SMEProfilePage = () => {
   const navigate = useNavigate();
 
@@ -12,7 +12,7 @@ const SMEProfilePage = () => {
     dataType: "",
   });
 
-  // Update profile state from form inputs.
+  // keep form state in sync
   const handleChange = (e) => {
     setProfile({
       ...profile,
@@ -20,7 +20,7 @@ const SMEProfilePage = () => {
     });
   };
 
-  // Validate required fields, store to localStorage, then start Stage 1.
+  // check required fields, save to localStorage, then go to stage 1
   const handleSubmit = () => {
     const orgName = String(profile.organizationName || "").trim();
     const sector = String(profile.sector || "").trim();

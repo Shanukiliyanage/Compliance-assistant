@@ -1,19 +1,17 @@
-// Maturity mapping utilities used by scoring.
-// Converts an average score into a label (Initial..Optimized).
+// converts an average score into a maturity label
 
 function clamp01(n) {
-  // Keeps numbers in the 0..1 range.
+  // clamp to 0..1
   const x = Number(n);
   if (!Number.isFinite(x)) return 0;
   return Math.min(1, Math.max(0, x));
 }
 
 export function getMaturityLevelFromAverage(averageScore) {
-  // Input: 0..1 average score. Output: maturity label.
+  // 0..1 score in, maturity label out
   const a = clamp01(averageScore);
 
-  // Preserve existing thresholds (based on percent buckets):
-  // 0-0.20 Initial, 0.21-0.40 Basic, 0.41-0.60 Developing, 0.61-0.80 Managed, 0.81-1.00 Optimized
+  // thresholds: 0-0.20 Initial, 0.21-0.40 Basic, 0.41-0.60 Developing, 0.61-0.80 Managed, 0.81-1.00 Optimized
   if (a <= 0.2) return "Initial";
   if (a <= 0.4) return "Basic";
   if (a <= 0.6) return "Developing";
@@ -22,7 +20,7 @@ export function getMaturityLevelFromAverage(averageScore) {
 }
 
 export function getMaturityLevelFromPercent(percent) {
-  // Same mapping as above, but with 0..100 input.
+  // same thresholds but takes 0..100 instead of 0..1
   const p = Number(percent);
   const n = Number.isFinite(p) ? Math.min(100, Math.max(0, p)) : 0;
   return getMaturityLevelFromAverage(n / 100);

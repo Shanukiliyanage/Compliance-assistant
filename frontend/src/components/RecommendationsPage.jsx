@@ -8,7 +8,7 @@ import peopleData from "../data/people.json";
 import physicalData from "../data/physical.json";
 import technologicalData from "../data/technological.json";
 
-// Recommendations page for a completed assessment (stage filtering + report download).
+// recommendations page - filter by stage and download the report
 
 const stageNames = {
   stage1: "Mandatory Clauses",
@@ -38,8 +38,7 @@ const stage1ClauseOrder = {
   CL10_IMPROVEMENT: 10,
 };
 
-// Safety helper for the printable HTML report.
-// Prevents user-provided strings from being treated as HTML.
+// sanitize strings before injecting them into the printed HTML report
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -77,7 +76,7 @@ function normalizePriority(value, complianceState) {
   const v = String(value || "").trim().toUpperCase();
   if (v === "HIGH" || v === "MEDIUM" || v === "LOW" || v === "NONE") return v;
 
-  // Backfill if backend didn't send priority
+  // fill in priority if the backend left it out
   const cs = String(complianceState || "").toUpperCase();
   if (cs === "NOT_COMPLIANT") return "HIGH";
   if (cs === "PARTIALLY_COMPLIANT") return "MEDIUM";
@@ -112,7 +111,7 @@ function extractClause(value) {
 
 function canonicalizeAnnexId(id) {
   const raw = String(id || "").trim();
-  // Only canonicalize simple Annex IDs like A5.1, A7.14, A8.23.1
+  // normalize simple Annex IDs like A5.1, A7.14
   if (!/^A\d+\.\d+(?:\.\d+)?$/.test(raw)) return raw;
   const m = /^A(\d+)\.(\d+)(?:\.(\d+))?$/.exec(raw);
   if (!m) return raw;
@@ -151,13 +150,13 @@ const STAGE5_SDLC_DEPENDENT_CONTROLS = (
 function isQuestionApplicable(stageId, controlId, question, answersByStage) {
   const stageAnswers = answersByStage?.[stageId] || {};
 
-  // Question-level conditional visibility
+  // showIf / conditional questions
   const cond = question?.showIf;
   if (cond?.questionId && Object.prototype.hasOwnProperty.call(cond, "equals")) {
     if (stageAnswers?.[cond.questionId] !== cond.equals) return false;
   }
 
-  // Stage-level gateway visibility
+  // stage gateway (e.g. incident management)
   if (stageId === "stage2") {
     if (STAGE2_SUPPLIER_DEPENDENT_CONTROLS.includes(controlId)) {
       const enabled = !STAGE2_SUPPLIER_GATEWAY_QID || stageAnswers?.[STAGE2_SUPPLIER_GATEWAY_QID] === "yes";
@@ -187,7 +186,7 @@ function isQuestionApplicable(stageId, controlId, question, answersByStage) {
 
 
 function getStage1Controls() {
-  // mandatory.json is an array; keys are clause strings like "4.1".
+  // mandatory.json uses clause strings like "4.1" as keys
   const items = getMandatoryItems(mandatoryData);
   const clauseMap = {
     4: { controlId: "CL4_CONTEXT", controlName: "Clause 4: Context of the Organization", questions: [] },
@@ -216,7 +215,7 @@ function getStage1Controls() {
 }
 
 function mapStageObjectToControls(stageObject) {
-  // Converts stage JSON (object keyed by controlId) into a consistent array shape.
+  // normalize stage JSON into an array
   return Object.entries(stageObject || {}).map(([controlId, entry]) => ({
     controlId: canonicalizeAnnexId(controlId),
     controlName: entry?.control || controlId,
@@ -225,9 +224,7 @@ function mapStageObjectToControls(stageObject) {
 }
 
 function getAllStageControls() {
-  // Builds a single “control list” for every stage so we can:
-  // - display control names
-  // - print all questions + answers in the report
+  // build the control list per stage for display and the printed report
   return {
     stage1: getStage1Controls(),
     stage2: mapStageObjectToControls(organizationalData),
@@ -321,10 +318,7 @@ function getStageIdFromRecommendation(rec) {
 }
 
 function normalizeRecommendation(rec, textIndex) {
-  // Normalizes backend vs older UI recommendation formats into one shape for rendering.
-  // Support both old UI shape and current backend shape:
-  // - backend: { controlId, stageId, complianceState, recommendation }
-  // - older:  { severity, title/message, description, stage }
+  // normalize both old and new recommendation formats into one shape for rendering
   if (!rec || typeof rec !== "object") {
     return {
       stageId: "",
@@ -344,12 +338,12 @@ function normalizeRecommendation(rec, textIndex) {
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
 
     const controlId = rec.controlId ? String(rec.controlId) : "";
-    // Skip stale/malformed recommendations with no real control identifier.
+    // skip anything without a control id
     if (!controlId || controlId === "undefined") return null;
     const questionId = rec.questionId ? String(rec.questionId) : "";
     const clauseTitle = mandatoryClauseTitles[controlId];
 
-    // Prefer question text (more specific than control id).
+    // use question text if available (more specific than control id)
     const questionTitle =
       questionId && stageId && textIndex?.get
         ? String(textIndex.get(`${stageId}::${questionId}`) || "")
@@ -361,9 +355,7 @@ function normalizeRecommendation(rec, textIndex) {
       return m ? Number(m[1]) : null;
     };
 
-    // Stage 1 legacy ids like "6.1.Q2" need mapping to the real clause question text.
-    // We keep the *displayed control* as the base ("6.1"), but fetch the correct question
-    // from mandatory.json (e.g. 6.1.Q2 maps to clause 6.2).
+    // stage 1 legacy ids like "6.1.Q2" need to map to the right question text in mandatory.json
     const stage1LegacyMap = {
       "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
       "5.1": { 1: "5.1", 2: "5.2" },
@@ -374,7 +366,7 @@ function normalizeRecommendation(rec, textIndex) {
       "10.1": { 1: "10.1", 2: "10.2" },
     };
 
-    // Stage 1: show full clause title (e.g. "Clause 5: Leadership"), not sub-numbers.
+    // show the full clause title in stage 1, not sub-clause numbers
     if (stageId === "stage1") {
       const idStr = String(controlId || "").trim();
 
@@ -388,8 +380,7 @@ function normalizeRecommendation(rec, textIndex) {
         "10": "Clause 10: Improvement",
       };
 
-      // Build question ordinal map (clause id → 1-based position within its clause group)
-      // so that "4.2" shows as Q1, "4.3" as Q2, "5.1" as Q1, etc.
+      // map each clause to its position within the clause group (4.2 → Q1, 4.3 → Q2, etc.)
       const clauseOrdinalMap = (() => {
         const items = getMandatoryItems(mandatoryData);
         const grouped = {};
@@ -407,7 +398,7 @@ function normalizeRecommendation(rec, textIndex) {
         return map;
       })();
 
-      // Path A: question-level ids like "5.1.Q2" or "6.1.Q1".
+      // path A: question-level ids like "5.1.Q2" or "6.1.Q1"
       const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/i.exec(idStr);
       if (m) {
         const majorClause = m[1];
@@ -433,7 +424,7 @@ function normalizeRecommendation(rec, textIndex) {
         };
       }
 
-      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3".
+      // path B: plain clause ids like "5.1", "4.2"
       const n = /^(\d+)\.(\d+)$/.exec(idStr);
       if (n) {
         const majorClause = n[1];
@@ -496,7 +487,7 @@ function getPriorityPill(priority) {
 }
 
 function getCompliancePill(complianceState) {
-  // UI styling helper: decides the pill label + colors based on compliance state.
+  // picks the badge label and color for a compliance state
   const cs = String(complianceState || "").toUpperCase();
   if (cs === "NOT_COMPLIANT") {
     return {
@@ -527,7 +518,7 @@ export default function RecommendationsPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // assessment = the result object returned by backend (scores + recommendations + metadata)
+  // assessment result from the backend
   const [assessment, setAssessment] = useState(location?.state?.assessment || null);
   const [selectedStage, setSelectedStage] = useState("stage1");
   const [loading, setLoading] = useState(true);
@@ -547,8 +538,7 @@ export default function RecommendationsPage() {
   useEffect(() => {
     const fetchAssessment = async () => {
       try {
-        // Quick UX: show cached result immediately if it matches this assessmentId.
-        // Still fetch fresh data from backend right after.
+        // show cached result right away then fetch fresh data in the background
         const cached = localStorage.getItem("assessmentResult");
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -572,7 +562,7 @@ export default function RecommendationsPage() {
           ...(report && typeof report === "object" ? { report } : {}),
         };
 
-        // Prefer live recommendations from the report endpoint.
+        // use live recommendations from the report endpoint
         if (report && Array.isArray(report?.recommendations)) {
           merged.recommendations = report.recommendations;
         }
@@ -584,8 +574,7 @@ export default function RecommendationsPage() {
           // Ignore storage failures (e.g., privacy mode)
         }
       } catch (err) {
-        // Do not fall back to cached localStorage results here.
-        // Cached results can be stale and show outdated recommendation templates.
+        // don't fall back to localStorage - cached results can be stale
         setAssessment(null);
         setError("Error loading assessment: " + (err?.message || String(err)));
         console.error(err);
@@ -608,9 +597,7 @@ export default function RecommendationsPage() {
       const controlsByStage = getAllStageControls();
       const answers = report?.answers || {};
 
-      // Use the same per-question recommendation source as the UI.
-      // The report endpoint returns controlStatuses, which may be aggregated by control.
-      // `report.recommendations` is computed live from answers (preferred).
+      // use the same recommendations as the UI - report.recommendations is computed live
       const recommendationIndex = new Map();
       let recommendationSource = Array.isArray(report?.recommendations)
         ? report.recommendations
@@ -636,8 +623,7 @@ export default function RecommendationsPage() {
         const recText = r.recommendation != null ? String(r.recommendation) : "";
         if (!recText.trim()) continue;
 
-        // stage1: backend uses `controlId` as the question id (e.g. "6.1" or "6.1.Q2")
-        // stage2-5: backend sets `{ controlId: baseControlId, questionId: originalQuestionId }`
+        // stage 1 uses controlId as the question id; stages 2-5 have a separate questionId
         const qid = String((r.questionId || r.controlId) ?? "").trim();
         if (!qid) continue;
         recommendationIndex.set(`${stageId}::${qid}`, recText);
@@ -678,7 +664,7 @@ export default function RecommendationsPage() {
         const direct = recommendationIndex.get(`${keyStage}::${qKey}`);
         if (direct) return direct;
 
-        // Gateway questions (e.g. A5.19.GW1) typically correspond to the control's Q1.
+        // gateway questions map to Q1 of that control
         const gwAlias = qKey.replace(/\.GW\d+$/i, ".Q1");
         if (gwAlias !== qKey) {
           const hit = recommendationIndex.get(`${keyStage}::${gwAlias}`);
@@ -744,9 +730,8 @@ export default function RecommendationsPage() {
           if (!control?.controlId) continue;
           let status = statusIndex.get(`${stageId}::${control.controlId}`);
 
-          // Stage 1 is displayed as clause groups (CL7_SUPPORT), but backend can return per-question
-          // statuses instead (e.g., "7.3" or "7.3.Q1"). If the clause status is missing, compute it
-          // from the questions under this clause.
+          // stage 1 is displayed as clause groups, but backend can return per-question statuses
+          // if the clause status is missing, compute it from the sub-questions
           if (stageId === "stage1" && !status && Array.isArray(control?.questions)) {
             const scoreFor = (cs) => {
               const s = String(cs || "").toUpperCase();
@@ -803,8 +788,7 @@ export default function RecommendationsPage() {
               const qid = q?.id;
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
               let answerValue = answers?.[stageId]?.[qid];
-              // If a question was hidden by a gateway/showIf rule, treat it as NOT APPLICABLE
-              // in the exported report (so we don't show irrelevant recommendations).
+              // questions hidden by gateway/showIf rules show as N/A in the report
               if ((answerValue == null || answerValue === "") && !applicableByRules) {
                 answerValue = "na";
               }
@@ -813,7 +797,7 @@ export default function RecommendationsPage() {
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
               const isNotApplicableAnswer = answerLabel === "N/A";
 
-              // Stage 1 is grouped for display (Clause 4–10), but recommendations must be per-question.
+              // stage 1 groups by clause for display but recommendations are per-question
               const qidStr = String(qid || "").trim();
               const qidClause = extractClause(qidStr) || qidStr;
               const rowStatus =
@@ -822,7 +806,7 @@ export default function RecommendationsPage() {
                     (qidClause !== qidStr ? statusIndex.get(`${stageId}::${qidClause}`) : null) ||
                     status
                   : status;
-              // Prefer per-question recommendation; fallback to backend controlStatus.
+              // per-question recommendation first, fall back to control status
               let rowRecommendationText = getRecommendationForQuestionRow({
                 stageId,
                 qidStr: qidStr || qidClause,
@@ -837,7 +821,7 @@ export default function RecommendationsPage() {
             }
             body += `</tbody></table>`;
           } else {
-            // If there are no questions to render, still show recommendation at control level.
+            // if no questions, still show the control-level recommendation
             body += `<p><strong>Recommendation:</strong> ${escapeHtml(recommendationText || "-")}</p>`;
           }
 
@@ -902,8 +886,7 @@ export default function RecommendationsPage() {
   };
 
   const controlNameIndex = useMemo(() => {
-    // Lookup table: (stageId + controlId) -> controlName.
-    // Used to show nicer titles like: "Control A.5.1 - Policies for information security".
+    // look up control names by stageId + controlId for nicer titles
     const index = new Map();
     const controlsByStage = getAllStageControls();
 
@@ -914,7 +897,7 @@ export default function RecommendationsPage() {
         if (!name) continue;
         index.set(`${stageId}::${String(c.controlId).trim()}`, name);
 
-        // Add a lookup from each question id (e.g., "4.1", "A5.1.Q1") to the question text.
+        // also map question ids to question text
         if (Array.isArray(c?.questions)) {
           for (const q of c.questions) {
             const qid = String(q?.id || "").trim();
@@ -929,13 +912,13 @@ export default function RecommendationsPage() {
   }, []);
 
   const normalizedRecommendations = useMemo(() => {
-    // Convert raw backend recommendations into a stable UI shape.
+    // normalize recommendations from the backend into a consistent shape
     const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
     return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
 
   const stageCounts = useMemo(() => {
-    // Used for stage tab badges: "Stage 2 (3)".
+    // powers the stage tab badges ("Stage 2 (3)")
     const counts = { stage1: 0, stage2: 0, stage3: 0, stage4: 0, stage5: 0 };
     for (const rec of normalizedRecommendations) {
       if (rec?.stageId && counts[rec.stageId] != null) counts[rec.stageId] += 1;
@@ -944,7 +927,7 @@ export default function RecommendationsPage() {
   }, [normalizedRecommendations]);
 
   useEffect(() => {
-    // If current stage has no recs, auto-pick first stage with recs.
+    // if the current stage has nothing, jump to the first stage that has recs
     const order = ["stage1", "stage2", "stage3", "stage4", "stage5"];
     if (stageCounts[selectedStage] > 0) return;
     const firstWithRecs = order.find((s) => stageCounts[s] > 0);
@@ -952,7 +935,7 @@ export default function RecommendationsPage() {
   }, [stageCounts, selectedStage]);
 
   const filtered = useMemo(() => {
-    // Show only one stage at a time, and sort controls in a human-friendly order.
+    // show one stage at a time and sort in a readable order
     const list = normalizedRecommendations.filter((r) => r.stageId === selectedStage);
 
     return list.sort((a, b) => {
@@ -979,8 +962,7 @@ export default function RecommendationsPage() {
         const sev = compareBySeverity(a, b);
         if (sev !== 0) return sev;
 
-        // If multiple questions exist under the same clause (legacy ids like "6.1.Q1"),
-        // keep them in Q1, Q2, Q3 order.
+        // keep legacy clause questions in Q1, Q2, Q3 order
         const aq = parseQuestionNumberFromId(a?.questionId || a?.controlId);
         const bq = parseQuestionNumberFromId(b?.questionId || b?.controlId);
         if (aq != null || bq != null) {
@@ -1003,8 +985,7 @@ export default function RecommendationsPage() {
         return 1;
       }
 
-      // Secondary: within the same Annex A control, order by question number (Q1, Q2, ...)
-      // so that e.g. A5.1.Q1 appears before A5.1.Q2.
+      // within the same control, keep questions in order (Q1 before Q2)
       const aq = parseQuestionNumberFromId(a?.questionId || a?.controlId);
       const bq = parseQuestionNumberFromId(b?.questionId || b?.controlId);
       if (aq != null || bq != null) {

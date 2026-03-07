@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import incidentData from "../data/incident.json";
-// If you already use react-router-dom, uncomment these two lines:
+// uncomment if using react-router-dom:
 // import { useNavigate } from "react-router-dom";
 
-// Incident management questionnaire (gateway-controlled follow-up questions).
+// incident management questions - follow-ups only show if the gateway question is yes
 function StageIncidentManagement() {
   // const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ function StageIncidentManagement() {
         [questionId]: value
       };
 
-      // Gateway: if incident management is not applicable, clear dependent answers.
+      // if gateway flips to no, clear the dependent answers
       if (questionId === gatewayQuestionId && prev[questionId] !== value) {
         clearAnswersForControls(gatewayTargets, next);
       }
@@ -86,14 +86,12 @@ function StageIncidentManagement() {
     }
 
     console.log("Incident management stage complete, go to next stage");
-    // If you have routing, you can do:
-    // navigate("/assessment/next");
+    // navigate("/assessment/next") if using routing
   };
 
   const handleBack = () => {
     console.log("Back to previous stage");
-    // If you have routing, you can do:
-    // navigate("/assessment/organizational");
+    // navigate("/assessment/organizational") if using routing
   };
 
   const { answeredCount, totalRequired } = useMemo(() => {

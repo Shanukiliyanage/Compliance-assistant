@@ -1,7 +1,7 @@
-// Compliance normalization helpers used by scoring and recommendations.
+// compliance helpers used by scoring and recommendations
 
 function normalizeAnswer(answer) {
-  // Normalize common answer variants.
+  // normalize answer variants (capitalisation etc.)
   const v = String(answer || "").trim().toLowerCase();
   if (v === "yes" || v === "y" || v === "true") return "YES";
   if (v === "partial" || v === "partially") return "PARTIAL";
@@ -10,7 +10,7 @@ function normalizeAnswer(answer) {
 }
 
 export function getComplianceState(answer) {
-  // Convert one answer into a compliance label.
+  // convert a single answer to a compliance label
   const normalized = normalizeAnswer(answer);
   if (normalized === "YES") return "FULLY_COMPLIANT";
   if (normalized === "PARTIAL") return "PARTIALLY_COMPLIANT";
@@ -18,16 +18,11 @@ export function getComplianceState(answer) {
   return "UNANSWERED";
 }
 
-// One ISO control can have multiple questions (Q1, Q2,).
-// This function rolls those into ONE final status:
-// Threshold-based rule (numeric average):
-// - YES = 1.0, PARTIAL = 0.5, NO = 0.0
-// - avg == 1.0                  -> FULLY_COMPLIANT
-// - avg > 0 and avg < 1.0        -> PARTIALLY_COMPLIANT
-// - avg == 0                     -> NOT_COMPLIANT
-// - nothing answered             -> UNANSWERED
+// roll up multiple question answers for one control into a single compliance status
+// YES = 1.0, PARTIAL = 0.5, NO = 0.0
+// avg 1.0 -> FULLY_COMPLIANT, 0 < avg < 1 -> PARTIALLY_COMPLIANT, 0 -> NOT_COMPLIANT
 export function getControlComplianceState(questionAnswers) {
-  // Reduce multiple question answers for one control into one final compliance label.
+  // combine all question answers for this control into one label
   const answersArray = Array.isArray(questionAnswers)
     ? questionAnswers
     : questionAnswers == null

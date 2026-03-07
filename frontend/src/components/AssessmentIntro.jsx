@@ -1,4 +1,4 @@
-// Assessment intro screen - Maze-inspired dark design with Firebase auth modal.
+// intro screen with the Firebase auth modal
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 

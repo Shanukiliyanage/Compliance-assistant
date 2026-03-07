@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAssessmentReport, getAssessmentResult } from "../services/backendApi";
 
-// Summary page for a completed assessment (scores, breakdown charts, and report download).
+// the results/summary page - shows scores, charts, and the download button
 
 import mandatoryData from "../data/mandatory.json";
 import organizationalData from "../data/organizational.json";
@@ -19,7 +19,7 @@ function getMandatoryItems(data) {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.default)) return data.default;
 
-  // Legacy shape support
+  // handle older data shape
   if (data && typeof data === "object") {
     const flattened = [];
     for (const v of Object.values(data)) {
@@ -36,7 +36,7 @@ function isAnnexControlKey(key, prefix) {
   if (!key.startsWith(prefix + ".")) return false;
   const rest = key.slice(prefix.length + 1);
   if (!rest) return false;
-  // Strip optional _suffix (e.g. "A5.19_Gateway" → numPart "19")
+  // strip suffix like "_Gateway" to get the number part
   const numPart = rest.split("_")[0];
   const n = Number(numPart);
   return Number.isInteger(n) && String(n) === numPart;
@@ -46,8 +46,7 @@ function countAnnexControls(stageObject, prefix) {
   return Object.keys(stageObject || {}).filter((k) => isAnnexControlKey(k, prefix)).length;
 }
 
-// Distributes counts as percentages that always sum to exactly 100
-// using the largest-remainder (Hamilton) method.
+// turns counts into percentages that always add up to 100 (largest remainder method)
 function largestRemainderRound(counts, total) {
   if (!total) return counts.map(() => 0);
   const raws = counts.map((c) => (c / total) * 100);
@@ -109,9 +108,7 @@ function buildAnnexSummaryWithNotApplicable(counts, total, notApplicableCount) {
   const fullyCount = Math.max(0, Number(counts.yes ?? 0));
   const partialCount = Math.max(0, Number(counts.partial ?? 0));
 
-  // Backend breakdown for Annex A is computed on the "applicable" set only
-  // (expected total minus NOT_APPLICABLE controls). So we derive the remaining
-  // "Not compliant" bucket against the full 93 total.
+  // Annex A breakdown only covers applicable controls, so we work out "not compliant" against the full 93
   const nonCount = Math.max(0, t - na - fullyCount - partialCount);
 
   const [fullyPercent, partialPercent, nonPercent, notApplicablePercent] =
@@ -182,15 +179,14 @@ export default function Summary() {
   const [downloading, setDownloading] = useState(false);
 
   const totals = useMemo(() => {
-    // Count unique clause groups (e.g. 4.2 + 4.3 both belong to clause "4")
-    // so 14 questions -> 7 clauses, matching how the backend scores stage1.
+    // count unique clause groups (e.g. 4.2 and 4.3 both roll up to clause "4")
     const stage1Total = new Set(
       getMandatoryItems(mandatoryData).map((item) =>
         String(item.clause || "").split(".")[0]
       )
     ).size;
 
-    // ISO/IEC 27001:2022 Annex A totals are expected to be 93 in total.
+    // Annex A has 93 controls total
     const stage2Total = countAnnexControls(organizationalData, "A5");
     const stage3Total = Array.isArray(peopleData?.controls) ? peopleData.controls.length : 0;
     const stage4Total = countAnnexControls(physicalData, "A7");
@@ -232,7 +228,7 @@ export default function Summary() {
 
   const scores = assessment?.scores || null;
 
-  // Backend can mark some controls as NOT_APPLICABLE; totals are adjusted accordingly.
+  // some controls get marked N/A by the backend, so totals adjust
   const adjustedTotals = useMemo(() => {
     const na2 = Number(scores?.stageScores?.stage2?.notApplicableCount ?? 0);
     const na3 = Number(scores?.stageScores?.stage3?.notApplicableCount ?? 0);
@@ -581,8 +577,7 @@ export default function Summary() {
                   ? 0
                   : Number(stageScore?.notApplicableCount ?? 0);
 
-                // Use stageTotalRaw as the single denominator for all categories
-                // so that Yes + Partial + No + Not applicable = 100%.
+                // use the same total for all categories so they add up to 100%
                 const fullyCount = Math.max(0, Number(stageScore?.breakdown?.counts?.yes ?? 0));
                 const partialCount = Math.max(0, Number(stageScore?.breakdown?.counts?.partial ?? 0));
                 const nonCount = Math.max(0, stageTotalRaw - notApplicableCount - fullyCount - partialCount);

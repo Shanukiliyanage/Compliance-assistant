@@ -4,8 +4,7 @@ import { getAuth } from "firebase/auth";
 import techData from "../data/technological.json";
 import { analyzeAssessment } from "../services/backendApi";
 
-// Stage 5 (Technological) questionnaire.
-// Applies gateway logic (network/SDLC) and submits the full assessment to the backend for scoring.
+// stage 5 technological questions - handles network/SDLC gateways and submits the full assessment
 function Stage5Technological() {
   const navigate = useNavigate();
 
@@ -18,17 +17,17 @@ function Stage5Technological() {
     }));
   }, [techData]);
 
-  // Gateway 1 (Networks)
+  // network gateway
   const networkGateway = controls.find((c) => c.id === "A8.20");
   const networkGatewayQid = networkGateway?.questions?.[0]?.id || null;
   const networkDependentIds = networkGateway?.gatewayFor || [];
 
-  // Gateway 2 (Software development)
+  // SDLC gateway
   const sdlcGateway = controls.find((c) => c.id === "SDLC_Gateway");
   const sdlcGatewayQid = sdlcGateway?.questions?.[0]?.id || null;
   const sdlcDependentControlIds = sdlcGateway?.gatewayFor || [];
 
-  // Load saved answers from localStorage.
+  // restore saved answers
   const [answers, setAnswers] = useState(() => {
     const saved = localStorage.getItem("stage5");
     return saved ? JSON.parse(saved) : {};
@@ -36,7 +35,7 @@ function Stage5Technological() {
   const [missingIds, setMissingIds] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
-  // Persist answers to localStorage.
+  // auto-save to localStorage
   useEffect(() => {
     localStorage.setItem("stage5", JSON.stringify(answers));
   }, [answers]);
@@ -64,7 +63,7 @@ function Stage5Technological() {
       const next = { ...prev, [questionId]: value };
 
       if (questionId === networkGatewayQid) {
-        // Network gateway: if "no", auto-set all dependent answers to "no" so they score correctly.
+        // network gateway: no = auto-set dependents to no, yes = let user answer fresh
         // If "yes", clear them so user answers fresh.
         if (value === "yes") {
           clearAnswersForControls(networkDependentIds, next);
@@ -74,7 +73,7 @@ function Stage5Technological() {
       }
 
       if (questionId === sdlcGatewayQid) {
-        // Gateway: if software development is not applicable, clear dependent answers.
+        // SDLC gateway - clear dependent answers if not applicable
         clearAnswersForControls(sdlcDependentControlIds, next);
       }
 
@@ -135,7 +134,7 @@ function Stage5Technological() {
     }
 
     try {
-      // Get all answers from localStorage
+      // pull all stage answers from localStorage
       const stage1 = JSON.parse(localStorage.getItem("stage1") || "{}");
       const stage2 = JSON.parse(localStorage.getItem("stage2") || "{}");
       const stage3 = JSON.parse(localStorage.getItem("stage3") || "{}");
@@ -144,7 +143,7 @@ function Stage5Technological() {
 
       const allAnswers = { stage1, stage2, stage3, stage4, stage5 };
 
-      // Get current user
+      // get the current user
       const auth = getAuth();
       const user = auth.currentUser;
 
@@ -153,7 +152,7 @@ function Stage5Technological() {
         return;
       }
 
-      // Get profile data from localStorage
+      // get profile from localStorage
       const profile = JSON.parse(localStorage.getItem("profile") || "{}");
 
       const result = await analyzeAssessment({
@@ -162,7 +161,7 @@ function Stage5Technological() {
         smeProfile: profile,
       });
 
-      // Store result for results page
+      // save result for the results page
       localStorage.setItem("assessmentResult", JSON.stringify(result));
 
       navigate(`/assessment/summary/${result.assessmentId}`);

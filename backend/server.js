@@ -1,4 +1,4 @@
-// Backend entrypoint: creates the Express app and starts the HTTP server.
+// starts the server
 import createApp from "./app.js";
 
 const PORT = Number(process.env.PORT || 5000);
