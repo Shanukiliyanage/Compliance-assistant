@@ -60,18 +60,13 @@ export function getNotApplicableControlIds(stageId, stageAnswers) {
       notApplicable.add("A.5.23");
     }
 
-    // Incident follow-up controls apply only if incident management is in scope.
-    if (!isYesAnswer(stage["A5.24.Q1"])) {
-      addRange(notApplicable, "A.5.", 25, 28);
-    }
+    // Note: incident management follow-up controls (A5.25-28) are NOT marked N/A when
+    // A5.24.Q1 = "no". The frontend sets them to "no" so they score as NOT_COMPLIANT.
   }
 
   if (stageId === "stage5") {
-    // Network security follow-up controls apply only if networking is in scope.
-    if (!isYesAnswer(stage["A8.20_Q1"])) {
-      notApplicable.add("A.8.21");
-      notApplicable.add("A.8.22");
-    }
+    // Note: network security follow-up controls (A8.21-22) are NOT marked N/A when
+    // A8.20_Q1 = "no". The frontend sets them to "no" so they score as NOT_COMPLIANT.
 
     // Secure development controls apply only if SDLC/software development is in scope.
     if (!isYesAnswer(stage["SDLC_GATE_Q1"])) {

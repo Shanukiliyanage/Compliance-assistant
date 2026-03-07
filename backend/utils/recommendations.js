@@ -62,10 +62,9 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
     return !isYesAnswer(stage["A5.23.Q1"]);
   }
 
-  // Only consider incident follow-up if incident intro was "yes".
-  if (/^A5\.(25|26|27|28)\./i.test(k)) {
-    return !isYesAnswer(stage["A5.24.Q1"]);
-  }
+  // Note: incident follow-up (A5.25-28) is NOT suppressed here.
+  // The frontend sets them to "no" when A5.24.Q1 = "no", so they should
+  // generate NOT_COMPLIANT recommendations.
 
   return false;
 }
@@ -74,10 +73,9 @@ function isSuppressedByStage5Gates(key, stageAnswers) {
   const k = String(key || "").trim();
   const stage = stageAnswers || {};
 
-  // Network security follow-up controls apply only if networking is in scope.
-  if (/^A8\.(21|22)[._-]/i.test(k)) {
-    return !isYesAnswer(stage["A8.20_Q1"]);
-  }
+  // Note: network security follow-up (A8.21-22) is NOT suppressed here.
+  // The frontend sets them to "no" when A8.20_Q1 = "no", so they should
+  // generate NOT_COMPLIANT recommendations.
 
   // Secure development controls apply only if SDLC/software development is in scope.
   if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
