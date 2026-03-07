@@ -1,4 +1,5 @@
-// figures out which controls are N/A based on gateway answers and explicit N/A selections
+// Applicability utilities.
+// Computes which controls are NOT_APPLICABLE based on gateway and explicit NA answers.
 
 function isYesAnswer(value) {
   return String(value || "")
@@ -32,12 +33,13 @@ function addRange(set, prefix, from, to) {
   }
 }
 
-// returns a Set of controlIds marked as N/A
+// Returns a Set of canonical controlIds (example: "A.5.19") marked NOT_APPLICABLE.
 export function getNotApplicableControlIds(stageId, stageAnswers) {
   const stage = stageAnswers || {};
   const notApplicable = new Set();
 
-  // explicit N/A answers only apply for stages 2-5 (Annex A)
+  // Explicit NA answers should mark the corresponding Annex A control as NOT_APPLICABLE.
+  // Per your requirement, we only allow explicit N/A handling for Annex A stages (2–5).
   if (stageId !== "stage1") {
     for (const [key, value] of Object.entries(stage)) {
       if (!isNotApplicableAnswer(value)) continue;
@@ -47,32 +49,33 @@ export function getNotApplicableControlIds(stageId, stageAnswers) {
   }
 
   if (stageId === "stage2") {
-    // supplier controls (A.5.19-A.5.22) are N/A if there are no supplier relationships
+    // Supplier-related follow-up controls only apply if supplier relationships exist.
+    // If GW1 is not YES, treat A.5.19–A.5.22 as not applicable.
     if (!isYesAnswer(stage["A5.19.GW1"])) {
       addRange(notApplicable, "A.5.", 19, 22);
     }
 
-    // cloud controls are N/A if the org doesn't use cloud
+    // Cloud risk management applies only if the org uses cloud services.
     if (!isYesAnswer(stage["A5.23.Q1"])) {
       notApplicable.add("A.5.23");
     }
 
-    // incident follow-ups are N/A if incident management isn't in scope
+    // Incident follow-up controls apply only if incident management is in scope.
     if (!isYesAnswer(stage["A5.24.Q1"])) {
       addRange(notApplicable, "A.5.", 25, 28);
     }
   }
 
   if (stageId === "stage5") {
-    // network controls are N/A if networking isn't in scope
+    // Network security follow-up controls apply only if networking is in scope.
     if (!isYesAnswer(stage["A8.20_Q1"])) {
       notApplicable.add("A.8.21");
       notApplicable.add("A.8.22");
     }
 
-    // SDLC/dev controls are N/A if there's no software development
+    // Secure development controls apply only if SDLC/software development is in scope.
     if (!isYesAnswer(stage["SDLC_GATE_Q1"])) {
-      // exclude dev-related controls
+      // Exclude the SDLC-dependent controls.
       ["A.8.25", "A.8.26", "A.8.27", "A.8.28", "A.8.29", "A.8.31", "A.8.33"].forEach((id) =>
         notApplicable.add(id)
       );

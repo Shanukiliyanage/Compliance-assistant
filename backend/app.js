@@ -1,4 +1,4 @@
-// sets up express middleware and mounts the routes
+// Express app factory: configures middleware and mounts API routes.
 import express from "express";
 import cors from "cors";
 
@@ -11,7 +11,7 @@ export default function createApp() {
   app.use(cors());
   app.use(express.json());
 
-  // return a 400 if the request body has invalid JSON
+  // Convert malformed JSON bodies into a clear 400 response.
   app.use((err, req, res, next) => {
     const isJsonSyntaxError =
       err instanceof SyntaxError &&

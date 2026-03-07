@@ -2,16 +2,17 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import physicalData from "../data/physical.json";
 
-// stage 4 physical questions - normalizes JSON, saves to localStorage, validates before moving on
+// Stage 4 (Physical) questionnaire.
+// Normalizes the JSON shape, persists answers in localStorage, and validates completion.
 function Stage4Physical() {
   const navigate = useNavigate();
 
-  // normalize JSON into: [{ id, control, questions: [{ id, question, explanation }] }]
+  // Normalize JSON into: [{ id, control, questions: [{ id, question, explanation }] }]
   const controls = useMemo(() => {
     const normalizeQuestions = (qs, controlId = "CTRL") => {
       if (!qs) return [];
 
-      // array format
+      // Array format
       if (Array.isArray(qs)) {
         return qs.map((q, i) => ({
           id: q.id || `${controlId}_Q${i + 1}`,
@@ -20,7 +21,7 @@ function Stage4Physical() {
         }));
       }
 
-      // object format (Q1/Q2 keys)
+      // Object format (Q1/Q2 keys)
       if (typeof qs === "object") {
         return Object.entries(qs).map(([k, v], i) => ({
           id: `${controlId}_${k || `Q${i + 1}`}`,
@@ -32,7 +33,7 @@ function Stage4Physical() {
       return [];
     };
 
-    // format A: { stage, title, subtitle, controls: [...] }
+    // Format A: { stage, title, subtitle, controls: [...] }
     if (physicalData && Array.isArray(physicalData.controls)) {
       return physicalData.controls.map((c, idx) => {
         const controlId = c.id || c.controlId || `A7_${idx + 1}`;
@@ -44,7 +45,7 @@ function Stage4Physical() {
       });
     }
 
-    // format B: { "A7.1": {control, questions}, ... }
+    // Format B: { "A7.1": {control, questions}, ... }
     if (physicalData && typeof physicalData === "object") {
       return Object.entries(physicalData)
         .filter(([key]) => !["stage", "title", "subtitle", "controls"].includes(key))
@@ -58,7 +59,7 @@ function Stage4Physical() {
     return [];
   }, []);
 
-  // restore saved answers
+  // Load saved answers from localStorage.
   const [answers, setAnswers] = useState(() => {
     const saved = localStorage.getItem("stage4");
     return saved ? JSON.parse(saved) : {};
@@ -66,7 +67,7 @@ function Stage4Physical() {
   const [missingIds, setMissingIds] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
-  // auto-save to localStorage
+  // Persist answers to localStorage.
   useEffect(() => {
     localStorage.setItem("stage4", JSON.stringify(answers));
   }, [answers]);
@@ -110,7 +111,7 @@ function Stage4Physical() {
       return;
     }
 
-    // go to stage 5
+    // ✅ Stage 5
     navigate("/assessment/technological");
   };
 

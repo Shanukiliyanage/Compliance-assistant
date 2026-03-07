@@ -1,12 +1,12 @@
-// scoring weights
+// Score weights used by the scoring utilities.
 
 export const SCORE_RULES = {
-  // fully compliant = full points
+  // If a control is fully compliant, it gets full points.
   YES: 1,
 
-  // partial = half points
+  // Partial compliance gets half points.
   PARTIAL: 0.5,
 
-  // not compliant = zero
+  // Not compliant gets zero points.
   NO: 0,
 };

@@ -2,7 +2,7 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 
-// Firestore integration - only runs if FIRESTORE_ENABLED is set
+// Optional Firestore persistence (enabled via FIRESTORE_ENABLED).
 
 let _admin;
 let _adminLoadError;
@@ -22,7 +22,7 @@ function getAdmin() {
 }
 
 function parseServiceAccountFromEnv() {
-  // service account can be set in env as JSON
+  // Optional: service account provided as JSON in env.
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!raw) return null;
   try {
@@ -44,7 +44,7 @@ export function isFirestoreEnabled() {
 }
 
 export function getFirestoreDb() {
-  // init once and reuse
+  // Initialize once and reuse the Firestore handle.
   if (_db) return _db;
   if (_initError) throw _initError;
 
@@ -77,7 +77,7 @@ export function getFirestoreDb() {
 }
 
 export async function saveAssessmentResultToFirestore(result) {
-  // save/update assessment result
+  // Upsert assessment result under assessments/{assessmentId}.
   const db = getFirestoreDb();
   const docId = result.assessmentId;
 
@@ -93,7 +93,7 @@ export async function saveAssessmentResultToFirestore(result) {
 }
 
 export async function getAssessmentResultFromFirestore(assessmentId) {
-  // get assessment result
+  // Read assessment result by id.
   const db = getFirestoreDb();
   const snap = await db.collection("assessments").doc(assessmentId).get();
   if (!snap.exists) return null;

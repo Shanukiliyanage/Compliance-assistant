@@ -1,4 +1,4 @@
-// landing page
+// Simple landing screen with a CTA that starts the assessment flow.
 function LandingPage() {
   return (
     <div className="page-landing">

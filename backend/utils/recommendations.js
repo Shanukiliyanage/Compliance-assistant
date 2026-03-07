@@ -1,11 +1,12 @@
-// groups answers by control, works out compliance state, picks the right recommendation text
+// Recommendation utilities.
+// Groups answers by control, derives compliance state, and selects recommendation text.
 
 import { getControlComplianceState } from "../rules/complianceRules.js";
 import { getRecommendationForControl } from "../rules/recommendationRules.js";
 import { getNotApplicableControlIds } from "./applicability.js";
 
 function getPriorityFromComplianceState(complianceState) {
-  // basic priority rule for the report/UI
+  // Minimal prioritization rule used by the report/UI.
   const cs = String(complianceState || "").toUpperCase();
   if (cs === "NOT_COMPLIANT") return "HIGH";
   if (cs === "PARTIALLY_COMPLIANT") return "MEDIUM";
@@ -26,16 +27,16 @@ function mapAnswerToComplianceState(value) {
 function shouldIgnoreAnswerKey(key) {
   const k = String(key || "").trim();
 
-  // skip gateway questions - they're not scored
+  // Ignore "gateway" questions that only decide if later questions apply.
   if (/[._-]GW\d+$/i.test(k)) return true;
 
-  // another gateway id format
+  // Another gateway naming style used in the frontend.
   if (/_gateway/i.test(k)) return true;
 
-  // cloud gateway - not scored
+  // Cloud applicability question: also a gate, not a scored control.
   if (/^A5\.23\.Q1$/i.test(k)) return true;
 
-  // SDLC gateway - not scored
+  // Stage 5 SDLC gateway: applicability only (not a scored control).
   if (/^SDLC_GATE_Q1$/i.test(k)) return true;
 
   return false;
@@ -51,17 +52,17 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
   const k = String(key || "").trim();
   const stage = stageAnswers || {};
 
-  // if gateway is no, skip the answers for hidden questions
+  // If a gateway is "no", ignore answers for questions that were hidden.
   if (/^A5\.(19|20|21|22)\./i.test(k)) {
     return !isYesAnswer(stage["A5.19.GW1"]);
   }
 
-  // only consider cloud risk management if cloud use was yes
+  // Only consider cloud risk management if cloud use was "yes".
   if (/^A5\.23\.Q2$/i.test(k)) {
     return !isYesAnswer(stage["A5.23.Q1"]);
   }
 
-  // only consider incident follow-up if incident intro was yes
+  // Only consider incident follow-up if incident intro was "yes".
   if (/^A5\.(25|26|27|28)\./i.test(k)) {
     return !isYesAnswer(stage["A5.24.Q1"]);
   }
@@ -73,12 +74,12 @@ function isSuppressedByStage5Gates(key, stageAnswers) {
   const k = String(key || "").trim();
   const stage = stageAnswers || {};
 
-  // network security follow-ups are N/A if networking isn't in scope
+  // Network security follow-up controls apply only if networking is in scope.
   if (/^A8\.(21|22)[._-]/i.test(k)) {
     return !isYesAnswer(stage["A8.20_Q1"]);
   }
 
-  // SDLC controls are N/A if there's no software development
+  // Secure development controls apply only if SDLC/software development is in scope.
   if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
     return !isYesAnswer(stage["SDLC_GATE_Q1"]);
   }
@@ -88,13 +89,13 @@ function isSuppressedByStage5Gates(key, stageAnswers) {
 
 function normalizeControlId(key) {
   const k = String(key || "").trim();
-  // strip question suffix to get the control id (e.g. "A5.24.Q2" -> "A.5.24")
+  // Convert question ids into control ids (example: "A5.24.Q2" -> "A.5.24").
 
   const stripped = k
     .replace(/[-_.]Q\d+$/i, "")
     .replace(/[._-]GW\d+$/i, "");
 
-  // normalize id format for rule lookups
+  // Make IDs consistent for rule lookups.
   const m2 = /^A(\d+)\.(\d+)$/.exec(stripped);
   if (m2) return `A.${Number(m2[1])}.${Number(m2[2])}`;
 
@@ -106,7 +107,9 @@ function normalizeControlId(key) {
 
 function normalizeForStage(stageId, key) {
   if (stageId === "stage1") {
-    // stage 1 keeps per-question keys - if there's a .Qn suffix, don't strip it
+    // Stage 1 needs per-question recommendations.
+    // Keys can be either clause-based ("6.1", "6.2") OR question-based ("6.1.Q1", "6.1.Q2").
+    // If a .Qn suffix exists, keep it so Q1/Q2 don't collapse into one id.
     return String(key || "").trim();
   }
 
@@ -114,10 +117,12 @@ function normalizeForStage(stageId, key) {
 }
 
 function groupStageAnswers(stageId, stageAnswers) {
-  // group stage answers into { controlId: [answers...] }
+  // Groups answers for one stage into { controlId: [answers...] }.
   const grouped = {};
 
-  // stage 1 compat: some builds saved 6.1.Q1 instead of 6.1.Q2 - treat Q1 as Q2 if Q2 is missing
+  // Stage 1 aliasing (compat fix): some builds stored the “risk treatment decisions mapped
+  // to controls/actions” question under 6.1.Q1, but the rule text is defined under 6.1.Q2.
+  // If Q2 is not present, treat Q1 as Q2.
   const stage1Aliases =
     stageId === "stage1" && stageAnswers && typeof stageAnswers === "object"
       ? {
@@ -128,7 +133,7 @@ function groupStageAnswers(stageId, stageAnswers) {
       : null;
 
   for (const [key, value] of Object.entries(stageAnswers || {})) {
-    // skip blank answers
+    // Skip blank answers.
     if (value == null) continue;
     if (typeof value === "string" && value.trim() === "") continue;
 
@@ -146,8 +151,10 @@ function groupStageAnswers(stageId, stageAnswers) {
 }
 
 export function generateRecommendations(answers, options = {}) {
-  // builds the recommendations list for the report/UI
-  // tries question-level rules first; falls back to one aggregated rec per control to avoid duplicates
+  // Builds the recommendations list used in report/UI.
+  // Output supports question-level recommendations when they exist.
+  // If a question-specific recommendation rule is missing, we fall back to a single aggregated
+  // control-level recommendation (avoids duplicates).
   const recommendations = [];
   const orgName =
     typeof options?.orgName === "string" && options.orgName.trim()
@@ -158,8 +165,8 @@ export function generateRecommendations(answers, options = {}) {
     const stage = stageAnswers || {};
     const notApplicableControlIds = getNotApplicableControlIds(stageId, stage);
 
-    // 1) question-level recs where explicit rules exist
-    // track which controls already have a question-level rec to skip the control-level fallback
+    // 1) Collect question-level recommendations where explicit question rules exist.
+    // Track controls that already have question-level recs so we can skip the control-level fallback.
     const controlsWithQuestionRecs = new Set();
 
     for (const [questionIdRaw, answerValue] of Object.entries(stage)) {
@@ -196,7 +203,7 @@ export function generateRecommendations(answers, options = {}) {
       }
     }
 
-    // 2) fallback: one aggregated rec per control where no question-level rules exist
+    // 2) Fallback: one aggregated recommendation per control where no question-level rules exist.
     const grouped = groupStageAnswers(stageId, stage);
     Object.entries(grouped).forEach(([controlId, questionAnswers]) => {
       if (notApplicableControlIds.has(controlId)) return;
@@ -222,7 +229,8 @@ export function generateRecommendations(answers, options = {}) {
 }
 
 export function buildControlStatusSummary(answers, options = {}) {
-  // full status list for the report - includes controls even if there's no recommendation
+  // What: Build a full “status list” for the report.
+  // Difference vs generateRecommendations: includes controls even if recommendation is empty.
   const orgName =
     typeof options?.orgName === "string" && options.orgName.trim()
       ? options.orgName.trim()
@@ -249,9 +257,9 @@ export function buildControlStatusSummary(answers, options = {}) {
       });
     });
 
-    // also add explicit N/A controls so reports can show them
+    // Add explicit NOT_APPLICABLE controls so reports can show them as N/A.
     for (const controlId of notApplicableControlIds) {
-      // skip if already in the list
+      // Avoid duplicates if a control was somehow answered.
       if (controls.some((c) => c.stageId === stageId && c.controlId === controlId)) continue;
       controls.push({
         stageId,
@@ -263,7 +271,7 @@ export function buildControlStatusSummary(answers, options = {}) {
     }
   });
 
-  // sort so the report output is consistent
+  // Sort output so the report looks consistent.
   const stageRank = { stage1: 1, stage2: 2, stage3: 3, stage4: 4, stage5: 5 };
   controls.sort((a, b) => {
     const ar = stageRank[a.stageId] ?? 999;

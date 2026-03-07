@@ -2,11 +2,12 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import peopleData from "../data/people.json";
 
-// stage 3 people questions - normalizes JSON, saves to localStorage, validates before moving on
+// Stage 3 (People) questionnaire.
+// Normalizes the JSON shape, persists answers in localStorage, and validates completion.
 function Stage3People() {
   const navigate = useNavigate();
 
-  // display titles for people controls
+  // Display names for the People controls.
   const PEOPLE_TITLES = [
     "Screening",
     "Terms and conditions of employment",
@@ -18,7 +19,7 @@ function Stage3People() {
     "Information security event reporting",
   ];
 
-  // normalize possible JSON shapes into: [{ id, control, questions: [...] }]
+  // Normalize possible JSON shapes into: [{ id, control, questions: [...] }]
   const controls = useMemo(() => {
     const normalizeQuestions = (qs, controlId = "CTRL") => {
       if (!qs) return [];
@@ -42,7 +43,7 @@ function Stage3People() {
       return [];
     };
 
-    // format A: { controls: [...] }
+    // Format A: { controls: [...] }
     if (peopleData && Array.isArray(peopleData.controls)) {
       return peopleData.controls.map((c, idx) => {
         const controlId = c.id || c.controlId || `A6_${idx + 1}`;
@@ -54,7 +55,7 @@ function Stage3People() {
       });
     }
 
-    // format B: { "A6.1": {control, questions}, ... }
+    // Format B: { "A6.1": {control, questions}, ... }
     if (peopleData && typeof peopleData === "object") {
       return Object.entries(peopleData)
         .filter(([key]) => !["stage", "title", "subtitle", "controls"].includes(key))
@@ -68,7 +69,7 @@ function Stage3People() {
     return [];
   }, [peopleData]);
 
-  // restore saved answers
+  // Load saved answers from localStorage.
   const [answers, setAnswers] = useState(() => {
     const saved = localStorage.getItem("stage3");
     return saved ? JSON.parse(saved) : {};
@@ -76,7 +77,7 @@ function Stage3People() {
   const [missingIds, setMissingIds] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
-  // auto-save to localStorage
+  // Persist answers to localStorage.
   useEffect(() => {
     localStorage.setItem("stage3", JSON.stringify(answers));
   }, [answers]);
@@ -125,18 +126,18 @@ function Stage3People() {
 
   const handleBack = () => navigate("/assessment/organizational");
 
-  // display title logic:
-  // 1) use the PEOPLE_TITLES array if the control name is just a placeholder like "Control 1"
-  // 2) strip any A.6.x prefix if present
+  // ✅ Display title logic:
+  // 1) If it says "Control 1", replace with your topic title using index
+  // 2) If it contains "A.6.x", strip it
   const getDisplayTitle = (control, idx) => {
     const raw = String(control?.control || "");
 
-    // generic fallback "Control 1" etc
+    // if UI fallback "Control 1" etc
     if (/^control\s+\d+$/i.test(raw)) {
       return PEOPLE_TITLES[idx] || raw;
     }
 
-    // strip A.6.x prefix
+    // strip A.6.x prefix if present
     return raw.replace(/^A\.6\.\d+\s*/i, "");
   };
 

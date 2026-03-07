@@ -2,14 +2,15 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import mandatoryData from "../data/mandatory.json";
 
-// stage 1 questions - saves answers to localStorage and blocks progress until everything's answered
+// Stage 1 (Mandatory Clauses) questionnaire.
+// Collects answers, stores them in localStorage, and validates completion before Stage 2.
 
-// flatten mandatory.json into a usable question array
+// Normalize mandatory.json into a flat question array.
 function getMandatoryItems(data) {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.default)) return data.default;
 
-  // handle older data shapes
+  // Legacy shape support.
   if (data && typeof data === "object") {
     const flattened = [];
     for (const v of Object.values(data)) {
@@ -21,7 +22,7 @@ function getMandatoryItems(data) {
   return [];
 }
 
-// clause section headings
+// Title shown for each main clause section.
 const clauseTitles = {
   4: "Clause 4: Context of the Organization",
   5: "Clause 5: Leadership",
@@ -32,13 +33,13 @@ const clauseTitles = {
   10: "Clause 10: Improvement",
 };
 
-// pulls the top-level clause number, e.g. "4.1" -> 4
+// Example: "4.1" -> 4, "10.2.1" -> 10 (used for grouping).
 function getMajorClause(value) {
   const m = /^\s*(\d+)/.exec(String(value ?? ""));
   return m ? Number(m[1]) : NaN;
 }
 
-// fallback to extract clause from ids like "4.1.Q1"
+// Fallback: from an id like "4.1.Q1", pull out "4.1".
 function extractClause(value) {
   const s = String(value ?? "").trim();
   const m = /^(\d+(?:\.\d+)+)/.exec(s);
@@ -48,23 +49,23 @@ function extractClause(value) {
 function QuestionsPage() {
   const navigate = useNavigate();
 
-  // load questions once
+  // Load the question list once.
   const mandatoryItems = useMemo(() => getMandatoryItems(mandatoryData), []);
 
-  // group by clause (4 through 10)
+  // Group questions into sections: Clause 4, Clause 5, ... Clause 10.
   const sections = useMemo(
     () => {
       const items = mandatoryItems;
       const grouped = new Map();
 
       for (const q of items) {
-        // get clause number
+        // Find the clause number for this question.
         const clause = String(q?.clause ?? extractClause(q?.id) ?? "").trim();
         const major = getMajorClause(clause);
         if (!Number.isFinite(major)) continue;
         if (!grouped.has(major)) grouped.set(major, []);
         grouped.get(major).push({
-          // this id is also the localStorage key
+          // `id` is the key we store the answer under (also used in localStorage).
           id: String(q?.clause ? clause : (q?.id ?? clause)).trim(),
           question: q?.question ?? q?.text,
           explanation: q?.explanation ?? q?.helpText,
@@ -83,7 +84,7 @@ function QuestionsPage() {
     [mandatoryItems]
   );
 
-  // restore saved answers so nothing gets lost on refresh
+  // Load saved answers so refresh doesn’t lose progress.
   const [answers, setAnswers] = useState(() => {
     const saved = localStorage.getItem("stage1");
     if (!saved) return {};
@@ -92,7 +93,7 @@ function QuestionsPage() {
       const parsed = JSON.parse(saved);
       if (!parsed || typeof parsed !== "object") return {};
 
-      // migrate old keys to current clause keys
+      // Small compatibility step: if older saves used different keys, map them to current clause keys.
       const items = mandatoryItems;
       const idToClause = new Map(items.map((q) => [String(q?.id), String(q?.clause ?? "").trim()]));
       const migrated = {};
@@ -108,16 +109,17 @@ function QuestionsPage() {
     }
   });
 
-  // tracks unanswered questions to highlight them
+  // Used to highlight questions the user skipped.
   const [missingIds, setMissingIds] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
-  // auto-save to localStorage (scoring runs on the backend, not here)
+  // Save answers automatically.
+  // Note: scoring/recommendations happen elsewhere; this page only collects answers.
   useEffect(() => {
     localStorage.setItem("stage1", JSON.stringify(answers));
   }, [answers]);
 
-  // handle Yes/Partial/No clicks
+  // When user clicks Yes/Partial/No.
   const handleAnswer = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
 
@@ -127,7 +129,7 @@ function QuestionsPage() {
     setShowValidationError(false);
   };
 
-  // don't let them continue until all questions are answered
+  // Block “Continue” until every question has an answer.
   const validateAndNext = () => {
     const newMissing = [];
 
@@ -146,7 +148,7 @@ function QuestionsPage() {
     navigate("/assessment/organizational");
   };
 
-  // progress bar
+  // Progress bar numbers.
   const totalQuestions = sections.reduce((sum, section) => sum + section.questions.length, 0);
   const answeredCount = sections.reduce((sum, section) => {
     return (
@@ -272,14 +274,14 @@ function QuestionsPage() {
             </h2>
 
             {section.questions.map((q, qIdx) => {
-              // a), b), c) labels
+              // a), b), c)... labeling per section
               const questionLabel = `${String.fromCharCode(97 + qIdx)})`;
 
-              // drives button highlight style
+              //selected drives button styling (Yes/Partial/No)
               const selected = answers[q.id];
               const isMissing = missingIds.includes(q.id);
 
-              // base button styles
+              // Common styles used by the three answer buttons.
               const baseButtonStyle = {
                 flex: 1,
                 padding: "8px",
@@ -306,7 +308,9 @@ function QuestionsPage() {
                   }}
                 >
                   {(() => {
-                    // some questions have multiple parts (q.parts or q.question as array)
+                    // Some questions can be “multi-part”.
+                                  // - `q.parts` array, or
+                    // - `q.question` being an array (legacy).
                     const questionText = q?.question;
                     const parts = Array.isArray(q?.parts)
                       ? q.parts

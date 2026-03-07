@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import orgData from "../data/organizational.json";
 
-// stage 2 organizational questions - saves answers to localStorage and handles gateway logic
+// Stage 2 (Organizational) questionnaire.
+// Stores answers in localStorage and applies gateway logic to hide/clear dependent questions.
 function Stage2Organizational() {
   const navigate = useNavigate();
 
@@ -24,7 +25,7 @@ function Stage2Organizational() {
   const incidentIntroQ1Id = "A5.24.Q1";
   const incidentFollowUpControlIds = ["A5.25", "A5.26", "A5.27", "A5.28"];
 
-  // restore saved answers
+  // Load saved answers from localStorage.
   const [answers, setAnswers] = useState(() => {
     const saved = localStorage.getItem("stage2");
     return saved ? JSON.parse(saved) : {};
@@ -32,7 +33,7 @@ function Stage2Organizational() {
   const [missingIds, setMissingIds] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
-  // auto-save to localStorage
+  // Persist answers to localStorage.
   useEffect(() => {
     localStorage.setItem("stage2", JSON.stringify(answers));
   }, [answers]);
@@ -75,13 +76,13 @@ function Stage2Organizational() {
     setAnswers((prev) => {
       const next = { ...prev, [questionId]: value };
 
-      // if supplier gateway goes off, clear the dependent answers
+      // Gateway: if supplier management is not applicable, clear dependent answers.
       if (questionId === gatewayQuestionId && prev[questionId] !== value) {
         clearAnswersForControls(supplierControlIds, next);
       }
 
-      // incident gateway - if no, auto-set follow-ups to no so they score as not compliant
-      // if yes, clear them so the user can answer fresh
+      // Gateway: incident management - if "no", auto-set follow-ups to "no" so they score as not compliant.
+      // If "yes", clear them so the user can answer fresh.
       if (questionId === incidentIntroQ1Id && prev[questionId] !== value) {
         if (value === "yes") {
           clearAnswersForControls(incidentFollowUpControlIds, next);
@@ -90,7 +91,7 @@ function Stage2Organizational() {
         }
       }
 
-      // wipe any answers that are now hidden
+      // Clear any answers that became hidden due to conditional visibility.
       clearHiddenConditionalAnswers(next);
 
       return next;
@@ -130,7 +131,7 @@ function Stage2Organizational() {
       return;
     }
 
-    // go to stage 3 (people)
+    // ✅ GO TO PEOPLE (Stage 3)
     navigate("/assessment/people");
   };
 

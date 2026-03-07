@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-// simple health check endpoint
+// Health route: used for uptime checks and quick backend verification.
 const router = Router();
 
 router.get("/health", (req, res) => {

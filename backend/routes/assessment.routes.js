@@ -14,8 +14,9 @@ import {
   getAssessmentResultFromFirestore,
 } from "../utils/firestore.js";
 
-// assessment routes - stores results in JSON by default (Firestore is optional)
-// older stored results get backfilled when they're fetched
+// Assessment API routes.
+// Note: results can be stored in JSON (default) or Firestore (optional), and older
+// stored results may be hydrated (backfilled) when fetched.
 
 const router = Router();
 
@@ -24,7 +25,8 @@ const __dirname = path.dirname(__filename);
 const resultsPath = path.join(__dirname, "..", "data", "results.json");
 const assessmentsPath = path.join(__dirname, "..", "data", "assessments.json");
 
-// helpers for detecting older result formats - we upgrade them on read
+// These helpers detect older saved result formats.
+// The project evolved over time, so older stored formats may be upgraded on read.
 function hasEmptyRecommendations(result) {
   return !Array.isArray(result?.recommendations) || result.recommendations.length === 0;
 }
@@ -64,7 +66,7 @@ function hasOutdatedPeopleControlTemplates(result) {
     "A.6.8",
   ]);
 
-  // old templates used ISO/IEC 27002 phrasing - now updated
+  // Earlier templates included ISO/IEC 27002 phrasing; we now use improved wording.
   return result.recommendations.some((r) => {
     const id = String(r?.controlId ?? "").trim();
     if (!peopleIds.has(id)) return false;
@@ -122,7 +124,7 @@ function hasOutdatedTechnologicalControlTemplates(result) {
 }
 
 function tryBackfillRecommendationsFromJson(result) {
-  // missing or old recommendations? regenerate from the stored answers
+  // If recommendations are missing/outdated, regenerate them from stored answers.
   if (
     !result ||
     (!hasEmptyRecommendations(result) &&
@@ -134,10 +136,10 @@ function tryBackfillRecommendationsFromJson(result) {
     return result;
   }
 
-  // use answers stored in the result if available, otherwise look them up
+  // Prefer answers embedded in the stored result (Firestore may include it).
   const embeddedAnswers = result.answers && typeof result.answers === "object" ? result.answers : null;
 
-  // otherwise look up by assessmentId
+  // Otherwise look up answers by assessmentId
   const assessmentId = result.assessmentId;
   if (!assessmentId) return result;
 
@@ -152,20 +154,20 @@ function tryBackfillRecommendationsFromJson(result) {
     orgName: orgName || "The organization",
   });
 
-  // if still empty after all that, leave it as-is
+  // If still empty, keep as-is.
   if (!Array.isArray(recommendations) || recommendations.length === 0) return result;
 
   return { ...result, recommendations };
 }
 
 function tryBackfillScoresFromJson(result) {
-  // no scores? recompute from answers
+  // If scores are missing, recompute them from stored answers.
   if (!result) return result;
 
-  // same as above - prefer embedded answers
+  // Prefer answers embedded in the result
   const embeddedAnswers = result.answers && typeof result.answers === "object" ? result.answers : null;
 
-  // otherwise look up by assessmentId
+  // Otherwise look up answers by assessmentId
   const assessmentId = result.assessmentId;
   if (!assessmentId) return result;
 
@@ -183,7 +185,7 @@ function tryBackfillScoresFromJson(result) {
 
 // POST /api/assessment/analyze
 router.post("/analyze", (req, res) => {
-  // main submit - runs scoring, generates recommendations, saves the result
+  // Main submit endpoint: computes scores/recommendations and persists the result.
   try {
     const { userId, answers, smeProfile } = req.body || {};
     const result = analyzeAssessment({ userId, answers, smeProfile });
@@ -196,24 +198,24 @@ router.post("/analyze", (req, res) => {
 
 // GET /api/assessment/result/:assessmentId
 router.get("/result/:assessmentId", (req, res) => {
-  // get a stored result for the summary/recommendations pages
+  // Fetch a stored assessment result (used by Summary/Recommendations pages).
   const { assessmentId } = req.params;
   if (!assessmentId) {
     return res.status(400).json({ error: "Missing assessmentId" });
   }
 
   const readFromJson = () => {
-    // fallback to JSON if Firestore isn't available
+    // JSON storage path (fallback when Firestore is disabled/unavailable).
     ensureJsonFile(resultsPath, []);
     const results = readJsonArray(resultsPath);
     const found = results.find((r) => r && r.assessmentId === assessmentId) || null;
 
-    // upgrade older result formats if needed
+    // Hydrate older stored results when needed.
     let hydrated = tryBackfillRecommendationsFromJson(found);
     hydrated = tryBackfillScoresFromJson(hydrated);
 
     if (hydrated && hydrated !== found && !isFirestoreEnabled()) {
-      // write updates back to the JSON file
+      // Persist updates back to JSON results.
       const idx = results.findIndex((r) => r && r.assessmentId === assessmentId);
       if (idx >= 0) {
         results[idx] = hydrated;
@@ -233,7 +235,7 @@ router.get("/result/:assessmentId", (req, res) => {
   getAssessmentResultFromFirestore(assessmentId)
     .then((doc) => {
       if (doc) {
-      // if Firestore has embedded answers, apply them in memory
+        // If Firestore includes answers, hydrate in-memory on read.
         let hydrated = tryBackfillRecommendationsFromJson(doc);
         hydrated = tryBackfillScoresFromJson(hydrated);
         return res.json(hydrated);
@@ -276,7 +278,7 @@ router.get("/report/:assessmentId", (req, res) => {
   };
 
   const buildPayload = ({ result, assessment, answers }) => {
-    // merge result, assessment, and answers into one payload
+    // Merge result + assessment + answers into one downloadable payload.
     if (!result) return null;
     const resolvedAnswers = answers || (result.answers && typeof result.answers === "object" ? result.answers : null);
     if (!resolvedAnswers) return null;
@@ -285,7 +287,9 @@ router.get("/report/:assessmentId", (req, res) => {
       result?.smeProfile?.organizationName || assessment?.smeProfile?.organizationName || ""
     ).trim();
 
-    // use stored answers as-is - gateway/showIf filtering happens via applicability logic
+    // Export-specific: use the stored answers object as-is.
+    // Gateway/showIf rules are handled via applicability logic so suppressed questions/controls
+    // appear as N/A (and do not produce irrelevant recommendations).
     const exportAnswers = buildAnswersForExport(resolvedAnswers);
 
     const controlStatuses = buildControlStatusSummary(exportAnswers, {
@@ -294,7 +298,7 @@ router.get("/report/:assessmentId", (req, res) => {
       includeGatewayQuestions: true,
     });
 
-    // per-question recommendations, including gated follow-ups
+    // Per-question recommendations (matches UI output), including gateway-controlled follow-ups.
     const recommendations = generateRecommendations(exportAnswers, {
       orgName: orgName || "The organization",
       includeSuppressed: true,

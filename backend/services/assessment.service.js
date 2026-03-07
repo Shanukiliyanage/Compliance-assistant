@@ -1,4 +1,4 @@
-// assessment analysis - scores answers, generates recommendations, saves the result
+// Backend assessment analysis service: validate input, compute scores, generate recommendations, persist result.
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -19,7 +19,7 @@ const assessmentsPath = path.join(__dirname, "..", "data", "assessments.json");
 const resultsPath = path.join(__dirname, "..", "data", "results.json");
 
 export function analyzeAssessment({ userId, answers, smeProfile }) {
-  // supports answers as an object (current) or array (legacy)
+  // Supports answers as an object (current) or array (legacy).
   const answersType = Array.isArray(answers)
     ? "array"
     : answers && typeof answers === "object"
@@ -53,7 +53,7 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
     console.log("[analyze] scores:", scores);
   }
 
-  // recommendations are personalized with the org name
+  // Recommendations can be personalized using organization name.
   const orgName = String(smeProfile?.organizationName || "").trim();
   const recommendations = generateRecommendations(answers, {
     orgName: orgName || "The organization",
@@ -62,7 +62,7 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
     console.log("[analyze] recommendations count:", recommendations.length);
   }
 
-  // result object returned to the frontend
+  // Result returned to the frontend.
   const result = {
     assessmentId,
     userId,
@@ -72,17 +72,17 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
     recommendations,
   };
 
-  // persistence
-  // - Firestore if FIRESTORE_ENABLED=1
-  // - local JSON files as fallback
+  // Persistence
+  // - If FIRESTORE_ENABLED=1, store in Firestore (collection: assessments, docId=assessmentId)
+  // - Otherwise, store in local JSON files (temporary DB)
   if (isFirestoreEnabled()) {
-    // Firestore is async - JSON storage is the fallback
+    // Firestore write is async; JSON storage remains the primary fallback.
     saveAssessmentResultToFirestore({ ...result, answers }).catch((err) => {
       console.error("[firestore] save failed, falling back to JSON:", err);
     });
   }
 
-  // local JSON storage
+  // Local JSON storage.
   ensureJsonFile(assessmentsPath, []);
   ensureJsonFile(resultsPath, []);
 

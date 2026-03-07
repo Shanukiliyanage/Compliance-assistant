@@ -9,7 +9,7 @@ function assert(condition, message) {
 
 const testAnswers = {
   stage1: {
-    // stage 1 - should generate per-question recommendations
+    // Stage 1 (Mandatory Clauses) should produce per-question recommendations.
     "4.1": "no",
     "4.2": "partial",
     "4.3": "no",
@@ -17,48 +17,50 @@ const testAnswers = {
     "6.2": "partial",
     "7.3": "no",
 
-    // stage 1 legacy: clause+suffix IDs should map to the right templates
+    // Compatibility: some clients store Stage 1 as clause + question suffix.
+    // These should map to the correct mandatory clause templates (not generic fallbacks).
     "6.1.Q1": "no",
     "6.1.Q2": "no",
     "8.1.Q1": "no",
     "8.1.Q2": "partial",
   },
   stage2: {
-    // supplier gateway alone should not produce a recommendation
+    // Supplier gateway should be ignored and NOT generate a recommendation by itself
     "A5.19.GW1": "no",
 
-    // supplier answers should be suppressed if the gateway isn't yes
+    // Even if a client mistakenly submits hidden supplier answers, they should be suppressed
+    // when the gateway is not "yes".
     "A5.19.Q1": "no",
     "A5.20.Q1": "no",
 
-    // cloud gateway should be ignored; Q2 only applies if Q1 is yes
+    // Cloud applicability gateway should be ignored; Q2 should only exist if Q1=yes
     "A5.23.Q1": "no",
 
-    // Q2 should be suppressed if Q1=no
+    // Even if mistakenly submitted while Q1=no, Q2 should be suppressed.
     "A5.23.Q2": "no",
 
-    // incident follow-ups should be suppressed unless A5.24.Q1 is yes
+    // Incident follow-ups should be suppressed unless A5.24.Q1 is yes
     "A5.24.Q1": "no",
     "A5.25.Q1": "no",
     "A5.26.Q1": "no",
 
-    // multi-question controls should still produce a recommendation
+    // A real control with multiple answers should still generate a recommendation
     "A5.14.Q1": "partial",
     "A5.14.Q2": "no"
   },
   stage3: {
-    // dotted Annex ID format should normalize properly
+    // Dotted Annex ID format should normalize properly
     "A.6.1-Q1": "yes"
   },
   stage5: {
-    // underscore question suffix should normalize properly
+    // Underscore question suffix should normalize properly
     "A8.2_Q1": "no"
   }
 };
 
 const results = generateRecommendations(testAnswers);
 
-// run assertions
+// Basic correctness assertions
 const ids = results.map((r) => r.controlId);
 
 assert(ids.includes("4.1"), "Expected recommendation for 4.1 (Stage 1 question)");

@@ -1,7 +1,7 @@
 /**
- * recommendation rulebook
- * maps (controlId, complianceState) to recommendation text
- * used by backend/utils/recommendations.js
+ * Recommendation rule book.
+ * Maps (controlId, complianceState) to a recommendation string.
+ * Used by backend/utils/recommendations.js.
  */
 
 export function getRecommendationForControl(
@@ -10,8 +10,8 @@ export function getRecommendationForControl(
   orgName = "The organization"
 ) {
   /**
-   * returns recommendation text for one control/question id and compliance state
-   * returns null when no recommendation needed or no rule applies
+   * Returns recommendation text for one control/question id and compliance state.
+   * Returns null when no recommendation is required or no rule applies.
    */
   if (complianceState === "FULLY_COMPLIANT" || complianceState === "NOT_APPLICABLE") {
     return null;
@@ -19,12 +19,15 @@ export function getRecommendationForControl(
 
   const interpolateOrgName = (text) => {
     if (text == null) return null;
-    // some templates use "{orgName}" as a literal placeholder (others use template literals)
+    // Support templates using the literal placeholder "{orgName}".
+    // (Other rules already interpolate orgName via template literals.)
     return String(text).split("{orgName}").join(orgName);
   };
 
   const aliasMandatoryQuestionId = (rawId) => {
-    // some builds saved stage 1 IDs as "6.1.Q1"/"6.1.Q2" but the rulebook uses clause keys like "6.1"/"6.2"
+    // Some builds store Stage 1 mandatory question IDs as "6.1.Q1" / "6.1.Q2"
+    // (two questions under one clause), while the rulebook uses ISO clause keys
+    // like "6.1" and "6.2".
     const id = String(rawId || "").trim();
 
     // Normalize suffix formats: ".Q1", "_Q1", "-Q1".
@@ -34,9 +37,16 @@ export function getRecommendationForControl(
     const qn = Number(m[2]);
     if (!Number.isFinite(qn) || qn < 1) return id;
 
-    // legacy stage 1 mapping - older UIs saved as 4.1.Q1/Q2/Q3, but the rulebook uses ISO clause keys 4.1, 4.2, 4.3
-    // clause 4 is a special case: Q1->4.2 (stakeholders), Q2->4.3 (scope)
+    // Legacy Stage 1 mapping:
+    // - Some older UIs asked multiple questions under a single clause base like "4.1",
+    //   saving answers as 4.1.Q1, 4.1.Q2, 4.1.Q3.
+    // - Our rulebook uses the ISO clause keys: 4.1, 4.2, 4.3, ...
+    // So we map (base, Qn) -> clause key.
     const map = {
+      // Clause 4 legacy variants:
+      // Some builds stored Clause 4 Q1/Q2 under a shared base "4.1".
+      // In the current questionnaire, stakeholder expectations map to 4.2 and ISMS scope maps to 4.3.
+      // Map legacy Q1/Q2 accordingly.
       "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
       "5.1": { 1: "5.1", 2: "5.2" },
       "6.1": { 1: "6.1", 2: "6.2" },
@@ -50,11 +60,18 @@ export function getRecommendationForControl(
   };
 
   const canonicalizeRuleKey = (rawId) => {
-    // normalize control/question IDs for lookup
+    // Normalizes common control/question id formats into a rule lookup key.
+    // Examples:
+    // - A5.1.Q1   -> A.5.1.Q1
+    // - A7.1_Q2   -> A.7.1.Q2
+    // - A8.2_Q1   -> A.8.2.Q1
+    // - A.6.4-Q2  -> A.6.4.Q2
+    // - A.6.1-Q1  -> A.6.1.Q1
+    // - 6.1.Q2    -> (left as-is; stage1 aliasing handles it)
     const id = String(rawId || "").trim();
     if (!id) return id;
 
-    // normalize -Q / _Q to .Q for dotted Annex ids
+    // Normalize -Q / _Q to .Q for dotted Annex ids.
     const dottedAnnexQ = /^A\.(\d+)\.(\d+)(?:\.(\d+))?[-_.]Q(\d+)$/i.exec(id);
     if (dottedAnnexQ) {
       const a = Number(dottedAnnexQ[1]);
@@ -65,11 +82,12 @@ export function getRecommendationForControl(
       return `${base}.Q${q}`;
     }
 
-    // normalize non-dotted Annex ids (e.g. A5.1.Q1 from stages 2/4/5)
+    // Normalize non-dotted Annex ids used by Stage 2/4/5 datasets.
     const flat2 = /^A(\d+)\.(\d+)\.[Qq](\d+)$/i.exec(id);
     if (flat2) return `A.${Number(flat2[1])}.${Number(flat2[2])}.Q${Number(flat2[3])}`;
 
-    // gateway IDs map to Q1 for that control (gateways use the same text as Q1)
+    // Normalize gateway ids (e.g. A5.19.GW1) to map to the corresponding question key.
+    // Gateways are usually the same text as Q1 for that control.
     const flat2Gw = /^A(\d+)\.(\d+)\.GW\d+$/i.exec(id);
     if (flat2Gw) return `A.${Number(flat2Gw[1])}.${Number(flat2Gw[2])}.Q1`;
 
@@ -104,7 +122,8 @@ export function getRecommendationForControl(
 
   // rules[controlId][complianceState] -> recommendation text
   const rules = {
-    // stage 1 recommendations (clauses 4-10) - only NOT_COMPLIANT and PARTIALLY_COMPLIANT are defined
+    // Stage 1 (Clauses 4–10): per-question and per-clause recommendations.
+    // Only NOT_COMPLIANT and PARTIALLY_COMPLIANT are defined here.
     // Clause 4: Context of the Organization
     "4.1": {
       NOT_COMPLIANT:
@@ -265,7 +284,12 @@ export function getRecommendationForControl(
         `{orgName} should make improvement more structured by keeping an improvement list, assigning owners/dates, and confirming improvements are completed and measurable.`,
     },
 
-    // stage 1 clause-level recommendations - grouped by CL4_CONTEXT, CL5_LEADERSHIP... etc.
+    
+    // MANDATORY CLAUSE RECOMMENDATIONS (ISO 27001 Clauses 4–10)
+    // Stage 1 questions are grouped to these IDs:
+    // CL4_CONTEXT, CL5_LEADERSHIP, CL6_PLANNING, CL7_SUPPORT,
+    // CL8_OPERATION, CL9_EVALUATION, CL10_IMPROVEMENT
+    
     CL4_CONTEXT: {
       NOT_COMPLIANT: `${orgName} should formally identify and document its business purpose, strategic direction, relevant internal and external issues, interested parties, and the scope of the ISMS to ensure information security requirements are clearly defined and aligned with organizational objectives, as required by ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should review and enhance its documentation of organizational context, interested parties, and ISMS scope to ensure completeness, consistency, and alignment with current business and security requirements, in line with ISO/IEC 27001.`,
@@ -947,8 +971,9 @@ export function getRecommendationForControl(
     },
 
     // ---------------------------------------------------------------------
-    // per-question rules (preferred) - keys like A.5.1.Q1
-    // incoming IDs like A5.1.Q1 or A7.1_Q2 get normalized before lookup
+    // Question-level rules (preferred): exact NO/PARTIAL text per question.
+    // Keys are canonicalized to: A.<annex>.<control>[.<subcontrol>].Q<n>
+    // Incoming ids like A5.1.Q1, A7.1_Q2, A.6.4-Q2 are normalized to match.
     // ---------------------------------------------------------------------
 
     // Annex A.5 (Organizational)
@@ -1138,7 +1163,8 @@ export function getRecommendationForControl(
         `{orgName} should improve review consistency and coverage across all key systems, track removals to closure, and report recurring issues.`,
     },
 
-    // applicability question - if no/partial, confirm whether suppliers are in scope
+    // Applicability-type: when answered NO/PARTIAL, give a short clarification action.
+    // (This question decides whether supplier-related controls apply.)
     "A.5.19.Q1": {
       NOT_COMPLIANT:
         `{orgName} should confirm whether any external suppliers provide IT services or can access information/systems. If YES, identify the suppliers and complete supplier security controls (A.5.19–A.5.22). If truly NO, document the rationale and review this periodically as suppliers change.`,
@@ -1146,7 +1172,8 @@ export function getRecommendationForControl(
         `{orgName} should complete an inventory of external suppliers with IT access, confirm which are in scope, and ensure supplier-related controls (A.5.19–A.5.22) are applied consistently to the in-scope suppliers.`,
     },
 
-    // stage 5 SDLC gateway - not an ISO Annex A id, just checks if dev is in scope
+    // Export/report gateway question used by Stage 5 (not an ISO Annex A id).
+    // Keep wording practical: confirm applicability and implement secure development controls if in scope.
     "SDLC_GATE_Q1": {
       NOT_COMPLIANT:
         `{orgName} should confirm whether it develops or significantly customizes software (including via third parties). If YES, treat secure development controls as in scope and implement the SDLC-related controls (A.8.25–A.8.29, A.8.31, A.8.33). If NO, document the rationale and review it when the organization’s delivery model changes.`,
@@ -1181,7 +1208,7 @@ export function getRecommendationForControl(
         `{orgName} should make reviews consistent with a schedule, retain evidence of reviews/decisions, and track follow-up actions to completion.`,
     },
 
-    // applicability question - if no/partial, confirm whether cloud services are in scope
+    // Applicability-type: when answered NO/PARTIAL, provide a short clarification action.
     "A.5.23.Q1": {
       NOT_COMPLIANT:
         `{orgName} should confirm whether any cloud services are used to store, process, or transmit information (including SaaS like email, file storage, CRM, accounting). If YES, complete cloud security controls (A.5.23 and related governance). If NO, document the rationale and review periodically as technology choices change.`,
@@ -1794,7 +1821,7 @@ export function getRecommendationForControl(
   const canonicalId = canonicalizeRuleKey(controlId);
   const lookupId = aliasMandatoryQuestionId(canonicalId);
 
-  // try exact match first, then fall back to the base control key
+  // Prefer exact match (including per-question keys), then fall back to base control keys.
   const baseId = String(lookupId || "")
     .trim()
     .replace(/\.Q\d+$/i, "");
@@ -1816,7 +1843,7 @@ export function getRecommendationForControl(
     return s;
   }
 
-  // fallback for controls without a specific rule
+  // Generic fallback so new/updated controls still get actionable guidance.
   if (complianceState === "NOT_COMPLIANT") {
     return interpolateOrgName(
       `Implement and document controls for ${controlId} to meet ISO/IEC 27001 requirements.`
