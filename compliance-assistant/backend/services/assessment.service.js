@@ -48,7 +48,9 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
     console.log("[analyze] answers type:", answersType);
   }
 
-  const scores = calculateAllScores(answers);
+  // Extract sector so the scoring engine can apply sector-specific weights.
+  const sector = String(smeProfile?.sector || "").trim() || null;
+  const scores = calculateAllScores(answers, sector);
   if (process.env.DEBUG_BACKEND) {
     console.log("[analyze] scores:", scores);
   }

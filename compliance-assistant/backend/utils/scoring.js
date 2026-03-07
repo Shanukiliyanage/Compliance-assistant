@@ -4,6 +4,7 @@ import { SCORE_RULES } from "../rules/scoreRules.js";
 import { getControlComplianceState } from "../rules/complianceRules.js";
 import { getMaturityLevelFromAverage } from "../rules/maturityRules.js";
 import { getNotApplicableControlIds } from "./applicability.js";
+import { getControlWeight } from "../rules/sectorWeights.js";
 
 // How many Annex A controls exist per stage (ISO 27001:2022).
 // Used so missing/hidden controls count as NOT COMPLIANT.
@@ -181,7 +182,8 @@ function buildBreakdownWithExpectedTotal(groupedStageAnswers, expectedTotal) {
   return base;
 }
 // Scores one stage and returns points + percent + breakdown.
-export function calculateStageScore(stageId, answers) {
+// Pass `sector` (e.g. "Healthcare") to apply sector-specific control weights.
+export function calculateStageScore(stageId, answers, sector = null) {
   const stageAnswers = getStageAnswers(stageId, answers);
   const notApplicableControlIds = getNotApplicableControlIds(stageId, stageAnswers);
   const grouped = groupStageAnswersByControl(stageId, stageAnswers);
@@ -199,33 +201,46 @@ export function calculateStageScore(stageId, answers) {
     ? buildBreakdownWithExpectedTotal(grouped, expectedTotal)
     : buildBreakdown(grouped);
 
-  // Turn compliance state into points.
-  let raw = 0;
-  for (const questionAnswers of Object.values(grouped)) {
+  // Turn compliance state into weighted points.
+  // When a sector is provided, each control's contribution is scaled by its
+  // sector-specific weight (see rules/sectorWeights.js).
+  // Missing/unanswered controls retain weight 1 and score 0.
+  const yesWeight = Number(SCORE_RULES.YES ?? 1);
+  let weightedRaw = 0;
+  let weightedMax = 0;
+
+  for (const [controlId, questionAnswers] of Object.entries(grouped)) {
     const state = getControlComplianceState(questionAnswers);
-    if (state === "FULLY_COMPLIANT") raw += SCORE_RULES.YES ?? 0;
-    else if (state === "PARTIALLY_COMPLIANT") raw += SCORE_RULES.PARTIAL ?? 0;
-    else raw += SCORE_RULES.NO ?? 0;
+    let score;
+    if (state === "FULLY_COMPLIANT") score = yesWeight;
+    else if (state === "PARTIALLY_COMPLIANT") score = Number(SCORE_RULES.PARTIAL ?? 0);
+    else score = Number(SCORE_RULES.NO ?? 0);
+
+    const w = getControlWeight(controlId, sector);
+    weightedRaw += score * w;
+    weightedMax += yesWeight * w;
   }
 
-  // Max score = (number of items) * (max points per item).
-  const yesWeight = Number(SCORE_RULES.YES ?? 1);
-  const maxScore = (expectedTotal ?? Object.keys(grouped).length) * yesWeight;
+  // Missing controls (expected but not in answers) count as NO with default weight 1.
+  const answeredCount = Object.keys(grouped).length;
+  const missingCount = expectedTotal ? Math.max(0, expectedTotal - answeredCount) : 0;
+  weightedMax += missingCount * yesWeight;
 
-  const averageScore = maxScore > 0 ? raw / maxScore : 0;
+  // Guard against divide-by-zero (e.g. fully N/A stage).
+  const averageScore = weightedMax > 0 ? weightedRaw / weightedMax : 0;
   const percent = Math.round(averageScore * 100);
 
   // Return a friendly shape for the frontend (plus older aliases).
   return {
-    totalScore: raw,
-    maxPossibleScore: maxScore,
+    totalScore: weightedRaw,
+    maxPossibleScore: weightedMax,
     averageScore,
     percent,
     breakdown,
     notApplicableCount: notApplicableControlIds.size,
     // Back-compat
-    raw,
-    max: maxScore,
+    raw: weightedRaw,
+    max: weightedMax,
   };
 }
 
@@ -259,14 +274,15 @@ export function calculateOverallScore(stageScores) {
 }
 
 // Main scoring entry point used by the API.
-export function calculateAllScores(answers) {
+// `sector` is optional (e.g. "Healthcare") — enables sector-weighted scoring.
+export function calculateAllScores(answers, sector = null) {
   const stageScores = {};
   const mandatoryCounts = { yes: 0, partial: 0, no: 0, unanswered: 0, total: 0 };
   const annexACounts = { yes: 0, partial: 0, no: 0, unanswered: 0, total: 0 };
 
   // Score each stage and accumulate combined breakdowns.
   ["stage1", "stage2", "stage3", "stage4", "stage5"].forEach((stageId) => {
-    stageScores[stageId] = calculateStageScore(stageId, answers);
+    stageScores[stageId] = calculateStageScore(stageId, answers, sector);
 
     const stageCounts = stageScores[stageId].breakdown?.counts;
     if (stageCounts) {
