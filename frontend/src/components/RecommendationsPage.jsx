@@ -782,7 +782,7 @@ export default function RecommendationsPage() {
           }
 
           const recommendationText = status?.recommendation ? String(status.recommendation) : "";
-          const priorityLabel = normalizePriority(status?.priority, status?.complianceState);
+          const priorityLabel = stageId === "stage1" ? "HIGH" : normalizePriority(status?.priority, status?.complianceState);
 
           body += `<section class="control">`;
           const isStage1Clause = stageId === "stage1" && /^CL\d+_/i.test(String(control.controlId));
@@ -880,14 +880,6 @@ export default function RecommendationsPage() {
       <div><strong>Assessment ID:</strong> ${escapeHtml(assessmentId)}</div>
       <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
-    </div>
-
-    <h2>Validation (How we checked it)</h2>
-    <div class="meta">
-      <ul>
-        <li><strong>ISO alignment:</strong> Questions are grouped by ISO clauses (Stage 1) and Annex A controls (Stages 2–5).</li>
-        <li><strong>Rule checks:</strong> Control compliance is computed consistently from YES/PARTIAL/NO answers, then scoring/recommendations use that output.</li>
-      </ul>
     </div>
     ${body}
     <script>
