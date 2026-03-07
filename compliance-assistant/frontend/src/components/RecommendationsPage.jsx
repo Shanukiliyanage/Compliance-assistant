@@ -652,7 +652,7 @@ export default function RecommendationsPage() {
           }
 
           const recommendationText = status?.recommendation ? String(status.recommendation) : "";
-          const priorityLabel = normalizePriority(status?.priority, status?.complianceState);
+          const priorityLabel = stageId === "stage1" ? "HIGH" : normalizePriority(status?.priority, status?.complianceState);
 
           body += `<section class="control">`;
           const isStage1Clause = stageId === "stage1" && /^CL\d+_/i.test(String(control.controlId));
@@ -691,7 +691,36 @@ export default function RecommendationsPage() {
                 : "";
 
               body += `<tr>`;
-              body += `<td>${escapeHtml(questionText)}</td>`;
+              const clauseOrdinals = (() => {
+                if (stageId !== "stage1") return null;
+                const items = getMandatoryItems(mandatoryData);
+                const grouped = {};
+                for (const mq of items) {
+                  const cl = String(mq?.clause ?? "").trim();
+                  const maj = getMajorClause(cl);
+                  if (!Number.isFinite(maj)) continue;
+                  if (!grouped[maj]) grouped[maj] = [];
+                  grouped[maj].push(cl);
+                }
+                const map = {};
+                for (const list of Object.values(grouped)) {
+                  list.forEach((cl, i) => { map[cl] = i + 1; });
+                }
+                return map;
+              })();
+              const qCellHtml = (() => {
+                const qText = String(questionText || "").trim();
+                if (stageId === "stage1") {
+                  const clauseId = extractClause(qidStr) || qidStr;
+                  const qn = clauseOrdinals?.[clauseId] ?? "";
+                  return `<strong>${escapeHtml(clauseId ? `Control ${clauseId}.` : "Control")}</strong><br/>${escapeHtml(qn ? `Q${qn} - ${qText}` : qText)}`;
+                }
+                const controlIdStr = String(control?.controlId || "").trim();
+                const qnMatch = /[._-]Q(\d+)$/i.exec(qidStr);
+                const qn = qnMatch ? Number(qnMatch[1]) : null;
+                return `<strong>${escapeHtml(controlIdStr ? `Control ${controlIdStr}.` : "Control")}</strong><br/>${escapeHtml(qn ? `Q${qn} - ${qText}` : qText)}`;
+              })();
+              body += `<td>${qCellHtml}</td>`;
               body += `<td><span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span></td>`;
               body += `<td>${escapeHtml(!applicable || isNotApplicableAnswer ? "N/A" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
               body += `</tr>`;
