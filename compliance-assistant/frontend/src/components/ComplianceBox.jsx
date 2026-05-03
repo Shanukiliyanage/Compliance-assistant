@@ -25,26 +25,26 @@ const ComplianceBox = ({ title, stats, counts, isMandatory = false }) => {
         {title}
       </div>
 
-      <div style={{ display: "grid", gap: "8px" }}>
+      <div style={{ display: "grid", gap: "10px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: "#6b7280", fontSize: "0.85rem" }}>Yes</span>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ fontWeight: 800, color: COLORS.yes }}>{stats.yes}%</span>
-            {counts && <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>({counts.yes}/{counts.total})</div>}
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Yes</span>
+          <div style={{ textAlign: "right", display: "flex", alignItems: "baseline", gap: "6px" }}>
+            {counts && <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 500 }}>{counts.yes}/{counts.total}</span>}
+            <span style={{ fontWeight: 800, color: COLORS.yes, fontSize: "1rem" }}>{stats.yes}%</span>
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: "#6b7280", fontSize: "0.85rem" }}>Partial</span>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ fontWeight: 800, color: COLORS.partial }}>{stats.partial}%</span>
-            {counts && <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>({counts.partial}/{counts.total})</div>}
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Partial</span>
+          <div style={{ textAlign: "right", display: "flex", alignItems: "baseline", gap: "6px" }}>
+            {counts && <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 500 }}>{counts.partial}/{counts.total}</span>}
+            <span style={{ fontWeight: 800, color: COLORS.partial, fontSize: "1rem" }}>{stats.partial}%</span>
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: "#6b7280", fontSize: "0.85rem" }}>No</span>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ fontWeight: 800, color: COLORS.no }}>{stats.no}%</span>
-            {counts && <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>({counts.no}/{counts.total})</div>}
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>No</span>
+          <div style={{ textAlign: "right", display: "flex", alignItems: "baseline", gap: "6px" }}>
+            {counts && <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 500 }}>{counts.no}/{counts.total}</span>}
+            <span style={{ fontWeight: 800, color: COLORS.no, fontSize: "1rem" }}>{stats.no}%</span>
           </div>
         </div>
         {!isMandatory && (
