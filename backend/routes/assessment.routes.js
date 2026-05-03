@@ -4,10 +4,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { readJsonArray, ensureJsonFile, writeJson } from "../utils/jsonStore.js";
 import {
-  generateRecommendations,
   buildControlStatusSummary,
   buildAnswersForExport,
 } from "../utils/recommendations.js";
+import { generateRecommendations } from "../services/recommendationEngine.js";
 import { calculateAllScores } from "../utils/scoring.js";
 import {
   isFirestoreEnabled,
@@ -151,9 +151,7 @@ function tryBackfillRecommendationsFromJson(result) {
   if (!answers || typeof answers !== "object") return result;
 
   const orgName = String(result?.smeProfile?.organizationName || match?.smeProfile?.organizationName || "").trim();
-  const recommendations = generateRecommendations(answers, {
-    orgName: orgName || "The organization",
-  });
+  const recommendations = generateRecommendations(answers);
 
   // If still empty, keep as-is.
   if (!Array.isArray(recommendations) || recommendations.length === 0) return result;
@@ -297,11 +295,7 @@ router.get("/report/:assessmentId", (req, res) => {
     });
 
     // Per-question recommendations (matches UI output), including gateway-controlled follow-ups.
-    const recommendations = generateRecommendations(exportAnswers, {
-      orgName: orgName || "The organization",
-      includeSuppressed: true,
-      includeGatewayQuestions: true,
-    });
+    const recommendations = generateRecommendations(exportAnswers);
 
     return {
       assessmentId,
