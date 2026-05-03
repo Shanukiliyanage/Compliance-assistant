@@ -42,7 +42,7 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
   const assessmentId = uuidv4();
   const timestamp = new Date().toISOString();
 
-  // THESIS-GRADE ANALYSIS
+  // ENGINE ANALYSIS
   const summary = getFullSummary(answers, smeProfile);
   summary.assessmentId = assessmentId;
   summary.userId = userId;

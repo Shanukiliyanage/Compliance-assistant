@@ -51,7 +51,11 @@ export function calculateScores(answers, smeProfile = {}) {
       stage5: { yes: 0, partial: 0, no: 0, na: 0, total: 34 },
     },
     details: {}, 
-    weightedScores: {}
+    weightedScores: {},
+    questionSummary: {
+      stage1: { yes: 0, partial: 0, no: 0, total: 0 },
+      annexA: { yes: 0, partial: 0, no: 0, na: 0, total: 0 }
+    }
   };
 
   console.log("\n==================================================");
@@ -76,6 +80,14 @@ export function calculateScores(answers, smeProfile = {}) {
       const score = getResponseScore(rawValue);
       console.log(`  Clause ${q.clause} (ID:${q.id}): Received='${rawValue}', Score=${score}`);
       s1Groups[clauseId].push(score);
+
+      // Question-level tracking
+      if (rawValue !== "missing") {
+          results.questionSummary.stage1.total++;
+          if (score >= 0.99) results.questionSummary.stage1.yes++;
+          else if (score > 0) results.questionSummary.stage1.partial++;
+          else results.questionSummary.stage1.no++;
+      }
     }
   });
 
@@ -108,6 +120,8 @@ export function calculateScores(answers, smeProfile = {}) {
         if (naControls.has(controlId)) {
             results.summary[stage.key].na++;
             results.details[controlId] = { score: 0, status: "na", weight: 0, type: "control" };
+            results.questionSummary.annexA.na++;
+            results.questionSummary.annexA.total++; // Treat the NA control as one item in the total count for the chart
             return;
         }
 
@@ -118,12 +132,20 @@ export function calculateScores(answers, smeProfile = {}) {
         
         results.summary[stage.key][status]++;
         results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry), type: "control" };
+
+        // Annex A Question-level tracking
+        results.questionSummary.annexA.total += scores.length;
+        scores.forEach(s => {
+            if (s >= 0.99) results.questionSummary.annexA.yes++;
+            else if (s > 0) results.questionSummary.annexA.partial++;
+            else results.questionSummary.annexA.no++;
+        });
     });
     
     logStageAudit(stage.label, results.summary[stage.key]);
   });
 
-  // Calculate Weighted Scores for thesis-grade overall compliance
+  // Calculate Weighted Scores for standardized overall compliance
   const calculateWeightedStageScore = (stageKey) => {
     const ids = stageKey === "stage1" ? ["4","5","6","7","8","9","10"] : Object.keys(results.details).filter(k => k.startsWith("A."));
     if (stageKey === "annexA") {

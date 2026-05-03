@@ -266,7 +266,7 @@ function Summary() {
   const annexCounts =
     scores?.complianceBreakdownAnnexA?.counts || scores?.complianceBreakdown?.counts || null;
 
-  const mandatorySummary = buildThreeWaySummary(mandatoryCounts, totals.stage1Total);
+  const mandatorySummary = buildThreeWaySummary(mandatoryCounts, mandatoryCounts?.total || totals.stage1Total);
   const annexNotApplicableTotal =
     Number(scores?.stageScores?.stage2?.notApplicableCount ?? 0) +
     Number(scores?.stageScores?.stage3?.notApplicableCount ?? 0) +
@@ -274,7 +274,7 @@ function Summary() {
     Number(scores?.stageScores?.stage5?.notApplicableCount ?? 0);
   const annexSummary = buildAnnexSummaryWithNotApplicable(
     annexCounts,
-    totals.annexATotal,
+    annexCounts?.total || totals.annexATotal,
     annexNotApplicableTotal
   );
 
@@ -436,7 +436,7 @@ function Summary() {
               Overall ISO 27001 Mandatory Clauses Compliance
             </h2>
             <p style={{ color: "#6b7280", marginBottom: "18px" }}>
-              Based on {totals.stage1Total} mandatory clauses
+              Based on {mandatorySummary.total} total questions
             </p>
 
             <div
@@ -495,7 +495,7 @@ function Summary() {
               Overall ISO 27001 Annex A Compliance
             </h2>
             <p style={{ color: "#6b7280", marginBottom: "18px" }}>
-              Based on {totals.annexATotal} total controls
+              Based on {annexSummary.total} total questions
             </p>
             <p style={{ color: "#0F172A", fontWeight: 700, marginBottom: "18px" }}>
               Maturity: {annexAMaturityLevel}

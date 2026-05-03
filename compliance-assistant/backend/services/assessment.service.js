@@ -66,7 +66,7 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
     });
   }
 
-  // Calculate thesis-grade compliance results
+  // Calculate standardized compliance results
   const complianceResults = calculateComplianceResults(controls, sector);
   if (process.env.DEBUG_BACKEND) {
     console.log("[analyze] complianceResults:", complianceResults);

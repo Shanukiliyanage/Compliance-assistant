@@ -142,7 +142,6 @@ const SMEProfilePage = () => {
             <option>Banking / Finance / Insurance</option>
             <option>IT / Software Development</option>
             <option>Healthcare</option>
-            <option>Education</option>
             <option>Manufacturing</option>
             <option>Retail / E-commerce</option>
             <option>Other</option>
