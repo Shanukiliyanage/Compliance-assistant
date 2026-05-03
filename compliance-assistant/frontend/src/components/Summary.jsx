@@ -147,10 +147,12 @@ function Summary() {
         </div>
 
         {/* PIE CHARTS */}
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
-          <PieChartCard title="Mandatory Controls Distribution" data={assessment.charts?.mandatory} showNA={false} />
-          <PieChartCard title="Annex A Controls Distribution" data={assessment.charts?.annexA} showNA={true} />
-        </div>
+        {assessment.charts && (
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
+            <PieChartCard title="Mandatory Controls Distribution" data={assessment.charts.mandatory} showNA={false} />
+            <PieChartCard title="Annex A Controls Distribution" data={assessment.charts.annexA} showNA={true} />
+          </div>
+        )}
 
         {/* BOTTOM ACTIONS */}
         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginTop: "20px" }}>

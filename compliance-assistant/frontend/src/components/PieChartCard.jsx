@@ -9,11 +9,19 @@ const COLORS = {
 };
 
 const PieChartCard = ({ title, data, showNA = false }) => {
+  // Defensive check for missing data to prevent runtime crash
+  const stats = {
+    yes: data?.yes ?? 0,
+    partial: data?.partial ?? 0,
+    no: data?.no ?? 0,
+    na: data?.na ?? 0
+  };
+
   const pieData = {
     labels: showNA ? ["Yes", "Partial", "No", "N/A"] : ["Yes", "Partial", "No"],
     datasets: [
       {
-        data: showNA ? [data.yes, data.partial, data.no, data.na] : [data.yes, data.partial, data.no],
+        data: showNA ? [stats.yes, stats.partial, stats.no, stats.na] : [stats.yes, stats.partial, stats.no],
         backgroundColor: showNA ? [COLORS.yes, COLORS.partial, COLORS.no, COLORS.na] : [COLORS.yes, COLORS.partial, COLORS.no],
         borderWidth: 0,
       },
