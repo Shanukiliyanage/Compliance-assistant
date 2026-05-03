@@ -30,6 +30,9 @@ function Summary() {
 
       try {
         let result;
+        if (assessmentId === "live") {
+          const auth = getAuth();
+          const user = auth.currentUser;
           const stage1 = JSON.parse(localStorage.getItem("stage1") || "{}");
           console.log("DEBUG: Raw Stage 1 Answers from LocalStorage:", stage1);
           console.log("DEBUG: Keys present in Stage 1:", Object.keys(stage1));
