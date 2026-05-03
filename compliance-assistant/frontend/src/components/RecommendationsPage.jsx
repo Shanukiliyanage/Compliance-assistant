@@ -303,19 +303,29 @@ function getStageIdFromRecommendation(rec) {
   if (!rec || typeof rec !== "object") return "";
 
   const raw = rec.stageId || rec.stage || rec.stageKey || rec.stageName;
-  if (!raw) return "";
+  if (raw) {
+    const s = String(raw).trim().toLowerCase();
 
-  const s = String(raw).trim().toLowerCase();
+    // Common variants
+    if (s === "stage1" || s === "1" || s.includes("mandatory")) return "stage1";
+    if (s === "stage2" || s === "2" || s.includes("organiz")) return "stage2";
+    if (s === "stage3" || s === "3" || s.includes("people")) return "stage3";
+    if (s === "stage4" || s === "4" || s.includes("physical")) return "stage4";
+    if (s === "stage5" || s === "5" || s.includes("technolog")) return "stage5";
 
-  // Common variants
-  if (s === "stage1" || s === "1" || s.includes("mandatory")) return "stage1";
-  if (s === "stage2" || s === "2" || s.includes("organiz")) return "stage2";
-  if (s === "stage3" || s === "3" || s.includes("people")) return "stage3";
-  if (s === "stage4" || s === "4" || s.includes("physical")) return "stage4";
-  if (s === "stage5" || s === "5" || s.includes("technolog")) return "stage5";
+    // If backend already gave stageId but in different case
+    if (s.startsWith("stage")) return s;
+  }
 
-  // If backend already gave stageId but in different case
-  if (s.startsWith("stage")) return s;
+  // Fallback to inferring from controlId / id
+  const cid = String(rec.controlId || rec.id || "").trim();
+  if (!cid) return "";
+  
+  if (/^\d+(\.\d+)*$/.test(cid) || cid.startsWith("CL")) return "stage1";
+  if (cid.startsWith("A5.")) return "stage2";
+  if (cid.startsWith("A6.")) return "stage3";
+  if (cid.startsWith("A7.")) return "stage4";
+  if (cid.startsWith("A8.")) return "stage5";
 
   return "";
 }
@@ -338,12 +348,15 @@ function normalizeRecommendation(rec, textIndex) {
   }
 
   if (typeof rec.recommendation === "string") {
-    const complianceState = String(rec.complianceState || "");
-    const priority = normalizePriority(rec.priority, complianceState);
+    let complianceState = String(rec.complianceState || "");
+    if (!complianceState && rec.score !== undefined) {
+      complianceState = rec.score > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
+    }
+    const priority = normalizePriority(rec.priority || rec.riskLevel, complianceState);
     const stageId = getStageIdFromRecommendation(rec);
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
 
-    const controlId = rec.controlId ? String(rec.controlId) : "";
+    const controlId = (rec.controlId || rec.id) ? String(rec.controlId || rec.id) : "";
     // Skip stale/malformed recommendations with no real control identifier.
     if (!controlId || controlId === "undefined") return null;
     const questionId = rec.questionId ? String(rec.questionId) : "";
@@ -433,11 +446,11 @@ function normalizeRecommendation(rec, textIndex) {
         };
       }
 
-      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3".
-      const n = /^(\d+)\.(\d+)$/.exec(idStr);
+      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3" or just "4", "5".
+      const n = /^(\d+)(?:\.(\d+))?$/.exec(idStr);
       if (n) {
         const majorClause = n[1];
-        const displayQn = clauseOrdinalMap[idStr] ?? Number(n[2]);
+        const displayQn = n[2] != null ? (clauseOrdinalMap[idStr] ?? Number(n[2])) : null;
         const qText = textIndex?.get ? String(textIndex.get(`${stageId}::${idStr}`) || "") : "";
         return {
           stageId,
@@ -446,7 +459,7 @@ function normalizeRecommendation(rec, textIndex) {
           complianceState,
           priority,
           title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
-          subtitle: qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`,
+          subtitle: displayQn != null ? (qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`) : qText,
           description: rec.recommendation,
           stageLabel,
         };
@@ -930,7 +943,7 @@ export default function RecommendationsPage() {
 
   const normalizedRecommendations = useMemo(() => {
     // Convert raw backend recommendations into a stable UI shape.
-    const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
+    const recs = Array.isArray(assessment?.allRecommendations) ? assessment.allRecommendations : (Array.isArray(assessment?.recommendations) ? assessment.recommendations : []);
     return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
 
