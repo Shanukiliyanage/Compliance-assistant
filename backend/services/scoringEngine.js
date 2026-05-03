@@ -62,10 +62,20 @@ export function calculateScores(answers, smeProfile = {}) {
   const stage1Answers = answers.stage1 || {};
   const s1Groups = { "4": [], "5": [], "6": [], "7": [], "8": [], "9": [], "10": [] };
   
+  console.log("--- STAGE 1 DATA LOOKUP AUDIT ---");
   mandatoryData.forEach(q => {
     const clauseId = String(q.clause || "").split(".")[0];
     if (s1Groups[clauseId]) {
-      s1Groups[clauseId].push(getResponseScore(stage1Answers[q.clause] || stage1Answers[q.id]));
+      // Robust lookup: try clause string, q.id number, and q.id string
+      const rawValue = stage1Answers[String(q.clause).trim()] || 
+                       stage1Answers[q.clause] || 
+                       stage1Answers[String(q.id)] || 
+                       stage1Answers[q.id] || 
+                       "missing";
+                       
+      const score = getResponseScore(rawValue);
+      console.log(`  Clause ${q.clause} (ID:${q.id}): Received='${rawValue}', Score=${score}`);
+      s1Groups[clauseId].push(score);
     }
   });
 
@@ -74,6 +84,7 @@ export function calculateScores(answers, smeProfile = {}) {
     const status = classifyStatus(avg);
     results.summary.stage1[status]++;
     results.details[clauseId] = { score: avg, status, weight: getControlWeight(clauseId, industry), type: "clause" };
+    console.log(`  -> Clause ${clauseId} Final Status: ${status.toUpperCase()} (Avg: ${avg.toFixed(2)})`);
   });
   
   logStageAudit("Mandatory Clauses", results.summary.stage1);

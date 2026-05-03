@@ -205,6 +205,12 @@ function Summary() {
                     no: data.noPercent,
                     na: data.naPercent
                   }} 
+                  counts={{
+                    yes: data.yesCount,
+                    partial: data.partialCount,
+                    no: data.noCount,
+                    total: stage.key === "stage1" ? 7 : (data.yesCount + data.partialCount + data.noCount + data.naCount)
+                  }}
                   isMandatory={stage.key === "stage1"} 
                 />
               );
