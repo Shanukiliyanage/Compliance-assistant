@@ -10,9 +10,6 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase";
 
-// Ensure all necessary imports and functionality are in place
-import "../styles/main.css";
-
 export default function AssessmentIntro() {
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);

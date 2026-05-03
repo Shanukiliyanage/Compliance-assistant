@@ -8,7 +8,7 @@ import Stage2Organizational from "./components/Stage2Organizational.jsx";
 import Stage3People from "./components/Stage3People.jsx";
 import Stage4Physical from "./components/Stage4Physical.jsx";
 import Stage5Technological from "./components/Stage5Technological.jsx";
-import Summary from "./components/Summary.jsx"; // Ensure correct file extension is used
+import Summary from "./components/Summary.jsx";
 import RecommendationsPage from "./components/RecommendationsPage.jsx";
 
 function App() {

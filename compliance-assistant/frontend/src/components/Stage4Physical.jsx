@@ -1,39 +1,9 @@
-  // Enhanced: also return NA/Implicit No status for each question
-  const isQuestionVisible = (q, nextAnswers) => {
-    const cond = q?.showIf;
-    if (!cond) return true;
-    if (!(cond.questionId in nextAnswers)) return false;
-    return nextAnswers?.[cond.questionId] === cond.equals;
-  };
-
-  const getQuestionStatus = (q, nextAnswers) => {
-    if (!isQuestionVisible(q, nextAnswers)) {
-      if (!(q?.showIf?.questionId in nextAnswers)) return { isNA: true, isImplicitNo: false };
-      return { isNA: false, isImplicitNo: true };
-    }
-    return { isNA: false, isImplicitNo: false };
-  };
-
-  // When saving/submitting, build a controls array with isNA/isImplicitNo for backend
-  const buildControlsForBackend = () => {
-    return controls.flatMap((control) =>
-      (control.questions || []).map((q) => {
-        const { isNA, isImplicitNo } = getQuestionStatus(q, answers);
-        return {
-          id: q.id,
-          status: answers[q.id],
-          isApplicable: !isNA,
-          isImplicitNo,
-        };
-      })
-    );
-  };
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import physicalData from "../data/physical.json";
 
 // Stage 4 (Physical) questionnaire.
-// Normalizes the JSON shape, persists answers in localStorage, and validates completion.
+// Normalizes the JSON shape, and validates completion.
 function Stage4Physical() {
   const navigate = useNavigate();
 
@@ -141,7 +111,7 @@ function Stage4Physical() {
       return;
     }
 
-    // ✅ Stage 5
+    // Stage 5
     navigate("/assessment/technological");
   };
 

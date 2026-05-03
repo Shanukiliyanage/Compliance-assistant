@@ -365,87 +365,8 @@ function QuestionsPage() {
                     );
                   })()}
 
-                  {q.id === "4.2" && q.explanation && (
-                    <p
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#6b7280",
-                        marginBottom: "12px",
-                        lineHeight: "1.55",
-                        background: "#f3f4f6",
-                        borderLeft: "3px solid #cbd5e1",
-                        borderRadius: "4px",
-                        padding: "8px 10px",
-                      }}
-                    >
-                      {q.explanation}
-                    </p>
-                  )}
-
-                  {q.id === "4.3" && q.explanation && (
-                    <p
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#6b7280",
-                        marginBottom: "12px",
-                        lineHeight: "1.55",
-                        background: "#f3f4f6",
-                        borderLeft: "3px solid #cbd5e1",
-                        borderRadius: "4px",
-                        padding: "8px 10px",
-                      }}
-                    >
-                      {q.explanation}
-                    </p>
-                  )}
-
-                  {q.id === "6.1" && q.explanation && (
-                    <p
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#6b7280",
-                        marginBottom: "12px",
-                        lineHeight: "1.55",
-                        background: "#f3f4f6",
-                        borderLeft: "3px solid #cbd5e1",
-                        borderRadius: "4px",
-                        padding: "8px 10px",
-                      }}
-                    >
-                      {q.explanation}
-                    </p>
-                  )}
-
-                  {q.id === "6.2" && q.explanation && (
-                    <p
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#6b7280",
-                        marginBottom: "12px",
-                        lineHeight: "1.55",
-                        background: "#f3f4f6",
-                        borderLeft: "3px solid #cbd5e1",
-                        borderRadius: "4px",
-                        padding: "8px 10px",
-                      }}
-                    >
-                      {q.explanation}
-                    </p>
-                  )}
-
-                  {q.id === "9.1" && q.explanation && (
-                    <p
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#6b7280",
-                        marginBottom: "12px",
-                        lineHeight: "1.55",
-                        background: "#f3f4f6",
-                        borderLeft: "3px solid #cbd5e1",
-                        borderRadius: "4px",
-                        padding: "8px 10px",
-                      }}
-                    >
+                  {q.explanation && (
+                    <p style={{ fontSize: "0.85rem", marginBottom: "14px", color: "#6b7280", lineHeight: "1.4" }}>
                       {q.explanation}
                     </p>
                   )}

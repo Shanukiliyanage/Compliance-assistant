@@ -1,33 +1,3 @@
-  // Enhanced: also return NA/Implicit No status for each question
-  const isQuestionVisible = (q, nextAnswers) => {
-    const cond = q?.showIf;
-    if (!cond) return true;
-    if (!(cond.questionId in nextAnswers)) return false;
-    return nextAnswers?.[cond.questionId] === cond.equals;
-  };
-
-  const getQuestionStatus = (q, nextAnswers) => {
-    if (!isQuestionVisible(q, nextAnswers)) {
-      if (!(q?.showIf?.questionId in nextAnswers)) return { isNA: true, isImplicitNo: false };
-      return { isNA: false, isImplicitNo: true };
-    }
-    return { isNA: false, isImplicitNo: false };
-  };
-
-  // When saving/submitting, build a controls array with isNA/isImplicitNo for backend
-  const buildControlsForBackend = () => {
-    return controls.flatMap((control) =>
-      (control.questions || []).map((q) => {
-        const { isNA, isImplicitNo } = getQuestionStatus(q, answers);
-        return {
-          id: q.id,
-          status: answers[q.id],
-          isApplicable: !isNA,
-          isImplicitNo,
-        };
-      })
-    );
-  };
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import peopleData from "../data/people.json";
@@ -156,7 +126,7 @@ function Stage3People() {
 
   const handleBack = () => navigate("/assessment/organizational");
 
-  // ✅ Display title logic:
+  // Display title logic:
   // 1) If it says "Control 1", replace with your topic title using index
   // 2) If it contains "A.6.x", strip it
   const getDisplayTitle = (control, idx) => {

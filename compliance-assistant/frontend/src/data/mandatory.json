@@ -1,11 +1,5 @@
 [
   {
-    "id": 15,
-    "clause": "4.1",
-    "question": "Have you identified internal and external issues relevant to your ISMS?",
-    "explanation": "e.g., internal (culture, values, knowledge) and external (legal, technological, market, social) factors that affect your security goals."
-  },
-  {
     "id": 1,
     "clause": "4.2",
     "question": "Have you identified key stakeholders and their information-security expectations?",

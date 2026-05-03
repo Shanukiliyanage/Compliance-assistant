@@ -4,16 +4,16 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { readJsonArray, ensureJsonFile, writeJson } from "../utils/jsonStore.js";
 import {
-  generateRecommendations,
   buildControlStatusSummary,
   buildAnswersForExport,
 } from "../utils/recommendations.js";
+import { generateRecommendations } from "../services/recommendationEngine.js";
 import { calculateAllScores } from "../utils/scoring.js";
 import {
   isFirestoreEnabled,
   getAssessmentResultFromFirestore,
 } from "../utils/firestore.js";
-import { calculateComplianceResults } from "../utils/complianceCalculation.js";
+import { getFullSummary } from "../services/summaryEngine.js";
 
 // Assessment API routes.
 // Note: results can be stored in JSON (default) or Firestore (optional), and older
@@ -124,8 +124,9 @@ function hasOutdatedTechnologicalControlTemplates(result) {
   });
 }
 
-// Always regenerate recommendations from latest answers to avoid stale data
 function tryBackfillRecommendationsFromJson(result) {
+  // FORCE REGENERATION: We have migrated to a Clause-level recommendation engine.
+  // We must regenerate to ensure old question-level "ghost" recs are removed.
   if (!result) return result;
 
   // Prefer answers embedded in the stored result (Firestore may include it).
@@ -142,21 +143,19 @@ function tryBackfillRecommendationsFromJson(result) {
   if (!answers || typeof answers !== "object") return result;
 
   const orgName = String(result?.smeProfile?.organizationName || match?.smeProfile?.organizationName || "").trim();
-  const recommendations = generateRecommendations(answers, {
-    orgName: orgName || "The organization",
-  });
+  const recommendations = generateRecommendations(answers);
+
+  // If still empty, keep as-is.
+  if (!Array.isArray(recommendations) || recommendations.length === 0) return result;
 
   return { ...result, recommendations };
 }
 
-// Always regenerate scores from latest answers to avoid stale data
 function tryBackfillScoresFromJson(result) {
+  // If scores are missing, recompute them from stored answers using the new Thesis Engine.
   if (!result) return result;
 
-  // Prefer answers embedded in the result
   const embeddedAnswers = result.answers && typeof result.answers === "object" ? result.answers : null;
-
-  // Otherwise look up answers by assessmentId
   const assessmentId = result.assessmentId;
   if (!assessmentId) return result;
 
@@ -166,10 +165,10 @@ function tryBackfillScoresFromJson(result) {
   const answers = embeddedAnswers || (match && match.answers);
   if (!answers || typeof answers !== "object") return result;
 
-  const nextScores = calculateAllScores(answers);
-  if (!nextScores || typeof nextScores !== "object") return result;
-
-  return { ...result, scores: nextScores };
+  // Use the new summary engine to get a standardized thesis-grade payload
+  const summary = getFullSummary(answers, result.smeProfile || match?.smeProfile || {});
+  
+  return { ...result, ...summary };
 }
 
 // POST /api/assessment/analyze
@@ -259,9 +258,7 @@ router.get("/report/:assessmentId", (req, res) => {
     const results = readJsonArray(resultsPath);
     const assessments = readJsonArray(assessmentsPath);
 
-    let result = results.find((r) => r && r.assessmentId === assessmentId) || null;
-    result = tryBackfillRecommendationsFromJson(result);
-    
+    const result = results.find((r) => r && r.assessmentId === assessmentId) || null;
     const assessment = assessments.find((a) => a && a.assessmentId === assessmentId) || null;
     const answers = assessment?.answers && typeof assessment.answers === "object" ? assessment.answers : null;
 
@@ -278,69 +275,27 @@ router.get("/report/:assessmentId", (req, res) => {
       result?.smeProfile?.organizationName || assessment?.smeProfile?.organizationName || ""
     ).trim();
 
-    // --- Strict evaluatedControls array ---
-    // Use buildControlStatusSummary to get all controls, then map to strict shape
-    const controlStatuses = buildControlStatusSummary(resolvedAnswers, {
+    // Export-specific: use the stored answers object as-is.
+    // Gateway/showIf rules are handled via applicability logic so suppressed questions/controls
+    // appear as N/A (and do not produce irrelevant recommendations).
+    const exportAnswers = buildAnswersForExport(resolvedAnswers);
+
+    const controlStatuses = buildControlStatusSummary(exportAnswers, {
       orgName: orgName || "The organization",
       includeSuppressed: true,
       includeGatewayQuestions: true,
     });
 
-    // Map to strict evaluatedControls array, log unexpected complianceState
-    const evaluatedControls = controlStatuses.map(ctrl => {
-      let status;
-      if (ctrl.complianceState === "FULLY_COMPLIANT") status = "YES";
-      else if (ctrl.complianceState === "PARTIALLY_COMPLIANT") status = "PARTIAL";
-      else if (ctrl.complianceState === "NOT_COMPLIANT") status = "NO";
-      else if (ctrl.complianceState === "NOT_APPLICABLE") status = "N/A";
-      else {
-        status = "NO";
-        console.warn("[evaluatedControls] Unexpected complianceState:", ctrl.complianceState, "for controlId:", ctrl.controlId);
-      }
-      return {
-        id: ctrl.controlId,
-        status,
-        isApplicable: ctrl.complianceState !== "NOT_APPLICABLE"
-      };
-    });
-
-    // Recommendations only for NO or PARTIAL, now include w_j, score_j, priority
-    const recommendations = (result.recommendations || []).map(r => ({
-      controlId: r.controlId,
-      stageId: r.stageId,
-      complianceState: r.complianceState,
-      w_j: r.w_j,
-      score_j: r.score_j,
-      priority: r.priority,
-      recommendation: r.recommendation
-    }));
-
-    // Calculate distributions using complianceCalculation.js logic
-    const mandatoryControls = evaluatedControls.filter(c => /^\d+\./.test(c.id));
-    const annexAControls = evaluatedControls.filter(c => /^A\./i.test(c.id));
-    const sector = result.smeProfile?.sector || assessment?.smeProfile?.sector || null;
-    const mandatoryResults = calculateComplianceResults(mandatoryControls, sector);
-    const annexAResults = calculateComplianceResults(annexAControls, sector);
-    const mandatory_distribution = mandatoryResults.distribution;
-    const annexA_distribution = annexAResults.distribution;
-    const mandatory_pie = mandatoryResults.piePercentages;
-    const annexA_pie = annexAResults.piePercentages;
-
-    // Control scores for traceability
-    const control_scores = evaluatedControls.map(c => ({
-      id: c.id,
-      status: c.status,
-      isApplicable: c.isApplicable
-    }));
+    // Per-question recommendations (matches UI output), including gateway-controlled follow-ups.
+    const recommendations = generateRecommendations(exportAnswers);
 
     return {
-      mandatory_distribution,
-      annexA_distribution,
-      mandatory_pie,
-      annexA_pie,
-      control_scores,
+      assessmentId,
+      smeProfile: result.smeProfile || assessment?.smeProfile || {},
+      scores: result.scores || {},
+      answers: exportAnswers,
+      controlStatuses,
       recommendations,
-      sector,
     };
   };
 
@@ -354,13 +309,12 @@ router.get("/report/:assessmentId", (req, res) => {
   getAssessmentResultFromFirestore(assessmentId)
     .then((doc) => {
       if (doc) {
-        const hydratedDoc = tryBackfillRecommendationsFromJson(doc);
         const fromJson = readFromJson();
         const payload = buildPayload({
-          result: hydratedDoc,
+          result: doc,
           assessment: fromJson.assessment,
           answers:
-            (hydratedDoc.answers && typeof hydratedDoc.answers === "object" ? hydratedDoc.answers : null) ||
+            (doc.answers && typeof doc.answers === "object" ? doc.answers : null) ||
             fromJson.answers,
         });
         if (!payload) return res.status(404).json({ error: "Assessment not found" });
