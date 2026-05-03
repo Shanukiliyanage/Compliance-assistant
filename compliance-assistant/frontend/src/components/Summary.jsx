@@ -50,6 +50,7 @@ function Summary() {
         }
 
         if (!cancelled) {
+          console.log("Full Assessment Payload Received:", result);
           setAssessment(result);
         }
       } catch (e) {
@@ -60,6 +61,49 @@ function Summary() {
     })();
     return () => { cancelled = true; };
   }, [assessmentId]);
+
+  /**
+   * MASTER PERCENTAGE ENGINE
+   * Every percentage in the system must go through this helper.
+   * Returns both counts and toFixed(1) percentages.
+   */
+  const calculateStagePercentages = (stageKey) => {
+    // 1. Locate the stage data in the payload (robust for legacy structures)
+    const s = assessment.scores?.[stageKey] || 
+              assessment.scores?.stageScores?.[stageKey] || 
+              assessment.stageScores?.[stageKey] || 
+              {};
+    
+    // 2. Extract raw counts safely
+    const yesCount = Number(s.yes ?? s.breakdown?.counts?.yes ?? 0);
+    const partialCount = Number(s.partial ?? s.breakdown?.counts?.partial ?? 0);
+    const noCount = Number(s.no ?? s.breakdown?.counts?.no ?? 0);
+    const naCount = Number(s.na ?? s.notApplicableCount ?? 0);
+
+    // 3. Determine the denominator (T)
+    // For Stage 1, it's always 7. For others, it's the sum of counts.
+    let T = (stageKey === "stage1") ? 7 : (yesCount + partialCount + noCount + naCount);
+    
+    // Safety: prevent division by zero or negative
+    if (T <= 0) T = 1;
+
+    // 4. Calculate percentages
+    const getPct = (val) => ((val / T) * 100).toFixed(1);
+
+    const result = {
+      yesCount,
+      partialCount,
+      noCount,
+      naCount,
+      yesPercent: getPct(yesCount),
+      partialPercent: getPct(partialCount),
+      noPercent: getPct(noCount),
+      naPercent: getPct(naCount)
+    };
+
+    console.log(`[Calc] ${stageKey}: Y=${yesCount}, P=${partialCount}, N=${noCount}, NA=${naCount} | T=${T} | Y%=${result.yesPercent}`);
+    return result;
+  };
 
   if (loading) {
     return (
@@ -80,33 +124,6 @@ function Summary() {
     );
   }
 
-  // --- DATA EXTRACTION ---
-  const extractStageStats = (stageKey) => {
-    // Check multiple locations for scores (handles both current and legacy structures)
-    const s = assessment.scores?.[stageKey] || 
-              assessment.scores?.stageScores?.[stageKey] || 
-              assessment.stageScores?.[stageKey] || 
-              {};
-    
-    const yesCount = Number(s?.yes ?? s?.breakdown?.counts?.yes ?? 0);
-    const partialCount = Number(s?.partial ?? s?.breakdown?.counts?.partial ?? 0);
-    const noCount = Number(s?.no ?? s?.breakdown?.counts?.no ?? 0);
-    const naCount = Number(s?.na ?? s?.notApplicableCount ?? 0);
-    const T = Number(s?.total ?? 1) || (yesCount + partialCount + noCount + naCount) || 1;
-    
-    const getPct = (val) => ((val / T) * 100).toFixed(1);
-
-    return {
-      counts: { yes: yesCount, partial: partialCount, no: noCount, na: naCount },
-      percentages: {
-        yes: getPct(yesCount),
-        partial: getPct(partialCount),
-        no: getPct(noCount),
-        na: getPct(naCount)
-      }
-    };
-  };
-
   const stages = [
     { key: "stage1", title: "Mandatory Clauses" },
     { key: "stage2", title: "Organizational Controls" },
@@ -114,6 +131,36 @@ function Summary() {
     { key: "stage4", title: "Physical Controls" },
     { key: "stage5", title: "Technological Controls" },
   ];
+
+  // Map all data through the engine
+  const stageData = {
+    stage1: calculateStagePercentages("stage1"),
+    stage2: calculateStagePercentages("stage2"),
+    stage3: calculateStagePercentages("stage3"),
+    stage4: calculateStagePercentages("stage4"),
+    stage5: calculateStagePercentages("stage5"),
+  };
+
+  // Pie Chart Data - Derived from the same counts
+  const mandatoryChart = {
+    yes: stageData.stage1.yesPercent,
+    partial: stageData.stage1.partialPercent,
+    no: stageData.stage1.noPercent
+  };
+
+  // Annex A chart needs to sum up counts then convert to %
+  const ay = stageData.stage2.yesCount + stageData.stage3.yesCount + stageData.stage4.yesCount + stageData.stage5.yesCount;
+  const ap = stageData.stage2.partialCount + stageData.stage3.partialCount + stageData.stage4.partialCount + stageData.stage5.partialCount;
+  const an = stageData.stage2.noCount + stageData.stage3.noCount + stageData.stage4.noCount + stageData.stage5.noCount;
+  const ana = stageData.stage2.naCount + stageData.stage3.naCount + stageData.stage4.naCount + stageData.stage5.naCount;
+  const at = ay + ap + an + ana || 1;
+
+  const annexAChart = {
+    yes: ((ay / at) * 100).toFixed(1),
+    partial: ((ap / at) * 100).toFixed(1),
+    no: ((an / at) * 100).toFixed(1),
+    na: ((ana / at) * 100).toFixed(1)
+  };
 
   return (
     <div style={{ padding: "40px 20px", width: "100%", display: "flex", justifyContent: "center", backgroundColor: "#07090f", minHeight: "100vh" }}>
@@ -147,12 +194,17 @@ function Summary() {
           <h2 style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#f1f5f9", fontWeight: 700 }}>Stage Compliance</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
             {stages.map((stage) => {
-              const data = extractStageStats(stage.key);
+              const data = stageData[stage.key];
               return (
                 <ComplianceBox 
                   key={stage.key} 
                   title={stage.title} 
-                  stats={data.percentages} 
+                  stats={{
+                    yes: data.yesPercent,
+                    partial: data.partialPercent,
+                    no: data.noPercent,
+                    na: data.naPercent
+                  }} 
                   isMandatory={stage.key === "stage1"} 
                 />
               );
@@ -161,29 +213,10 @@ function Summary() {
         </div>
 
         {/* PIE CHARTS */}
-        {assessment.charts && (
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
-            <PieChartCard title="Mandatory Controls Distribution" data={assessment.charts.mandatory} showNA={false} />
-            <PieChartCard title="Annex A Controls Distribution" data={assessment.charts.annexA} showNA={true} />
-          </div>
-        )}
-
-        {/* FALLBACK CHARTS (if backend charts missing) */}
-        {!assessment.charts && (
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
-            <PieChartCard title="Mandatory Controls Distribution" data={extractStageStats("stage1").counts} showNA={false} />
-            <PieChartCard 
-              title="Annex A Controls Distribution" 
-              data={{
-                yes: extractStageStats("stage2").counts.yes + extractStageStats("stage3").counts.yes + extractStageStats("stage4").counts.yes + extractStageStats("stage5").counts.yes,
-                partial: extractStageStats("stage2").counts.partial + extractStageStats("stage3").counts.partial + extractStageStats("stage4").counts.partial + extractStageStats("stage5").counts.partial,
-                no: extractStageStats("stage2").counts.no + extractStageStats("stage3").counts.no + extractStageStats("stage4").counts.no + extractStageStats("stage5").counts.no,
-                na: extractStageStats("stage2").counts.na + extractStageStats("stage3").counts.na + extractStageStats("stage4").counts.na + extractStageStats("stage5").counts.na,
-              }} 
-              showNA={true} 
-            />
-          </div>
-        )}
+        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
+          <PieChartCard title="Mandatory Controls Distribution" data={mandatoryChart} showNA={false} />
+          <PieChartCard title="Annex A Controls Distribution" data={annexAChart} showNA={true} />
+        </div>
 
         {/* BOTTOM ACTIONS */}
         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginTop: "20px" }}>
