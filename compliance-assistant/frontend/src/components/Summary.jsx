@@ -219,33 +219,6 @@ function Summary() {
                     }}
                     isMandatory={stage.key === "stage1"} 
                   />
-                  
-                  {/* Detailed Clause Audit for Mandatory Section */}
-                  {stage.key === "stage1" && (
-                    <div style={{ 
-                      padding: "12px", 
-                      background: "rgba(255,255,255,0.03)", 
-                      borderRadius: "12px", 
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      fontSize: "0.75rem",
-                      color: "#94a3b8"
-                    }}>
-                      <div style={{ fontWeight: 700, marginBottom: "8px", color: "#f1f5f9", fontSize: "0.8rem" }}>Clause Status</div>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "4px" }}>
-                        {[4,5,6,7,8,9,10].map(cId => {
-                          const detail = assessment.scores?.details?.[cId] || assessment.details?.[cId] || {};
-                          const status = detail.status || "no";
-                          const color = status === "yes" ? "#16a34a" : (status === "partial" ? "#f59e0b" : "#dc2626");
-                          return (
-                            <div key={cId} style={{ textAlign: "center", padding: "4px", borderRadius: "4px", background: "rgba(255,255,255,0.05)" }}>
-                              <div style={{ marginBottom: "2px" }}>C{cId}</div>
-                              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: color, margin: "0 auto" }}></div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
