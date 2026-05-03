@@ -242,6 +242,13 @@ export function generateRecommendations(answers, options = {}) {
   return recommendations;
 }
 
+function getPriorityFromComplianceState(complianceState) {
+  const cs = String(complianceState || "").toUpperCase();
+  if (cs === "NOT_COMPLIANT") return "HIGH";
+  if (cs === "PARTIALLY_COMPLIANT") return "MEDIUM";
+  return "NONE";
+}
+
 export function buildControlStatusSummary(answers, options = {}) {
   // What: Build a full “status list” for the report.
   // Difference vs generateRecommendations: includes controls even if recommendation is empty.
