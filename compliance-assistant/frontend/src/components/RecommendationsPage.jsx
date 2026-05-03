@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { getAssessmentReport, getAssessmentResult } from "../services/backendApi";
+
 import mandatoryData from "../data/mandatory.json";
 import organizationalData from "../data/organizational.json";
 import peopleData from "../data/people.json";
 import physicalData from "../data/physical.json";
 import technologicalData from "../data/technological.json";
-import { getAssessmentReport, getAssessmentResult } from "../services/backendApi";
-import { extractComplianceSummary } from "../utils/scoring";
-import { generateComplianceReportSummary } from "../utils/complianceReportUtils";
 
 // Recommendations page for a completed assessment (stage filtering + report download).
 
@@ -188,33 +187,8 @@ function isQuestionApplicable(stageId, controlId, question, answersByStage) {
 
 
 function getStage1Controls() {
-    const complianceSummary = extractComplianceSummary(assessment);
-    const recommendations = complianceSummary?.recommendations || [];
-
-    return (
-      <div style={{ padding: "40px 20px", maxWidth: 800, margin: "0 auto" }}>
-        <h1 style={{ fontSize: "2rem", marginBottom: 24, color: "#0F172A" }}>Recommendations</h1>
-        {loading && <p>Loading...</p>}
-        {error && <p style={{ color: "#dc2626" }}>{error}</p>}
-        {!loading && !error && (
-          <div style={{ display: "grid", gap: "16px" }}>
-            {recommendations.length === 0 && <p>No recommendations found. All controls are compliant.</p>}
-            {recommendations.map((rec, idx) => (
-              <div key={rec.id || idx} style={{ background: "#fff", borderRadius: 10, padding: "18px 24px", color: "#0F172A", fontWeight: 600, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                <span style={{ color: "#dc2626", fontWeight: 800, marginRight: 8 }}>#{idx + 1}</span>
-                <b>Control:</b> {rec.id} &nbsp;|&nbsp; <b>Priority:</b> {rec.priority?.toFixed(2)}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-
-
-// Helper to group questions by clause (used elsewhere in the app)
-export function groupQuestionsByClause(items) {
+  // mandatory.json is an array; keys are clause strings like "4.1".
+  const items = getMandatoryItems(mandatoryData);
   const clauseMap = {
     4: { controlId: "CL4_CONTEXT", controlName: "Clause 4: Context of the Organization", questions: [] },
     5: { controlId: "CL5_LEADERSHIP", controlName: "Clause 5: Leadership", questions: [] },
@@ -224,6 +198,7 @@ export function groupQuestionsByClause(items) {
     9: { controlId: "CL9_EVALUATION", controlName: "Clause 9: Performance Evaluation", questions: [] },
     10: { controlId: "CL10_IMPROVEMENT", controlName: "Clause 10: Improvement", questions: [] },
   };
+
   for (const q of items) {
     const clause = String(q?.clause ?? extractClause(q?.id) ?? "").trim();
     const major = getMajorClause(clause);
@@ -236,10 +211,11 @@ export function groupQuestionsByClause(items) {
       explanation: q?.explanation ?? q?.helpText,
     });
   }
+
   return Object.values(clauseMap);
 }
 
-export function mapStageObjectToControls(stageObject) {
+function mapStageObjectToControls(stageObject) {
   // Converts stage JSON (object keyed by controlId) into a consistent array shape.
   return Object.entries(stageObject || {}).map(([controlId, entry]) => ({
     controlId: canonicalizeAnnexId(controlId),
@@ -279,7 +255,9 @@ function parseAnnexControlOrder(controlId) {
 
 function parseMandatoryQuestionOrder(controlId) {
   // Matches: 4.1, 6.1.3, 10.2
-  const id = String(controlId || "").trim();
+  const id = String(controlId || "")
+    .trim()
+    .replace(/[._-]Q\d+$/i, "");
   const m = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?$/.exec(id);
   if (!m) return null;
   const parts = [Number(m[1])];
@@ -312,6 +290,13 @@ function compareBySeverity(a, b) {
     return String(rec?.severity).toLowerCase() === "high" ? 0 : 1;
   };
   return rank(a) - rank(b);
+}
+
+function parseQuestionNumberFromId(value) {
+  // Matches suffixes like ".Q2", "_Q2", "-Q2".
+  const s = String(value || "").trim();
+  const m = /[._-]Q(\d+)$/i.exec(s);
+  return m ? Number(m[1]) : null;
 }
 
 function getStageIdFromRecommendation(rec) {
@@ -377,6 +362,8 @@ function normalizeRecommendation(rec, textIndex) {
     };
 
     // Stage 1 legacy ids like "6.1.Q2" need mapping to the real clause question text.
+    // We keep the *displayed control* as the base ("6.1"), but fetch the correct question
+    // from mandatory.json (e.g. 6.1.Q2 maps to clause 6.2).
     const stage1LegacyMap = {
       "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
       "5.1": { 1: "5.1", 2: "5.2" },
@@ -386,6 +373,24 @@ function normalizeRecommendation(rec, textIndex) {
       "9.1": { 1: "9.1", 2: "9.2" },
       "10.1": { 1: "10.1", 2: "10.2" },
     };
+
+    // Always show question text (or questionId) as subtitle for all stages
+    let subtitle = "";
+    if (questionTitle) {
+      subtitle = `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`;
+    } else if (questionId) {
+      subtitle = questionId;
+    } else if (stageId && controlId && textIndex?.get) {
+      // Fallback: show first question under this control if questionId is missing
+      // Try Q1, Q2, Q3 in order
+      for (let i = 1; i <= 3; ++i) {
+        const tryQ = textIndex.get(`${stageId}::${controlId}.Q${i}`);
+        if (tryQ) {
+          subtitle = `Q${i} - ${tryQ}`;
+          break;
+        }
+      }
+    }
 
     // Stage 1: show full clause title (e.g. "Clause 5: Leadership"), not sub-numbers.
     if (stageId === "stage1") {
@@ -402,6 +407,7 @@ function normalizeRecommendation(rec, textIndex) {
       };
 
       // Build question ordinal map (clause id → 1-based position within its clause group)
+      // so that "4.2" shows as Q1, "4.3" as Q2, "5.1" as Q1, etc.
       const clauseOrdinalMap = (() => {
         const items = getMandatoryItems(mandatoryData);
         const grouped = {};
@@ -420,7 +426,7 @@ function normalizeRecommendation(rec, textIndex) {
       })();
 
       // Path A: question-level ids like "5.1.Q2" or "6.1.Q1".
-      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/i.exec(idStr);
+      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/.exec(idStr);
       if (m) {
         const majorClause = m[1];
         const base = `${m[1]}.${m[2]}`;
@@ -472,9 +478,7 @@ function normalizeRecommendation(rec, textIndex) {
       complianceState,
       priority,
       title: controlId ? `Control ${controlId}.` : clauseTitle || "Recommendation",
-      subtitle: questionTitle
-        ? `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`
-        : "",
+      subtitle,
       description: rec.recommendation,
       stageLabel,
     };
@@ -494,6 +498,7 @@ function normalizeRecommendation(rec, textIndex) {
     complianceState: inferredComplianceState,
     priority,
     title: rec.title || rec.message || "Recommendation",
+    subtitle: "",
     description: rec.description || "",
     stageLabel: stageId ? stageNames[stageId] || "" : (rec.stageLabel || rec.stage || rec.stageName || ""),
   };
@@ -573,10 +578,24 @@ export default function RecommendationsPage() {
           return;
         }
 
-        const data = await getAssessmentResult(assessmentId);
-        setAssessment(data);
+        const [result, report] = await Promise.all([
+          getAssessmentResult(assessmentId),
+          getAssessmentReport(assessmentId).catch(() => null),
+        ]);
+
+        const merged = {
+          ...(result && typeof result === "object" ? result : {}),
+          ...(report && typeof report === "object" ? { report } : {}),
+        };
+
+        // Prefer live recommendations from the report endpoint.
+        if (report && Array.isArray(report?.recommendations)) {
+          merged.recommendations = report.recommendations;
+        }
+
+        setAssessment(merged);
         try {
-          localStorage.setItem("assessmentResult", JSON.stringify(data));
+          localStorage.setItem("assessmentResult", JSON.stringify(merged));
         } catch {
           // Ignore storage failures (e.g., privacy mode)
         }
@@ -605,55 +624,128 @@ export default function RecommendationsPage() {
       const controlsByStage = getAllStageControls();
       const answers = report?.answers || {};
 
+      // Use the same per-question recommendation source as the UI.
+      // The report endpoint returns controlStatuses, which may be aggregated by control.
+      // `report.recommendations` is computed live from answers (preferred).
+      const recommendationIndex = new Map();
+      let recommendationSource = Array.isArray(report?.recommendations)
+        ? report.recommendations
+        : Array.isArray(assessment?.recommendations)
+          ? assessment.recommendations
+          : [];
+      if (!recommendationSource.length) {
+        try {
+          const fresh = await getAssessmentResult(assessmentId);
+          recommendationSource = Array.isArray(fresh?.recommendations)
+            ? fresh.recommendations
+            : [];
+        } catch {
+          // Ignore: export will fall back to controlStatuses.
+        }
+      }
+
+      for (const r of recommendationSource) {
+        if (!r || typeof r !== "object") continue;
+        const stageId = String(r.stageId || "").trim();
+        if (!stageId) continue;
+
+        const recText = r.recommendation != null ? String(r.recommendation) : "";
+        if (!recText.trim()) continue;
+
+        // stage1: backend uses `controlId` as the question id (e.g. "6.1" or "6.1.Q2")
+        // stage2-5: backend sets `{ controlId: baseControlId, questionId: originalQuestionId }`
+        const qid = String((r.questionId || r.controlId) ?? "").trim();
+        if (!qid) continue;
+        recommendationIndex.set(`${stageId}::${qid}`, recText);
+      }
+
+      const parseQuestionNumberForReport = (qid) => {
+        const s = String(qid || "").trim();
+        const m = /(?:^|[._-])Q(\d+)$/i.exec(s) || /_Q(\d+)$/i.exec(s);
+        return m ? Number(m[1]) : null;
+      };
+
       const badgeClassForLabel = (label) => {
         switch (String(label || "").trim().toUpperCase()) {
-          case "YES": return "badge badge-yes";
-          case "NO": return "badge badge-no";
-          case "PARTIAL": return "badge badge-partial";
-          case "N/A": return "badge badge-na";
-          case "HIGH": return "badge badge-no";
-          case "MEDIUM": return "badge badge-partial";
-          case "LOW": return "badge badge-low";
-          default: return "badge";
+          case "YES":
+            return "badge badge-yes";
+          case "NO":
+            return "badge badge-no";
+          case "PARTIAL":
+            return "badge badge-partial";
+          case "N/A":
+            return "badge badge-na";
+          case "HIGH":
+            return "badge badge-no";
+          case "MEDIUM":
+            return "badge badge-partial";
+          case "LOW":
+            return "badge badge-low";
+          default:
+            return "badge";
         }
+      };
+
+      const getRecommendationForQuestionRow = ({ stageId, qidStr }) => {
+        const keyStage = String(stageId || "").trim();
+        const qKey = String(qidStr || "").trim();
+        if (!keyStage || !qKey) return "";
+
+        const direct = recommendationIndex.get(`${keyStage}::${qKey}`);
+        if (direct) return direct;
+
+        // Gateway questions (e.g. A5.19.GW1) typically correspond to the control's Q1.
+        const gwAlias = qKey.replace(/\.GW\d+$/i, ".Q1");
+        if (gwAlias !== qKey) {
+          const hit = recommendationIndex.get(`${keyStage}::${gwAlias}`);
+          if (hit) return hit;
+        }
+
+        if (keyStage === "stage1") {
+          const clause = extractClause(qKey) || qKey;
+          if (clause !== qKey) {
+            const clauseHit = recommendationIndex.get(`${keyStage}::${clause}`);
+            if (clauseHit) return clauseHit;
+          }
+
+          // Legacy variants some data used.
+          const q1 = recommendationIndex.get(`${keyStage}::${clause}.Q1`);
+          if (q1) return q1;
+          const q2 = recommendationIndex.get(`${keyStage}::${clause}.Q2`);
+          if (q2) return q2;
+          const q3 = recommendationIndex.get(`${keyStage}::${clause}.Q3`);
+          if (q3) return q3;
+        }
+
+        return "";
+      };
+
+      const formatQuestionCellHtml = ({ stageId, control, qid, questionText }) => {
+        // Match the on-screen “written way”:
+        // Control X.
+        // Qn - <question>
+        const qidStr = String(qid || "").trim();
+        const qText = String(questionText || "").trim();
+
+        if (stageId === "stage1") {
+          const clauseId = extractClause(qidStr) || qidStr;
+          const label = clauseId ? `Control ${clauseId}.` : "Control";
+          return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(`Q1 - ${qText || clauseId || ""}`)}</span>`;
+        }
+
+        const controlId = String(control?.controlId || "").trim();
+        const qn = parseQuestionNumberForReport(qidStr);
+        const label = controlId ? `Control ${controlId}.` : "Control";
+        const qLine = qText ? `${qn ? `Q${qn} - ` : ""}${qText}` : qidStr;
+        return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(qLine)}</span>`;
       };
 
       const statusIndex = new Map(
         (report?.controlStatuses || []).map((s) => [`${s.stageId}::${s.controlId}`, s])
       );
 
-
       const orgName = report?.smeProfile?.organizationName || "";
-      const sector = report?.smeProfile?.sector || "";
-      const size = report?.smeProfile?.size || "";
-      const dataType = report?.smeProfile?.dataType || "";
       const generatedAt = new Date().toLocaleString();
-
-      // Use strict evaluatedControls array from backend for all calculations
-      const evaluatedControls = Array.isArray(report?.evaluatedControls) ? report.evaluatedControls : [];
-      // For summary and pie chart, map N/A to NA, etc.
-      const allControlResults = evaluatedControls.map(ctrl => ({
-        id: ctrl.id,
-        status: ctrl.status === "N/A" ? "N/A" : ctrl.status,
-        isApplicable: ctrl.isApplicable
-      }));
-      // For summary, treat N/A as not applicable
-      const summary = generateComplianceReportSummary(allControlResults);
-
-      // Calculate percentages for Annex A
-      const annexA = summary.annexA;
-      const annexATotal = annexA.total || 1;
-      const annexAYes = Math.round((annexA.fullyCompliant / annexATotal) * 100);
-      const annexAPartial = Math.round((annexA.partiallyCompliant / annexATotal) * 100);
-      const annexANo = Math.round((annexA.notCompliant / annexATotal) * 100);
-      const annexANA = Math.round((annexA.notApplicable / annexATotal) * 100);
-
-      // Calculate percentages for Mandatory Clauses
-      const mandatory = summary.mandatoryClauses;
-      const mandatoryTotal = mandatory.total || 1;
-      const mandatoryYes = Math.round((mandatory.fullyCompliant / mandatoryTotal) * 100);
-      const mandatoryPartial = Math.round((mandatory.partiallyCompliant / mandatoryTotal) * 100);
-      const mandatoryNo = Math.round((mandatory.notCompliant / mandatoryTotal) * 100);
 
       let body = "";
       const stageOrder = ["stage1", "stage2", "stage3", "stage4", "stage5"];
@@ -694,7 +786,7 @@ export default function RecommendationsPage() {
 
             if (scores.length) {
               const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-              const complianceState = avg === 1 ? "FULLY_COMPLIANT" : avg >= 0.5 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
+              const complianceState = avg === 1 ? "FULLY_COMPLIANT" : avg > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
               status = {
                 stageId,
                 controlId: control.controlId,
@@ -714,7 +806,8 @@ export default function RecommendationsPage() {
             ? `${escapeHtml(control.controlName || "")}`
             : `${escapeHtml(control.controlId)} - ${escapeHtml(control.controlName || "")}`;
           body += `<h3>${heading}</h3>`;
-          body += `<p><strong>Status:</strong> <span class="${badgeClassForLabel(complianceLabel(status?.complianceState) || "")}">${escapeHtml(complianceLabel(status?.complianceState) || "")}</span></p>`;
+          const statusLabel = complianceLabel(status?.complianceState) || "";
+          body += `<p><strong>Status:</strong> <span class="${badgeClassForLabel(statusLabel)}">${escapeHtml(statusLabel)}</span></p>`;
           if (priorityLabel && priorityLabel !== "NONE") {
             body += `<p><strong>Priority:</strong> <span class="${badgeClassForLabel(priorityLabel)}">${escapeHtml(priorityLabel)}</span></p>`;
           }
@@ -724,11 +817,15 @@ export default function RecommendationsPage() {
             body += `<table><thead><tr><th style="width:55%">Question</th><th style="width:15%">Answer</th><th>Recommendation</th></tr></thead><tbody>`;
             for (const q of qs) {
               const qid = q?.id;
-              const answerValue = answers?.[stageId]?.[qid];
+              const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
+              let answerValue = answers?.[stageId]?.[qid];
+              // If a question was hidden by a gateway/showIf rule, treat it as NOT APPLICABLE
+              // in the exported report (so we don't show irrelevant recommendations).
+              if ((answerValue == null || answerValue === "") && !applicableByRules) {
+                answerValue = "na";
+              }
               const questionText = q?.question || q?.text || "";
-              const applicable = isQuestionApplicable(stageId, control.controlId, q, answers);
               const answerLabel = normalizeAnswerLabel(answerValue);
-              // Only show recommendations for NO and PARTIAL answers
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
               const isNotApplicableAnswer = answerLabel === "N/A";
 
@@ -741,43 +838,17 @@ export default function RecommendationsPage() {
                     (qidClause !== qidStr ? statusIndex.get(`${stageId}::${qidClause}`) : null) ||
                     status
                   : status;
-              const rowRecommendationText = rowStatus?.recommendation
-                ? String(rowStatus.recommendation)
-                : "";
+              // Prefer per-question recommendation; fallback to backend controlStatus.
+              let rowRecommendationText = getRecommendationForQuestionRow({
+                stageId,
+                qidStr: qidStr || qidClause,
+              });
+              if (!rowRecommendationText) rowRecommendationText = rowStatus?.recommendation ? String(rowStatus.recommendation) : "";
 
               body += `<tr>`;
-              const clauseOrdinals = (() => {
-                if (stageId !== "stage1") return null;
-                const items = getMandatoryItems(mandatoryData);
-                const grouped = {};
-                for (const mq of items) {
-                  const cl = String(mq?.clause ?? "").trim();
-                  const maj = getMajorClause(cl);
-                  if (!Number.isFinite(maj)) continue;
-                  if (!grouped[maj]) grouped[maj] = [];
-                  grouped[maj].push(cl);
-                }
-                const map = {};
-                for (const list of Object.values(grouped)) {
-                  list.forEach((cl, i) => { map[cl] = i + 1; });
-                }
-                return map;
-              })();
-              const qCellHtml = (() => {
-                const qText = String(questionText || "").trim();
-                if (stageId === "stage1") {
-                  const clauseId = extractClause(qidStr) || qidStr;
-                  const qn = clauseOrdinals?.[clauseId] ?? "";
-                  return `<strong>${escapeHtml(clauseId ? `Control ${clauseId}.` : "Control")}</strong><br/>${escapeHtml(qn ? `Q${qn} - ${qText}` : qText)}`;
-                }
-                const controlIdStr = String(control?.controlId || "").trim();
-                const qnMatch = /[._-]Q(\d+)$/i.exec(qidStr);
-                const qn = qnMatch ? Number(qnMatch[1]) : null;
-                return `<strong>${escapeHtml(controlIdStr ? `Control ${controlIdStr}.` : "Control")}</strong><br/>${escapeHtml(qn ? `Q${qn} - ${qText}` : qText)}`;
-              })();
-              body += `<td>${qCellHtml}</td>`;
+              body += `<td>${formatQuestionCellHtml({ stageId, control, qid, questionText })}</td>`;
               body += `<td><span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span></td>`;
-              body += `<td>${escapeHtml(!applicable || isNotApplicableAnswer ? "N/A" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
+              body += `<td>${escapeHtml(isNotApplicableAnswer ? "-" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
@@ -801,21 +872,20 @@ export default function RecommendationsPage() {
       h1 { margin: 0 0 8px; }
       h2 { margin-top: 28px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
       .meta { color: #444; margin-bottom: 18px; }
-      .summary-table { margin-bottom: 18px; }
-      .summary-table th, .summary-table td { padding: 4px 12px; text-align: left; }
-      .summary-table th { background: #f5f5f5; }
       .control { margin: 14px 0 18px; page-break-inside: avoid; }
       table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; }
       th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
       th { background: #f5f5f5; text-align: left; }
-      .badge { display: inline-block; padding: 3px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.5; border: 2px solid; white-space: nowrap; }
-      .badge-yes { background: #dcfce7; border-color: #16a34a; color: #166534; }
-      .badge-no { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
-      .badge-partial { background: #fef9c3; border-color: #ca8a04; color: #854d0e; }
-      .badge-na { background: #f3f4f6; border-color: #d1d5db; color: #6b7280; }
-      .badge-low { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+      .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; line-height: 1.4; border: 2px solid #e5e7eb; background: #f9fafb; color: #111827; white-space: nowrap; }
+      /* Strong, print-friendly color coding for YES/NO/PARTIAL */
+      .badge-yes { background: #dcfce7; border-color: #166534; color: #166534; box-shadow: inset 6px 0 0 #16a34a; }
+      .badge-no { background: #fee2e2; border-color: #991b1b; color: #991b1b; box-shadow: inset 6px 0 0 #dc2626; }
+      .badge-partial { background: #fef9c3; border-color: #854d0e; color: #854d0e; box-shadow: inset 6px 0 0 #ca8a04; }
+      .badge-na { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
+      .badge-low { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
       @media print {
         body { margin: 12mm; }
+        /* Ask the browser to preserve colors when printing to PDF */
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       }
     </style>
@@ -825,32 +895,8 @@ export default function RecommendationsPage() {
     <div class="meta">
       <div><strong>Assessment ID:</strong> ${escapeHtml(assessmentId)}</div>
       <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
-      <div><strong>Sector:</strong> ${escapeHtml(sector)}</div>
-      <div><strong>Number of Employees:</strong> ${escapeHtml(size)}</div>
-      <div><strong>Data Type:</strong> ${escapeHtml(dataType)}</div>
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
     </div>
-
-    <table class="summary-table">
-      <caption style="font-weight:bold;text-align:left;margin-bottom:4px;">Annex A Controls Summary</caption>
-      <tr><th>YES</th><th>PARTIAL</th><th>NO</th><th>N/A</th></tr>
-      <tr>
-        <td>${annexAYes}%</td>
-        <td>${annexAPartial}%</td>
-        <td>${annexANo}%</td>
-        <td>${annexANA}%</td>
-      </tr>
-    </table>
-    <table class="summary-table">
-      <caption style="font-weight:bold;text-align:left;margin-bottom:4px;">Mandatory Clauses Summary</caption>
-      <tr><th>YES</th><th>PARTIAL</th><th>NO</th></tr>
-      <tr>
-        <td>${mandatoryYes}%</td>
-        <td>${mandatoryPartial}%</td>
-        <td>${mandatoryNo}%</td>
-      </tr>
-    </table>
-
     ${body}
     <script>
       window.print();
@@ -873,7 +919,7 @@ export default function RecommendationsPage() {
 
   const controlNameIndex = useMemo(() => {
     // Lookup table: (stageId + controlId) -> controlName.
-    // Used to show nicer titles like: "Control A.5.1 — Policies for information security".
+    // Used to show nicer titles like: "Control A.5.1 - Policies for information security".
     const index = new Map();
     const controlsByStage = getAllStageControls();
 
@@ -899,7 +945,7 @@ export default function RecommendationsPage() {
   }, []);
 
   const normalizedRecommendations = useMemo(() => {
-    // Use only recommendations for NO or PARTIAL from backend
+    // Convert raw backend recommendations into a stable UI shape.
     const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
     return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
@@ -948,6 +994,17 @@ export default function RecommendationsPage() {
         }
         const sev = compareBySeverity(a, b);
         if (sev !== 0) return sev;
+
+        // If multiple questions exist under the same clause (legacy ids like "6.1.Q1"),
+        // keep them in Q1, Q2, Q3 order.
+        const aq = parseQuestionNumberFromId(a?.questionId || a?.controlId);
+        const bq = parseQuestionNumberFromId(b?.questionId || b?.controlId);
+        if (aq != null || bq != null) {
+          const ao = aq ?? 999;
+          const bo = bq ?? 999;
+          if (ao !== bo) return ao - bo;
+        }
+
         return String(a?.title || "").localeCompare(String(b?.title || ""));
       }
 
@@ -960,6 +1017,16 @@ export default function RecommendationsPage() {
         return -1;
       } else if (!aParts && bParts) {
         return 1;
+      }
+
+      // Secondary: within the same Annex A control, order by question number (Q1, Q2, ...)
+      // so that e.g. A5.1.Q1 appears before A5.1.Q2.
+      const aq = parseQuestionNumberFromId(a?.questionId || a?.controlId);
+      const bq = parseQuestionNumberFromId(b?.questionId || b?.controlId);
+      if (aq != null || bq != null) {
+        const ao = aq ?? 999;
+        const bo = bq ?? 999;
+        if (ao !== bo) return ao - bo;
       }
 
       const sev = compareBySeverity(a, b);
