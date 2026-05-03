@@ -46,10 +46,17 @@ function countAnnexControls(stageObject, prefix) {
 
 function largestRemainderRound(counts, total) {
   if (!total) return counts.map(() => 0);
-  const raws = counts.map((c) => (c / total) * 100);
+  const sumCounts = counts.reduce((a, b) => a + b, 0);
+  if (sumCounts === 0) return counts.map(() => 0);
+
+  const actualTotal = sumCounts > 0 && sumCounts !== total ? sumCounts : total;
+  const raws = counts.map((c) => (c / actualTotal) * 100);
   const floors = raws.map(Math.floor);
   const remainders = raws.map((r, i) => r - floors[i]);
   let toDistribute = 100 - floors.reduce((a, b) => a + b, 0);
+  
+  toDistribute = Math.max(0, Math.min(toDistribute, counts.length));
+  
   const order = remainders
     .map((r, i) => [r, i])
     .sort((a, b) => b[0] - a[0]);
