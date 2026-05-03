@@ -13,6 +13,7 @@ import {
   isFirestoreEnabled,
   getAssessmentResultFromFirestore,
 } from "../utils/firestore.js";
+import { calculateComplianceResults } from "../utils/complianceCalculation.js";
 
 // Assessment API routes.
 // Note: results can be stored in JSON (default) or Firestore (optional), and older
@@ -316,7 +317,6 @@ router.get("/report/:assessmentId", (req, res) => {
     const mandatoryControls = evaluatedControls.filter(c => /^\d+\./.test(c.id));
     const annexAControls = evaluatedControls.filter(c => /^A\./i.test(c.id));
     const sector = result.smeProfile?.sector || assessment?.smeProfile?.sector || null;
-    const { calculateComplianceResults } = require("../utils/complianceCalculation.js");
     const mandatoryResults = calculateComplianceResults(mandatoryControls, sector);
     const annexAResults = calculateComplianceResults(annexAControls, sector);
     const mandatory_distribution = mandatoryResults.distribution;
