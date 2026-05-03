@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Recommendation rule book.
  * Maps (controlId, complianceState) to a recommendation string.
  * Used by backend/utils/recommendations.js.
@@ -122,201 +122,41 @@ export function getRecommendationForControl(
 
   // rules[controlId][complianceState] -> recommendation text
   const rules = {
-    // Stage 1 (Clauses 4, 10): per-question and per-clause recommendations.
+    // Stage 1 (Clauses 4–10): per-clause recommendations.
     // Only NOT_COMPLIANT and PARTIALLY_COMPLIANT are defined here.
-    // Clause 4: Context of the Organization
-    "4.1": {
-      NOT_COMPLIANT:
-        `${orgName} could document its business purpose and strategic direction, and identify the key internal and external issues that affect information security (e.g., regulatory, market, technology, organizational changes). Review and update this when significant changes occur.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could complete its documentation of business context by capturing missing internal/external issues, clarifying impacts on information security, assigning ownership, and reviewing it regularly (and when things change).`,
-    },
-    "4.2": {
-      NOT_COMPLIANT:
-        `${orgName} could list all key stakeholders (customers, regulators, partners, employees) and write down what each expects for information security (laws, contracts, privacy, service requirements). Keep this list updated.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could complete the stakeholder list and fill missing expectations. Make sure the requirements are clear, owned by someone, and reviewed regularly (and when things change).`,
-    },
-    "4.3": {
-      NOT_COMPLIANT:
-        `${orgName} could document what is included in the ISMS (sites, systems, data, and processes) and what is excluded (with a clear reason). Share this scope with the people responsible for security.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could make the scope clearer and more complete (what’s in/out, key systems and data, third parties). Keep it controlled and updated when the business or IT changes.`,
-    },
-
-    // Clause 5: Leadership
-    "5.1": {
-      NOT_COMPLIANT:
-        `${orgName} could have top management actively support security by approving the security direction, assigning clear responsibility, providing budget/time/tools, and reviewing security performance regularly.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could make management support more consistent by setting a regular review (e.g., monthly/quarterly), recording decisions/actions, and following up until actions are completed.`,
-    },
-    "5.2": {
-      NOT_COMPLIANT:
-        `${orgName} could create a simple Information Security Policy, get it approved by management, and share it with all employees (including new joiners). Keep one owner and a review date.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could update the policy to reflect how the organization actually operates, make sure employees receive it and acknowledge it, and review it at least yearly or after major changes.`,
-    },
-    "5.3": {
-      NOT_COMPLIANT:
-        `${orgName} could clearly assign and document information security roles and responsibilities (e.g., who owns security, who approves access, who handles incidents) and communicate them to the relevant people.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could remove role confusion by documenting ownership for each key security task, defining escalation paths, and ensuring people understand their responsibilities.`,
-    },
-
-    // Clause 6: Planning (Risk Assessment & Treatment)
-    "6.1": {
-      NOT_COMPLIANT:
-        `${orgName} could create a repeatable risk assessment method: list key assets, identify threats and weaknesses, and rate impact and likelihood. Record results in a risk register.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could make risk assessments consistent by using one method across all areas, keeping records, and reassessing when major changes happen (new systems, suppliers, incidents).`,
-    },
-    "6.2": {
-      NOT_COMPLIANT:
-        `${orgName} could document how each major risk will be handled (accept/mitigate/transfer/avoid) and list the exact controls or actions to implement, with an owner and deadline.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve risk treatment by ensuring every risk has a clear decision, mapped actions/controls, tracked progress, and evidence when actions are completed (including approvals for accepted risks).`,
-    },
-
-    // Legacy/extended Clause 6 keys (kept for compatibility)
-    "6.1.1": {
-      NOT_COMPLIANT:
-        `${orgName} could identify information security risks and opportunities and create a simple plan to address them (actions, owner, due date). Track progress to completion.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could make risk/opportunity planning more consistent by documenting actions, assigning owners and deadlines, and regularly reviewing progress and outcomes.`,
-    },
-    "6.1.2": {
-      NOT_COMPLIANT:
-        `${orgName} could define a repeatable risk assessment method (assets, threats, vulnerabilities, likelihood and impact) and use it consistently. Record results in a risk register so risks can be compared and prioritized over time.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could standardize risk assessments by using one agreed method and criteria across the organization, keeping records, and reassessing when major changes occur.`,
-    },
-    "6.1.3": {
-      NOT_COMPLIANT:
-        `${orgName} could document how each major risk will be handled (accept/mitigate/transfer/avoid) and list the exact controls or actions to implement, with an owner and deadline.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve risk treatment by ensuring every risk has a clear decision, mapped actions/controls, tracked progress, and evidence when actions are completed (including approvals for accepted risks).`,
-    },
-
-    // Clause 7: Support (Resources, Competence, Awareness)
-    "7.1": {
-      NOT_COMPLIANT:
-        `${orgName} could run basic security training for all staff during onboarding and at least yearly (phishing, passwords, data handling, incident reporting). Track attendance.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve training by covering all staff consistently, refreshing it regularly, and checking understanding (short quiz or phishing simulation). Keep records.`,
-    },
-    "7.2": {
-      NOT_COMPLIANT:
-        `${orgName} could clearly define who owns security, who manages access, and who handles incidents. Document these responsibilities and tell the relevant people.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could remove role confusion by documenting ownership for each key security task, setting escalation paths, and ensuring staff understand their responsibilities.`,
-    },
-    "7.3": {
-      NOT_COMPLIANT:
-        `${orgName} could maintain a competency/skills record (e.g., a competency matrix) for information security roles, define required competencies, assess current gaps, and provide training or support. Keep evidence of competence (training records, experience).`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve competence management by completing the competency record for all relevant roles, keeping it up to date, addressing identified gaps with training, and periodically reviewing competence as systems and threats change.`,
-    },
-    "7.4": {
-      NOT_COMPLIANT:
-        `${orgName} could define what security-related communications are needed, who they are for, when they happen, and how they are delivered (internal and external where relevant). Assign owners for these communications.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could formalize communications by setting a clear schedule/triggers (e.g., incidents, policy changes), assigning responsibility, and keeping evidence that key communications happen.`,
-    },
-    "7.5": {
-      NOT_COMPLIANT:
-        `${orgName} could implement document control for ISMS documentation (version control, approvals, access control, secure storage, and regular review) so documents stay accurate and protected.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could strengthen document control by ensuring documents are reviewed on schedule, outdated versions are removed or marked, access is controlled, and changes are tracked consistently.`,
-    },
-
-    // Clause 8: Operation (Implementing and Running Controls)
-    "8.1": {
-      NOT_COMPLIANT:
-        `${orgName} could document and implement basic procedures for access control, backups/restore, incident handling, and change management (who does what, when, and how).`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could complete missing procedures and standardize how they are followed across teams and systems, not only in some areas.`,
-    },
-    "8.2": {
-      NOT_COMPLIANT:
-        `${orgName} could ensure day-to-day use of procedures by keeping evidence such as tickets, approvals, backup logs, restore test results, incident records, and change records.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve consistency by collecting evidence every time, reviewing it regularly, and fixing repeated gaps (e.g., missing approvals, untested restores).`,
-    },
-    "8.3": {
-      NOT_COMPLIANT:
-        `${orgName} could implement risk treatment plans and keep records showing what was done (actions completed, evidence, approvals, and any accepted residual risks).`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve treatment execution by tracking actions to closure, keeping consistent evidence, and periodically confirming that implemented treatments remain effective.`,
-    },
-
-    // Clause 9: Performance Evaluation
-    "9.1": {
-      NOT_COMPLIANT:
-        `${orgName} could run internal reviews/audits at least annually, document findings, and track corrective actions until completed.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could make reviews more effective by using a plan, covering all key areas, documenting evidence, and verifying corrective actions are completed and working.`,
-    },
-    "9.2": {
-      NOT_COMPLIANT:
-        `${orgName} could hold regular management reviews of security performance (incidents, audits, key metrics) and decide actions with owners and deadlines.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve management review by recording decisions, tracking actions to completion, and reviewing trends (repeat incidents/issues) to prevent recurrence.`,
-    },
-    "9.3": {
-      NOT_COMPLIANT:
-        `${orgName} could hold regular management reviews of the ISMS (incidents, audits, metrics, risks, resource needs) and record decisions and actions with owners and deadlines.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve management review by using a consistent agenda/inputs, recording actions, and tracking them to completion with follow-up on outcomes.`,
-    },
-
-    // Clause 10: Improvement
-    "10.1": {
-      NOT_COMPLIANT:
-        `${orgName} could log incidents and audit findings, assign corrective actions (owner + due date), and track them until they are completed and checked for effectiveness.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could improve corrective actions by doing basic root-cause checks, prioritizing high-risk issues, and confirming the fix actually prevents the issue from happening again.`,
-    },
-    "10.2": {
-      NOT_COMPLIANT:
-        `${orgName} could set a regular improvement review (e.g., quarterly) to identify what to improve based on incidents, audits, risks, and feedback, then implement and track those improvements.`,
-      PARTIALLY_COMPLIANT:
-        `${orgName} could make improvement more structured by keeping an improvement list, assigning owners/dates, and confirming improvements are completed and measurable.`,
-    },
-
     
-    // MANDATORY CLAUSE RECOMMENDATIONS (ISO 27001 Clauses 4, 10)
-    // Stage 1 questions are grouped to these IDS (Intrusion Detection System):
+    // MANDATORY CLAUSE RECOMMENDATIONS (ISO 27001 Clauses 4–10)
+    // Stage 1 questions are grouped to these IDs:
     // CL4_CONTEXT, CL5_LEADERSHIP, CL6_PLANNING, CL7_SUPPORT,
     // CL8_OPERATION, CL9_EVALUATION, CL10_IMPROVEMENT
     
     CL4_CONTEXT: {
-      NOT_COMPLIANT: `${orgName} could identify all key stakeholders and their information-security expectations, and document the scope of the ISMS (what is included and excluded, with clear reasons). Keep both updated as the business changes.`,
-      PARTIALLY_COMPLIANT: `${orgName} could complete the stakeholder list with any missing expectations, and make the ISMS scope clearer (what's in/out, key systems and data, third parties). Keep both updated regularly.`,
+      NOT_COMPLIANT: `${orgName} should formally identify and document its business purpose, strategic direction, relevant internal and external issues, interested parties, and the scope of the ISMS to ensure information security requirements are clearly defined and aligned with organizational objectives, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should review and enhance its documentation of organizational context, interested parties, and ISMS scope to ensure completeness, consistency, and alignment with current business and security requirements, in line with ISO/IEC 27001.`,
     },
     CL5_LEADERSHIP: {
-      NOT_COMPLIANT: `${orgName} could have top management actively support information security by approving a clear Information Security Policy, assigning responsibility, providing necessary resources, and reviewing security performance regularly.`,
-      PARTIALLY_COMPLIANT: `${orgName} could make management support more consistent and ensure the Information Security Policy fully reflects how the organization operates, with employees receiving, acknowledging, and having access to it.`,
+      NOT_COMPLIANT: `${orgName} should ensure top management demonstrates active commitment to information security by approving and supporting an information security policy, allocating necessary resources, and establishing clear direction and accountability, in accordance with ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen leadership involvement in information security by improving policy communication, management oversight, and ongoing review of security performance, as recommended by ISO/IEC 27001.`,
     },
     CL6_PLANNING: {
-      NOT_COMPLIANT: `${orgName} could create a repeatable risk assessment method to identify and score risks, and document how each will be handled (accept/mitigate/transfer/avoid), with an owner and deadline for each treatment action.`,
-      PARTIALLY_COMPLIANT: `${orgName} could make risk assessments consistent across all areas using one method, and ensure every risk has a clear treatment decision, mapped controls, tracked progress, and evidence of completion.`,
+      NOT_COMPLIANT: `${orgName} should establish a formal and repeatable information security risk assessment and risk treatment process, including documented decisions and mapped security controls, to systematically manage security risks in line with ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should enhance its existing risk assessment and treatment processes by ensuring they are consistently applied, properly documented, and regularly reviewed, as required by ISO/IEC 27001.`,
     },
     CL7_SUPPORT: {
-      NOT_COMPLIANT: `${orgName} could provide basic security training for all staff at onboarding and at least annually, and clearly define and document security roles and responsibilities so everyone knows what they are responsible for.`,
-      PARTIALLY_COMPLIANT: `${orgName} could improve training coverage and frequency for all staff, and remove any role confusion by documenting security ownership, escalation paths, and responsibilities clearly.`,
+      NOT_COMPLIANT: `${orgName} should provide adequate resources, assign and document information security roles and responsibilities, and implement structured security awareness and training programs to ensure personnel are competent to support the ISMS, in accordance with ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should improve its security support mechanisms by formalizing role assignments, maintaining competency records, and strengthening security awareness activities to ensure consistent staff capability, as recommended by ISO/IEC 27001.`,
     },
     CL8_OPERATION: {
-      NOT_COMPLIANT: `${orgName} could document and implement procedures for key security operations (access control, backups, incident handling, and change management) and ensure they are followed day-to-day with supporting evidence.`,
-      PARTIALLY_COMPLIANT: `${orgName} could complete missing operational procedures and improve consistency in how they are followed across teams, collecting evidence every time and fixing repeated gaps such as missing approvals or untested restores.`,
+      NOT_COMPLIANT: `${orgName} should define, document, and implement operational procedures for key security activities such as access management, backup, incident handling, and change management to ensure effective operation of information security controls, in line with ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen operational security by ensuring documented procedures are consistently followed in day-to-day activities and supported by appropriate evidence, as required by ISO/IEC 27001.`,
     },
     CL9_EVALUATION: {
-      NOT_COMPLIANT: `${orgName} could run internal reviews or audits at least annually, document findings, and hold regular management reviews of security performance, with recorded decisions, action owners, and deadlines.`,
-      PARTIALLY_COMPLIANT: `${orgName} could make internal reviews more systematic and improve management reviews by recording decisions, tracking actions to completion, and reviewing trends to prevent recurring issues.`,
+      NOT_COMPLIANT: `${orgName} should establish regular monitoring, internal audit, and management review activities to evaluate the effectiveness of information security controls and ISMS performance, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should enhance its performance evaluation processes by improving the frequency, documentation, and management review of security metrics, audit findings, and incidents, in line with ISO/IEC 27001.`,
     },
     CL10_IMPROVEMENT: {
-      NOT_COMPLIANT: `${orgName} could log all incidents and audit findings, assign corrective actions with an owner and due date, and track them until they are completed and checked for effectiveness.`,
-      PARTIALLY_COMPLIANT: `${orgName} could improve corrective actions with basic root-cause checks, keep a structured improvement list with owners and dates, and confirm that fixes prevent issues from happening again.`,
+      NOT_COMPLIANT: `${orgName} should establish a formal process to record security incidents, audit findings, and non-conformities, track corrective actions to completion, and drive continual improvement of the ISMS, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen its improvement processes by consistently tracking corrective actions and proactively identifying opportunities to enhance information security controls and ISMS effectiveness, in line with ISO/IEC 27001.`,
     },
 
     "A.5.1": {
