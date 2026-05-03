@@ -327,7 +327,7 @@ function Summary() {
         {/* ── ACTION BUTTONS ── */}
         <div style={{ display: "flex", justifyContent: "center", gap: "25px", marginTop: "20px" }}>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/assessment/technological")}
             style={{
               padding: "16px 45px",
               borderRadius: "100px",
