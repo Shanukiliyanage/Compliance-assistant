@@ -134,13 +134,13 @@ function buildPieData(summary) {
   if (!summary) return null;
   return {
     labels: [
-      `Fully compliant (${summary.fullyCount})`,
-      `Partially compliant (${summary.partialCount})`,
-      `Not compliant (${summary.nonCount})`,
+      `Fully compliant`,
+      `Partially compliant`,
+      `Not compliant`,
     ],
     datasets: [
       {
-        data: [summary.fullyCount, summary.partialCount, summary.nonCount],
+        data: [summary.fullyPercent, summary.partialPercent, summary.nonPercent],
         backgroundColor: ["#16a34a", "#facc15", "#dc2626"],
         borderWidth: 0,
       },
@@ -148,24 +148,53 @@ function buildPieData(summary) {
   };
 }
 
-function buildAnnexPieData(summary) {
+function buildAnnexDistributionPieData(summary) {
   if (!summary) return null;
   return {
     labels: [
-      `Fully compliant (${summary.fullyCount})`,
-      `Partially compliant (${summary.partialCount})`,
-      `Not compliant (${summary.nonCount})`,
-      `Not applicable (${summary.notApplicableCount})`,
+      `Fully compliant`,
+      `Partially compliant`,
+      `Not compliant`,
+      `Not applicable`,
     ],
     datasets: [
       {
         data: [
-          summary.fullyCount,
-          summary.partialCount,
-          summary.nonCount,
-          summary.notApplicableCount,
+          summary.fullyPercent,
+          summary.partialPercent,
+          summary.nonPercent,
+          summary.notApplicablePercent,
         ],
         backgroundColor: ["#16a34a", "#facc15", "#dc2626", "#6b7280"],
+        borderWidth: 0,
+      },
+    ],
+  };
+}
+
+function buildAnnexApplicablePieData(summary) {
+  if (!summary) return null;
+
+  const totalApplicable = summary.fullyCount + summary.partialCount + summary.nonCount;
+  let fp = 0, pp = 0, np = 0;
+  
+  if (totalApplicable > 0) {
+    const pcts = largestRemainderRound([summary.fullyCount, summary.partialCount, summary.nonCount], totalApplicable);
+    fp = pcts[0];
+    pp = pcts[1];
+    np = pcts[2];
+  }
+
+  return {
+    labels: [
+      `Fully compliant`,
+      `Partially compliant`,
+      `Not compliant`,
+    ],
+    datasets: [
+      {
+        data: [fp, pp, np],
+        backgroundColor: ["#16a34a", "#facc15", "#dc2626"],
         borderWidth: 0,
       },
     ],
@@ -279,7 +308,8 @@ function Summary() {
   );
 
   const mandatoryPieData = buildPieData(mandatorySummary);
-  const annexPieData = buildAnnexPieData(annexSummary);
+  const annexDistributionPieData = buildAnnexDistributionPieData(annexSummary);
+  const annexApplicablePieData = buildAnnexApplicablePieData(annexSummary);
 
   const annexAOverall = scores?.overallAnnexA || null;
   const annexAPercent = (() => {
@@ -541,8 +571,20 @@ function Summary() {
                 </div>
               </div>
 
-              <div style={{ width: "100%", maxWidth: "360px", margin: "0 auto" }}>
-                <Pie data={annexPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#0F172A" } } } }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: "30px", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: "100%", maxWidth: "250px", textAlign: "center" }}>
+                  <h4 style={{ fontSize: "1rem", marginBottom: "10px", color: "#4b5563" }}>Full Distribution</h4>
+                  <div style={{ height: "250px" }}>
+                    <Pie data={annexDistributionPieData} options={pieOptions} />
+                  </div>
+                </div>
+                
+                <div style={{ width: "100%", maxWidth: "250px", textAlign: "center" }}>
+                  <h4 style={{ fontSize: "1rem", marginBottom: "10px", color: "#4b5563" }}>Applicable Controls Only</h4>
+                  <div style={{ height: "250px" }}>
+                    <Pie data={annexApplicablePieData} options={pieOptions} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
