@@ -31,7 +31,6 @@ function Summary() {
       try {
         let result;
         if (assessmentId === "live") {
-          // Perform a fresh analysis if in live mode
           const auth = getAuth();
           const user = auth.currentUser;
           const stage1 = JSON.parse(localStorage.getItem("stage1") || "{}");
@@ -62,14 +61,6 @@ function Summary() {
     return () => { cancelled = true; };
   }, [assessmentId]);
 
-  const stageNames = {
-    stage1: "Mandatory Clauses",
-    stage2: "Organizational Controls",
-    stage3: "People Controls",
-    stage4: "Physical Controls",
-    stage5: "Technological Controls",
-  };
-
   if (loading) {
     return (
       <div style={{ padding: "40px", textAlign: "center", minHeight: "100vh", background: "#07090f", color: "#f1f5f9" }}>
@@ -89,7 +80,66 @@ function Summary() {
     );
   }
 
-  const { scores, charts, weightedScores } = assessment;
+  // --- DATA EXTRACTION (Robust for both new and legacy backend payloads) ---
+  const extractStageStats = (stageKey) => {
+    let source = null;
+
+    // Path A: New backend structure (result.scores.stageX)
+    if (assessment.scores?.[stageKey]) {
+      source = assessment.scores[stageKey];
+    } 
+    // Path B: Legacy backend structure (result.scores.stageScores.stageX)
+    else if (assessment.scores?.stageScores?.[stageKey]) {
+      source = assessment.scores.stageScores[stageKey];
+    }
+
+    // Map counts safely to prevent NaN
+    const yes = Number(source?.yes ?? source?.breakdown?.counts?.yes ?? 0);
+    const partial = Number(source?.partial ?? source?.breakdown?.counts?.partial ?? 0);
+    const no = Number(source?.no ?? source?.breakdown?.counts?.no ?? 0);
+    const na = Number(source?.na ?? source?.notApplicableCount ?? 0);
+
+    const total = yes + partial + no + na;
+    const getPct = (val) => total === 0 ? 0 : Math.round((val / total) * 100);
+
+    return {
+      yes: getPct(yes),
+      partial: getPct(partial),
+      no: getPct(no),
+      na: getPct(na)
+    };
+  };
+
+  // --- PIE CHART DATA ---
+  const getChartData = (type) => {
+    if (assessment.charts?.[type]) return assessment.charts[type];
+
+    // Fallback: calculate from extracted stage stats
+    if (type === "mandatory") {
+      const s1 = extractStageStats("stage1");
+      return s1;
+    } else {
+      const s2 = extractStageStats("stage2");
+      const s3 = extractStageStats("stage3");
+      const s4 = extractStageStats("stage4");
+      const s5 = extractStageStats("stage5");
+      return {
+        yes: s2.yes + s3.yes + s4.yes + s5.yes, // Note: these are percentages, we need raw counts for accurate charts
+        // But for visual representation in fallback, we'll just sum them up or use percentages
+        partial: s2.partial + s3.partial + s4.partial + s5.partial,
+        no: s2.no + s3.no + s4.no + s5.no,
+        na: s2.na + s3.na + s4.na + s5.na
+      };
+    }
+  };
+
+  const stages = [
+    { key: "stage1", title: "Mandatory Clauses" },
+    { key: "stage2", title: "Organizational Controls" },
+    { key: "stage3", title: "People Controls" },
+    { key: "stage4", title: "Physical Controls" },
+    { key: "stage5", title: "Technological Controls" },
+  ];
 
   return (
     <div style={{ padding: "40px 20px", width: "100%", display: "flex", justifyContent: "center", backgroundColor: "#07090f", minHeight: "100vh" }}>
@@ -108,10 +158,12 @@ function Summary() {
         <div style={{ marginBottom: "40px", textAlign: "center" }}>
           <h1 style={{ fontSize: "2.5rem", color: "#f1f5f9", marginBottom: "8px" }}>Assessment Complete</h1>
           <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>ISO 27001:2022 Thesis-Grade Analysis</p>
-          {weightedScores && (
+          {assessment.weightedScores && (
             <div style={{ marginTop: "20px", padding: "15px", background: "rgba(37, 99, 235, 0.1)", borderRadius: "12px", border: "1px solid rgba(37, 99, 235, 0.3)" }}>
               <span style={{ color: "#94a3b8", marginRight: "10px" }}>Weighted Compliance Score:</span>
-              <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "#14b8a6" }}>{weightedScores.overall.toFixed(1)}%</span>
+              <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "#14b8a6" }}>
+                {Number(assessment.weightedScores.overall || 0).toFixed(1)}%
+              </span>
             </div>
           )}
         </div>
@@ -120,30 +172,22 @@ function Summary() {
         <div style={{ marginBottom: "40px" }}>
           <h2 style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#f1f5f9", fontWeight: 700 }}>Stage Compliance</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
-            {scores && Object.entries(scores).map(([key, counts]) => {
-              // Convert raw counts to percentages for the box
-              const total = counts.yes + counts.partial + counts.no + (counts.na || 0);
-              const getPct = (val) => total === 0 ? 0 : Math.round((val / total) * 100);
-              const stats = {
-                yes: getPct(counts.yes),
-                partial: getPct(counts.partial),
-                no: getPct(counts.no),
-                na: getPct(counts.na || 0)
-              };
-              return (
-                <ComplianceBox key={key} title={stageNames[key] || key} stats={stats} isMandatory={key === "stage1"} />
-              );
-            })}
+            {stages.map((stage) => (
+              <ComplianceBox 
+                key={stage.key} 
+                title={stage.title} 
+                stats={extractStageStats(stage.key)} 
+                isMandatory={stage.key === "stage1"} 
+              />
+            ))}
           </div>
         </div>
 
         {/* PIE CHARTS */}
-        {charts && (
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
-            <PieChartCard title="Mandatory Controls Distribution" data={charts.mandatory} showNA={false} />
-            <PieChartCard title="Annex A Controls Distribution" data={charts.annexA} showNA={true} />
-          </div>
-        )}
+        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
+          <PieChartCard title="Mandatory Controls Distribution" data={getChartData("mandatory")} showNA={false} />
+          <PieChartCard title="Annex A Controls Distribution" data={getChartData("annexA")} showNA={true} />
+        </div>
 
         {/* BOTTOM ACTIONS */}
         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginTop: "20px" }}>

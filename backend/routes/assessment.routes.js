@@ -161,13 +161,10 @@ function tryBackfillRecommendationsFromJson(result) {
 }
 
 function tryBackfillScoresFromJson(result) {
-  // If scores are missing, recompute them from stored answers.
+  // If scores are missing, recompute them from stored answers using the new Thesis Engine.
   if (!result) return result;
 
-  // Prefer answers embedded in the result
   const embeddedAnswers = result.answers && typeof result.answers === "object" ? result.answers : null;
-
-  // Otherwise look up answers by assessmentId
   const assessmentId = result.assessmentId;
   if (!assessmentId) return result;
 
@@ -177,10 +174,10 @@ function tryBackfillScoresFromJson(result) {
   const answers = embeddedAnswers || (match && match.answers);
   if (!answers || typeof answers !== "object") return result;
 
-  const nextScores = calculateAllScores(answers);
-  if (!nextScores || typeof nextScores !== "object") return result;
-
-  return { ...result, scores: nextScores };
+  // Use the new summary engine to get a standardized thesis-grade payload
+  const summary = getFullSummary(answers, result.smeProfile || match?.smeProfile || {});
+  
+  return { ...result, ...summary };
 }
 
 // POST /api/assessment/analyze
