@@ -131,7 +131,7 @@ function Stage2Organizational() {
       return;
     }
 
-    // ✅ GO TO PEOPLE (Stage 3)
+    // GO TO PEOPLE (Stage 3)
     navigate("/assessment/people");
   };
 

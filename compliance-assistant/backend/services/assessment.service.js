@@ -4,8 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 
-import { calculateAllScores } from "../utils/scoring.js";
-import { generateRecommendations } from "../utils/recommendations.js";
+import { calculateComplianceResults } from "../utils/complianceCalculation.js";
 import { readJsonArray, writeJson, ensureJsonFile } from "../utils/jsonStore.js";
 import {
   isFirestoreEnabled,
@@ -48,30 +47,41 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
     console.log("[analyze] answers type:", answersType);
   }
 
-  // Extract sector so the scoring engine can apply sector-specific weights.
+  // Extract sector for sector-specific weights.
   const sector = String(smeProfile?.sector || "").trim() || null;
-  const scores = calculateAllScores(answers, sector);
-  if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] scores:", scores);
+
+  // Compose controls array from answers (flatten all stages)
+  const controls = [];
+  if (answers && typeof answers === "object") {
+    Object.entries(answers).forEach(([stageKey, stageAnswers]) => {
+      if (stageAnswers && typeof stageAnswers === "object") {
+        Object.entries(stageAnswers).forEach(([qId, value]) => {
+          controls.push({
+            id: qId,
+            status: value,
+            // TODO: Add isApplicable, isImplicitNo, subQuestions if available from frontend
+          });
+        });
+      }
+    });
   }
 
-  // Recommendations can be personalized using organization name.
-  const orgName = String(smeProfile?.organizationName || "").trim();
-  const recommendations = generateRecommendations(answers, {
-    orgName: orgName || "The organization",
-  });
+  // Calculate thesis-grade compliance results
+  const complianceResults = calculateComplianceResults(controls, sector);
   if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] recommendations count:", recommendations.length);
+    console.log("[analyze] complianceResults:", complianceResults);
   }
 
-  // Result returned to the frontend.
+  // Result returned to the frontend (save all required fields)
   const result = {
     assessmentId,
     userId,
     timestamp,
     smeProfile: smeProfile || {},
-    scores,
-    recommendations,
+    sector,
+    responses: answers,
+    complianceResults,
+    recommendations: complianceResults.recommendations,
   };
 
   // Persistence

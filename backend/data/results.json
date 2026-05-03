@@ -38325,5 +38325,273 @@
       }
     },
     "recommendations": []
+  },
+  {
+    "assessmentId": "7a78ec7e-d745-42ab-84be-60229d5f1eba",
+    "userId": "test",
+    "timestamp": "2026-03-07T06:42:23.865Z",
+    "smeProfile": {},
+    "scores": {
+      "stageScores": {
+        "stage1": {
+          "totalScore": 1,
+          "maxPossibleScore": 1,
+          "averageScore": 1,
+          "percent": 100,
+          "breakdown": {
+            "counts": {
+              "yes": 1,
+              "partial": 0,
+              "no": 0,
+              "unanswered": 0,
+              "total": 1
+            },
+            "percent": {
+              "fullyCompliant": 100,
+              "partiallyCompliant": 0,
+              "nonCompliant": 0,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 1,
+          "max": 1
+        },
+        "stage2": {
+          "totalScore": 1,
+          "maxPossibleScore": 32,
+          "averageScore": 0.03125,
+          "percent": 3,
+          "breakdown": {
+            "counts": {
+              "yes": 1,
+              "partial": 0,
+              "no": 31,
+              "unanswered": 0,
+              "total": 32
+            },
+            "percent": {
+              "fullyCompliant": 3,
+              "partiallyCompliant": 0,
+              "nonCompliant": 97,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 5,
+          "raw": 1,
+          "max": 32
+        },
+        "stage3": {
+          "totalScore": 0,
+          "maxPossibleScore": 8,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 8,
+              "unanswered": 0,
+              "total": 8
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 0,
+          "max": 8
+        },
+        "stage4": {
+          "totalScore": 0,
+          "maxPossibleScore": 14,
+          "averageScore": 0,
+          "percent": 0,
+          "breakdown": {
+            "counts": {
+              "yes": 0,
+              "partial": 0,
+              "no": 14,
+              "unanswered": 0,
+              "total": 14
+            },
+            "percent": {
+              "fullyCompliant": 0,
+              "partiallyCompliant": 0,
+              "nonCompliant": 100,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 0,
+          "raw": 0,
+          "max": 14
+        },
+        "stage5": {
+          "totalScore": 1,
+          "maxPossibleScore": 27,
+          "averageScore": 0.037037037037037035,
+          "percent": 4,
+          "breakdown": {
+            "counts": {
+              "yes": 1,
+              "partial": 0,
+              "no": 26,
+              "unanswered": 0,
+              "total": 27
+            },
+            "percent": {
+              "fullyCompliant": 4,
+              "partiallyCompliant": 0,
+              "nonCompliant": 96,
+              "unanswered": 0
+            }
+          },
+          "notApplicableCount": 7,
+          "raw": 1,
+          "max": 27
+        }
+      },
+      "overall": {
+        "totalScore": 2,
+        "maxPossibleScore": 81,
+        "averageScore": 0.024691358024691357,
+        "percent": 2,
+        "maturityLevel": "Initial",
+        "raw": 2,
+        "max": 81
+      },
+      "complianceBreakdown": {
+        "counts": {
+          "yes": 2,
+          "partial": 0,
+          "no": 79,
+          "unanswered": 0,
+          "total": 81
+        },
+        "percent": {
+          "fullyCompliant": 2,
+          "partiallyCompliant": 0,
+          "nonCompliant": 98,
+          "unanswered": 0
+        }
+      },
+      "overallMandatory": {
+        "totalScore": 1,
+        "maxPossibleScore": 1,
+        "averageScore": 1,
+        "percent": 100,
+        "maturityLevel": "Optimized",
+        "raw": 1,
+        "max": 1
+      },
+      "overallAnnexA": {
+        "totalScore": 2,
+        "maxPossibleScore": 81,
+        "averageScore": 0.024691358024691357,
+        "percent": 2,
+        "maturityLevel": "Initial",
+        "raw": 2,
+        "max": 81
+      },
+      "complianceBreakdownMandatory": {
+        "counts": {
+          "yes": 1,
+          "partial": 0,
+          "no": 0,
+          "unanswered": 0,
+          "total": 1
+        },
+        "percent": {
+          "fullyCompliant": 100,
+          "partiallyCompliant": 0,
+          "nonCompliant": 0,
+          "unanswered": 0
+        }
+      },
+      "complianceBreakdownAnnexA": {
+        "counts": {
+          "yes": 2,
+          "partial": 0,
+          "no": 79,
+          "unanswered": 0,
+          "total": 81
+        },
+        "percent": {
+          "fullyCompliant": 2,
+          "partiallyCompliant": 0,
+          "nonCompliant": 98,
+          "unanswered": 0
+        }
+      }
+    },
+    "recommendations": [
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.24",
+        "questionId": "A5.24.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should define and document an incident management approach (roles, reporting, triage, escalation, communications, and response steps) and ensure staff know how to report incidents."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.25",
+        "questionId": "A5.25.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should define event triage and classification (severity levels, criteria, escalation rules) and ensure it is applied consistently with evidence."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.26",
+        "questionId": "A5.26.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should define incident response steps (containment, eradication, recovery, communications), assign owners, and keep evidence of actions taken for each incident."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.27",
+        "questionId": "A5.27.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should perform post-incident reviews, identify root causes and improvement actions, update controls/procedures/training, and track actions to completion."
+      },
+      {
+        "stageId": "stage2",
+        "controlId": "A.5.28",
+        "questionId": "A5.28.Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should implement a simple RCA process for serious incidents (causal analysis, contributing factors, corrective actions) and document outcomes and approvals."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.20",
+        "questionId": "A8.20_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should implement network security controls such as firewalls, secure configuration, segmentation where needed, and monitoring, with clear ownership and change control."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.21",
+        "questionId": "A8.21_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should secure network services (such as name resolution, remote access, wireless) with strong authentication, secure configuration, and monitoring appropriate to risk."
+      },
+      {
+        "stageId": "stage5",
+        "controlId": "A.8.22",
+        "questionId": "A8.22_Q1",
+        "complianceState": "NOT_COMPLIANT",
+        "priority": "HIGH",
+        "recommendation": "The organization should segment networks based on risk (for example separating user devices, servers, and sensitive systems) and restrict traffic between segments to necessary flows only."
+      }
+    ]
   }
 ]

@@ -123,18 +123,9 @@ function hasOutdatedTechnologicalControlTemplates(result) {
   });
 }
 
+// Always regenerate recommendations from latest answers to avoid stale data
 function tryBackfillRecommendationsFromJson(result) {
-  // If recommendations are missing/outdated, regenerate them from stored answers.
-  if (
-    !result ||
-    (!hasEmptyRecommendations(result) &&
-      !hasLegacyRecommendationsShape(result) &&
-      !hasGenericFallbackRecommendations(result) &&
-      !hasOutdatedPeopleControlTemplates(result) &&
-      !hasOutdatedTechnologicalControlTemplates(result))
-  ) {
-    return result;
-  }
+  if (!result) return result;
 
   // Prefer answers embedded in the stored result (Firestore may include it).
   const embeddedAnswers = result.answers && typeof result.answers === "object" ? result.answers : null;
@@ -154,14 +145,11 @@ function tryBackfillRecommendationsFromJson(result) {
     orgName: orgName || "The organization",
   });
 
-  // If still empty, keep as-is.
-  if (!Array.isArray(recommendations) || recommendations.length === 0) return result;
-
   return { ...result, recommendations };
 }
 
+// Always regenerate scores from latest answers to avoid stale data
 function tryBackfillScoresFromJson(result) {
-  // If scores are missing, recompute them from stored answers.
   if (!result) return result;
 
   // Prefer answers embedded in the result
@@ -287,31 +275,70 @@ router.get("/report/:assessmentId", (req, res) => {
       result?.smeProfile?.organizationName || assessment?.smeProfile?.organizationName || ""
     ).trim();
 
-    // Export-specific: use the stored answers object as-is.
-    // Gateway/showIf rules are handled via applicability logic so suppressed questions/controls
-    // appear as N/A (and do not produce irrelevant recommendations).
-    const exportAnswers = buildAnswersForExport(resolvedAnswers);
-
-    const controlStatuses = buildControlStatusSummary(exportAnswers, {
+    // --- Strict evaluatedControls array ---
+    // Use buildControlStatusSummary to get all controls, then map to strict shape
+    const controlStatuses = buildControlStatusSummary(resolvedAnswers, {
       orgName: orgName || "The organization",
       includeSuppressed: true,
       includeGatewayQuestions: true,
     });
 
-    // Per-question recommendations (matches UI output), including gateway-controlled follow-ups.
-    const recommendations = generateRecommendations(exportAnswers, {
-      orgName: orgName || "The organization",
-      includeSuppressed: true,
-      includeGatewayQuestions: true,
+    // Map to strict evaluatedControls array, log unexpected complianceState
+    const evaluatedControls = controlStatuses.map(ctrl => {
+      let status;
+      if (ctrl.complianceState === "FULLY_COMPLIANT") status = "YES";
+      else if (ctrl.complianceState === "PARTIALLY_COMPLIANT") status = "PARTIAL";
+      else if (ctrl.complianceState === "NOT_COMPLIANT") status = "NO";
+      else if (ctrl.complianceState === "NOT_APPLICABLE") status = "N/A";
+      else {
+        status = "NO";
+        console.warn("[evaluatedControls] Unexpected complianceState:", ctrl.complianceState, "for controlId:", ctrl.controlId);
+      }
+      return {
+        id: ctrl.controlId,
+        status,
+        isApplicable: ctrl.complianceState !== "NOT_APPLICABLE"
+      };
     });
+
+    // Recommendations only for NO or PARTIAL, now include w_j, score_j, priority
+    const recommendations = (result.recommendations || []).map(r => ({
+      controlId: r.controlId,
+      stageId: r.stageId,
+      complianceState: r.complianceState,
+      w_j: r.w_j,
+      score_j: r.score_j,
+      priority: r.priority,
+      recommendation: r.recommendation
+    }));
+
+    // Calculate distributions using complianceCalculation.js logic
+    const mandatoryControls = evaluatedControls.filter(c => /^\d+\./.test(c.id));
+    const annexAControls = evaluatedControls.filter(c => /^A\./i.test(c.id));
+    const sector = result.smeProfile?.sector || assessment?.smeProfile?.sector || null;
+    const { calculateComplianceResults } = require("../utils/complianceCalculation.js");
+    const mandatoryResults = calculateComplianceResults(mandatoryControls, sector);
+    const annexAResults = calculateComplianceResults(annexAControls, sector);
+    const mandatory_distribution = mandatoryResults.distribution;
+    const annexA_distribution = annexAResults.distribution;
+    const mandatory_pie = mandatoryResults.piePercentages;
+    const annexA_pie = annexAResults.piePercentages;
+
+    // Control scores for traceability
+    const control_scores = evaluatedControls.map(c => ({
+      id: c.id,
+      status: c.status,
+      isApplicable: c.isApplicable
+    }));
 
     return {
-      assessmentId,
-      smeProfile: result.smeProfile || assessment?.smeProfile || {},
-      scores: result.scores || {},
-      answers: exportAnswers,
-      controlStatuses,
+      mandatory_distribution,
+      annexA_distribution,
+      mandatory_pie,
+      annexA_pie,
+      control_scores,
       recommendations,
+      sector,
     };
   };
 

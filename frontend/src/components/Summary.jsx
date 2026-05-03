@@ -110,7 +110,7 @@ function buildAnnexSummaryWithNotApplicable(counts, total, notApplicableCount) {
   const partialCount = Math.max(0, Number(counts.partial ?? 0));
 
   // Backend breakdown for Annex A is computed on the "applicable" set only
-  // (expected total minus NOT_APPLICABLE controls). So we derive the remaining
+  // (expected total minus NOT_APPLICABLE controls).
   // "Not compliant" bucket against the full 93 total.
   const nonCount = Math.max(0, t - na - fullyCount - partialCount);
 
@@ -172,7 +172,7 @@ function buildAnnexPieData(summary) {
   };
 }
 
-export default function Summary() {
+function Summary() {
   const { assessmentId } = useParams();
   const navigate = useNavigate();
 
@@ -723,3 +723,5 @@ export default function Summary() {
     </div>
   );
 }
+
+export default Summary;

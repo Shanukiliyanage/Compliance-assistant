@@ -72,6 +72,17 @@ function Stage2Organizational() {
     });
   };
 
+  // Enhanced: also return NA/Implicit No status for each question
+  const getQuestionStatus = (q, nextAnswers) => {
+    if (!isQuestionVisible(q, nextAnswers)) {
+      // If hidden due to parent not answered, treat as True N/A
+      if (!(q?.showIf?.questionId in nextAnswers)) return { isNA: true, isImplicitNo: false };
+      // If hidden due to parent answered 'no', treat as Implicit No
+      return { isNA: false, isImplicitNo: true };
+    }
+    return { isNA: false, isImplicitNo: false };
+  };
+
   const handleAnswer = (questionId, value) => {
     setAnswers((prev) => {
       const next = { ...prev, [questionId]: value };
@@ -101,6 +112,21 @@ function Stage2Organizational() {
       setMissingIds((prev) => prev.filter((id) => id !== questionId));
     }
     setShowValidationError(false);
+  };
+
+  // When saving/submitting, build a controls array with isNA/isImplicitNo for backend
+  const buildControlsForBackend = () => {
+    return controls.flatMap((control) =>
+      (control.questions || []).map((q) => {
+        const { isNA, isImplicitNo } = getQuestionStatus(q, answers);
+        return {
+          id: q.id,
+          status: answers[q.id],
+          isApplicable: !isNA,
+          isImplicitNo,
+        };
+      })
+    );
   };
 
   const validateAndNext = () => {

@@ -10788,5 +10788,35 @@
       "stage4": {},
       "stage5": {}
     }
+  },
+  {
+    "assessmentId": "7a78ec7e-d745-42ab-84be-60229d5f1eba",
+    "userId": "test",
+    "timestamp": "2026-03-07T06:42:23.865Z",
+    "smeProfile": {},
+    "answers": {
+      "stage1": {
+        "4.1": "yes"
+      },
+      "stage2": {
+        "A5.1.Q1": "yes",
+        "A5.19.GW1": "no",
+        "A5.23.Q1": "no",
+        "A5.24.Q1": "no",
+        "A5.25.Q1": "no",
+        "A5.26.Q1": "no",
+        "A5.27.Q1": "no",
+        "A5.28.Q1": "no"
+      },
+      "stage3": {},
+      "stage4": {},
+      "stage5": {
+        "A8.1_Q1": "yes",
+        "A8.20_Q1": "no",
+        "A8.21_Q1": "no",
+        "A8.22_Q1": "no",
+        "SDLC_GATE_Q1": "no"
+      }
+    }
   }
 ]

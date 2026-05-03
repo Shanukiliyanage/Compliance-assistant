@@ -1,55 +1,96 @@
-// Sector-specific control weight profiles.
-//
-// Weight 2   = Critical   (directly governs core sector risk)
+
+// ISO/IEC 27001 Sector-Based Control Weighting System
+// Weight 2.0 = Critical   (directly governs core sector risk)
 // Weight 1.5 = Important  (notable sector relevance, detection/compliance)
-// Weight 1   = Normal     (standard, sector-neutral)
-//
-// Any control not listed here defaults to weight 1.
-// Control IDs must match the normalised form used by scoring.js (e.g. "A.5.12").
+// Weight 1.0 = Standard   (sector-neutral baseline)
 
 export const SECTOR_WEIGHTS = {
-  Manufacturing: {
-    // ── Critical (Weight = 2) ─────────────────────────────────────────────
-    "A.7.1":  2,   // Physical security (access control mechanisms)
-    "A.7.2":  2,   // Physical entry (server room access restriction)
+ 
+  SOFTWARE_IT: {
+    // Critical (DEMATEL-based high influence controls)
+    "A.5.7": 2.0,
+    "A.8.25": 2.0,
+    "A.8.27": 2.0,
+    "A.8.28": 2.0,
+    "A.8.29": 2.0,
+    "A.8.31": 2.0,
 
-    // ── Important (Weight = 1.5) ──────────────────────────────────────────
-    "A.7.3":  1.5, // Securing offices, rooms and facilities (visitor escort)
-    "A.7.4":  1.5, // Physical security monitoring (CCTV)
+    // Important
+    "A.8.26": 1.5,
+    "A.8.33": 1.5,
 
-    // ── Normal (Weight = 1) ───────────────────────────────────────────────
-    "A.7.5":  1,   // Protection against environmental threats
-    "A.7.11": 1,   // Supporting utilities
+    // Standard
+    "A.8.4": 1.0,
   },
 
-  Healthcare: {
-    // ── Critical (Weight = 2) ─────────────────────────────────────────────
-    "A.5.12": 2,   // Classification of information
-    "A.8.24": 2,   // Use of cryptography
-    "A.8.3":  2,   // Information access restriction
+  HEALTHCARE: {
+    // Critical (AHP-based priorities: confidentiality + availability)
+    "A.8.24": 2.0,
+    "A.8.3": 2.0,
+    "A.5.34": 2.0,
+    "A.5.29": 2.0,
+    "A.5.30": 2.0,
+    "A.8.13": 2.0,
 
-    // ── Important (Weight = 1.5) ──────────────────────────────────────────
-    "A.8.15": 1.5, // Logging
-    "A.8.16": 1.5, // Monitoring activities
-    "A.5.34": 1.5, // Privacy and protection of PII
+    // Important
+    "A.8.15": 1.5,
+    "A.8.16": 1.5,
+    "A.8.14": 1.5,
 
-    // ── Normal (Weight = 1) ───────────────────────────────────────────────
-    "A.5.13": 1,   // Labelling of information
-    "A.5.31": 1,   // Legal, statutory, regulatory requirements
+    // Standard
+    "A.5.12": 1.0,
+    "A.5.13": 1.0,
+    "A.5.31": 1.0,
+  },
+
+  MANUFACTURING: {
+    // Critical (physical + operational dominance)
+    "A.7.1": 2.0,
+    "A.7.2": 2.0,
+    "A.5.19": 2.0,
+
+    // Important
+    "A.7.3": 1.5,
+    "A.7.4": 1.5,
+    "A.5.20": 1.5,
+    "A.5.21": 1.5,
+    "A.5.22": 1.5,
+
+    // Standard
+    "A.7.5": 1.0,
+    "A.7.11": 1.0,
+    "A.5.23": 1.0,
+  },
+
+  FINANCIAL: {
+    // Critical (CILOS-TOPSIS + PRISM validated)
+    "A.8.24": 2.0,
+    "A.8.15": 2.0,
+    "A.8.16": 2.0,
+    "A.8.13": 2.0,
+    "A.5.30": 2.0,
+    "A.5.33": 2.0,
+
+    // Important
+    "A.8.2": 1.5,
+    "A.8.18": 1.5,
+    "A.5.12": 1.5,
+    "A.5.34": 1.5,
+
+    // Standard
+    "A.8.11": 1.0,
+    "A.8.20": 1.0,
   },
 };
 
 /**
  * Returns the weight for a specific control in a given sector.
- * Falls back to 1 if the sector or control is not listed.
- *
- * @param {string} controlId  Normalised control ID, e.g. "A.5.12"
- * @param {string|null} sector  Sector name as stored in smeProfile.sector
- * @returns {number}
  */
 export function getControlWeight(controlId, sector) {
-  if (!sector) return 1;
-  const profile = SECTOR_WEIGHTS[sector];
-  if (!profile) return 1;
-  return profile[controlId] ?? 1;
+  if (!sector) return 1.0;
+
+  const profile = SECTOR_WEIGHTS[sector.toUpperCase?.()];
+  if (!profile) return 1.0;
+
+  return profile[controlId] ?? 1.0;
 }

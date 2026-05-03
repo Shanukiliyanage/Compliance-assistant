@@ -5,22 +5,23 @@ import { getControlComplianceState } from "../rules/complianceRules.js";
 import { getRecommendationForControl } from "../rules/recommendationRules.js";
 import { getNotApplicableControlIds } from "./applicability.js";
 
-function getPriorityFromComplianceState(complianceState) {
-  // Minimal prioritization rule used by the report/UI.
-  const cs = String(complianceState || "").toUpperCase();
-  if (cs === "NOT_COMPLIANT") return "HIGH";
-  if (cs === "PARTIALLY_COMPLIANT") return "MEDIUM";
-  return "NONE";
+import { getControlWeight } from "../rules/sectorWeights.js";
+
+// Compute recommendation priority: Priority_j = w_j * (1 - Score_j)
+function getRecommendationPriority(controlId, sector, score_j) {
+  const w_j = getControlWeight(controlId, sector);
+  const priority = w_j * (1 - score_j);
+  // Fully compliant controls: priority = 0
+  return priority;
 }
 
 function mapAnswerToComplianceState(value) {
-  const v = String(value ?? "")
-    .trim()
-    .toLowerCase();
-  if (v === "yes") return "FULLY_COMPLIANT";
-  if (v === "no") return "NOT_COMPLIANT";
-  if (v === "partial" || v === "partially") return "PARTIALLY_COMPLIANT";
-  if (v === "not applicable" || v === "n/a" || v === "na") return "NOT_APPLICABLE";
+  if (value == null) return "";
+  const v = String(value).trim().toLowerCase();
+  if (["yes", "y", "true", "1"].includes(v)) return "FULLY_COMPLIANT";
+  if (["no", "n", "false", "0"].includes(v)) return "NOT_COMPLIANT";
+  if (["partial", "partially", "part", "p"].includes(v)) return "PARTIALLY_COMPLIANT";
+  if (["not applicable", "n/a", "na", "notapplicable"].includes(v.replace(/\s+/g, ""))) return "NOT_APPLICABLE";
   return "";
 }
 
@@ -170,6 +171,8 @@ export function generateRecommendations(answers, options = {}) {
       if (stageId === "stage5" && isSuppressedByStage5Gates(questionId, stage)) continue;
 
       const complianceState = mapAnswerToComplianceState(answerValue);
+      // Only emit recommendations for NO or PARTIAL answers
+      if (complianceState !== "NOT_COMPLIANT" && complianceState !== "PARTIALLY_COMPLIANT") continue;
       if (!complianceState || complianceState === "NOT_APPLICABLE") continue;
 
       // For Annex A stages, normalize question IDs to the canonical controlId used by rules and N/A.
@@ -181,7 +184,13 @@ export function generateRecommendations(answers, options = {}) {
       // Only emit a question-level recommendation when an explicit rule exists.
       const recommendation = getRecommendationForControl(questionId, complianceState, orgName);
 
-      const priority = getPriorityFromComplianceState(complianceState);
+      // Score_j mapping: Yes=1.0, Partial=0.5, No/Implicit NO=0.0
+      let score_j = 0.0;
+      if (complianceState === "FULLY_COMPLIANT") score_j = 1.0;
+      else if (complianceState === "PARTIALLY_COMPLIANT") score_j = 0.5;
+      // else 0.0
+      const w_j = getControlWeight(controlId, options?.sector);
+      const priority = getRecommendationPriority(controlId, options?.sector, score_j);
       if (recommendation) {
         controlsWithQuestionRecs.add(controlId);
         recommendations.push({
@@ -189,6 +198,8 @@ export function generateRecommendations(answers, options = {}) {
           controlId,
           questionId,
           complianceState,
+          score_j,
+          w_j,
           priority,
           recommendation,
         });
@@ -203,7 +214,15 @@ export function generateRecommendations(answers, options = {}) {
       if (controlsWithQuestionRecs.has(controlId)) return;
 
       const complianceState = getControlComplianceState(questionAnswers);
-      const priority = getPriorityFromComplianceState(complianceState);
+      // Only emit recommendations for NO or PARTIAL controls
+      if (complianceState !== "NOT_COMPLIANT" && complianceState !== "PARTIALLY_COMPLIANT") return;
+      // Score_j mapping: Yes=1.0, Partial=0.5, No/Implicit NO=0.0
+      let score_j = 0.0;
+      if (complianceState === "FULLY_COMPLIANT") score_j = 1.0;
+      else if (complianceState === "PARTIALLY_COMPLIANT") score_j = 0.5;
+      // else 0.0
+      const w_j = getControlWeight(controlId, options?.sector);
+      const priority = getRecommendationPriority(controlId, options?.sector, score_j);
       const recommendation = getRecommendationForControl(controlId, complianceState, orgName);
 
       if (recommendation) {
@@ -211,6 +230,8 @@ export function generateRecommendations(answers, options = {}) {
           controlId,
           stageId,
           complianceState,
+          score_j,
+          w_j,
           priority,
           recommendation,
         });

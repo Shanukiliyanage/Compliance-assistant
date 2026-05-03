@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import physicalData from "../data/physical.json";
 
 // Stage 4 (Physical) questionnaire.
-// Normalizes the JSON shape, persists answers in localStorage, and validates completion.
+// Normalizes the JSON shape, and validates completion.
 function Stage4Physical() {
   const navigate = useNavigate();
 

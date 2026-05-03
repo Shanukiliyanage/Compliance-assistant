@@ -2,7 +2,6 @@
 // Normalizes answers, applies applicability rules, and computes stage + overall scores.
 import { SCORE_RULES } from "../rules/scoreRules.js";
 import { getControlComplianceState } from "../rules/complianceRules.js";
-import { getMaturityLevelFromAverage } from "../rules/maturityRules.js";
 import { getNotApplicableControlIds } from "./applicability.js";
 
 // How many Annex A controls exist per stage (ISO 27001:2022).

@@ -374,6 +374,24 @@ function normalizeRecommendation(rec, textIndex) {
       "10.1": { 1: "10.1", 2: "10.2" },
     };
 
+    // Always show question text (or questionId) as subtitle for all stages
+    let subtitle = "";
+    if (questionTitle) {
+      subtitle = `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`;
+    } else if (questionId) {
+      subtitle = questionId;
+    } else if (stageId && controlId && textIndex?.get) {
+      // Fallback: show first question under this control if questionId is missing
+      // Try Q1, Q2, Q3 in order
+      for (let i = 1; i <= 3; ++i) {
+        const tryQ = textIndex.get(`${stageId}::${controlId}.Q${i}`);
+        if (tryQ) {
+          subtitle = `Q${i} - ${tryQ}`;
+          break;
+        }
+      }
+    }
+
     // Stage 1: show full clause title (e.g. "Clause 5: Leadership"), not sub-numbers.
     if (stageId === "stage1") {
       const idStr = String(controlId || "").trim();
@@ -408,7 +426,7 @@ function normalizeRecommendation(rec, textIndex) {
       })();
 
       // Path A: question-level ids like "5.1.Q2" or "6.1.Q1".
-      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/i.exec(idStr);
+      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/.exec(idStr);
       if (m) {
         const majorClause = m[1];
         const base = `${m[1]}.${m[2]}`;
@@ -460,9 +478,7 @@ function normalizeRecommendation(rec, textIndex) {
       complianceState,
       priority,
       title: controlId ? `Control ${controlId}.` : clauseTitle || "Recommendation",
-      subtitle: questionTitle
-        ? `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`
-        : "",
+      subtitle,
       description: rec.recommendation,
       stageLabel,
     };

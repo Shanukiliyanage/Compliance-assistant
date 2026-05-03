@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { getAssessmentReport, getAssessmentResult } from "../services/backendApi";
-
 import mandatoryData from "../data/mandatory.json";
 import organizationalData from "../data/organizational.json";
 import peopleData from "../data/people.json";
 import physicalData from "../data/physical.json";
 import technologicalData from "../data/technological.json";
+import { getAssessmentReport, getAssessmentResult } from "../services/backendApi";
+import { extractComplianceSummary } from "../utils/scoring";
+import { generateComplianceReportSummary } from "../utils/complianceReportUtils";
 
 // Recommendations page for a completed assessment (stage filtering + report download).
 
@@ -187,8 +188,33 @@ function isQuestionApplicable(stageId, controlId, question, answersByStage) {
 
 
 function getStage1Controls() {
-  // mandatory.json is an array; keys are clause strings like "4.1".
-  const items = getMandatoryItems(mandatoryData);
+    const complianceSummary = extractComplianceSummary(assessment);
+    const recommendations = complianceSummary?.recommendations || [];
+
+    return (
+      <div style={{ padding: "40px 20px", maxWidth: 800, margin: "0 auto" }}>
+        <h1 style={{ fontSize: "2rem", marginBottom: 24, color: "#0F172A" }}>Recommendations</h1>
+        {loading && <p>Loading...</p>}
+        {error && <p style={{ color: "#dc2626" }}>{error}</p>}
+        {!loading && !error && (
+          <div style={{ display: "grid", gap: "16px" }}>
+            {recommendations.length === 0 && <p>No recommendations found. All controls are compliant.</p>}
+            {recommendations.map((rec, idx) => (
+              <div key={rec.id || idx} style={{ background: "#fff", borderRadius: 10, padding: "18px 24px", color: "#0F172A", fontWeight: 600, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                <span style={{ color: "#dc2626", fontWeight: 800, marginRight: 8 }}>#{idx + 1}</span>
+                <b>Control:</b> {rec.id} &nbsp;|&nbsp; <b>Priority:</b> {rec.priority?.toFixed(2)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+
+
+// Helper to group questions by clause (used elsewhere in the app)
+export function groupQuestionsByClause(items) {
   const clauseMap = {
     4: { controlId: "CL4_CONTEXT", controlName: "Clause 4: Context of the Organization", questions: [] },
     5: { controlId: "CL5_LEADERSHIP", controlName: "Clause 5: Leadership", questions: [] },
@@ -198,7 +224,6 @@ function getStage1Controls() {
     9: { controlId: "CL9_EVALUATION", controlName: "Clause 9: Performance Evaluation", questions: [] },
     10: { controlId: "CL10_IMPROVEMENT", controlName: "Clause 10: Improvement", questions: [] },
   };
-
   for (const q of items) {
     const clause = String(q?.clause ?? extractClause(q?.id) ?? "").trim();
     const major = getMajorClause(clause);
@@ -211,11 +236,10 @@ function getStage1Controls() {
       explanation: q?.explanation ?? q?.helpText,
     });
   }
-
   return Object.values(clauseMap);
 }
 
-function mapStageObjectToControls(stageObject) {
+export function mapStageObjectToControls(stageObject) {
   // Converts stage JSON (object keyed by controlId) into a consistent array shape.
   return Object.entries(stageObject || {}).map(([controlId, entry]) => ({
     controlId: canonicalizeAnnexId(controlId),
@@ -598,8 +622,38 @@ export default function RecommendationsPage() {
         (report?.controlStatuses || []).map((s) => [`${s.stageId}::${s.controlId}`, s])
       );
 
+
       const orgName = report?.smeProfile?.organizationName || "";
+      const sector = report?.smeProfile?.sector || "";
+      const size = report?.smeProfile?.size || "";
+      const dataType = report?.smeProfile?.dataType || "";
       const generatedAt = new Date().toLocaleString();
+
+      // Use strict evaluatedControls array from backend for all calculations
+      const evaluatedControls = Array.isArray(report?.evaluatedControls) ? report.evaluatedControls : [];
+      // For summary and pie chart, map N/A to NA, etc.
+      const allControlResults = evaluatedControls.map(ctrl => ({
+        id: ctrl.id,
+        status: ctrl.status === "N/A" ? "N/A" : ctrl.status,
+        isApplicable: ctrl.isApplicable
+      }));
+      // For summary, treat N/A as not applicable
+      const summary = generateComplianceReportSummary(allControlResults);
+
+      // Calculate percentages for Annex A
+      const annexA = summary.annexA;
+      const annexATotal = annexA.total || 1;
+      const annexAYes = Math.round((annexA.fullyCompliant / annexATotal) * 100);
+      const annexAPartial = Math.round((annexA.partiallyCompliant / annexATotal) * 100);
+      const annexANo = Math.round((annexA.notCompliant / annexATotal) * 100);
+      const annexANA = Math.round((annexA.notApplicable / annexATotal) * 100);
+
+      // Calculate percentages for Mandatory Clauses
+      const mandatory = summary.mandatoryClauses;
+      const mandatoryTotal = mandatory.total || 1;
+      const mandatoryYes = Math.round((mandatory.fullyCompliant / mandatoryTotal) * 100);
+      const mandatoryPartial = Math.round((mandatory.partiallyCompliant / mandatoryTotal) * 100);
+      const mandatoryNo = Math.round((mandatory.notCompliant / mandatoryTotal) * 100);
 
       let body = "";
       const stageOrder = ["stage1", "stage2", "stage3", "stage4", "stage5"];
@@ -674,6 +728,7 @@ export default function RecommendationsPage() {
               const questionText = q?.question || q?.text || "";
               const applicable = isQuestionApplicable(stageId, control.controlId, q, answers);
               const answerLabel = normalizeAnswerLabel(answerValue);
+              // Only show recommendations for NO and PARTIAL answers
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
               const isNotApplicableAnswer = answerLabel === "N/A";
 
@@ -746,6 +801,9 @@ export default function RecommendationsPage() {
       h1 { margin: 0 0 8px; }
       h2 { margin-top: 28px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
       .meta { color: #444; margin-bottom: 18px; }
+      .summary-table { margin-bottom: 18px; }
+      .summary-table th, .summary-table td { padding: 4px 12px; text-align: left; }
+      .summary-table th { background: #f5f5f5; }
       .control { margin: 14px 0 18px; page-break-inside: avoid; }
       table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; }
       th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
@@ -767,8 +825,32 @@ export default function RecommendationsPage() {
     <div class="meta">
       <div><strong>Assessment ID:</strong> ${escapeHtml(assessmentId)}</div>
       <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
+      <div><strong>Sector:</strong> ${escapeHtml(sector)}</div>
+      <div><strong>Number of Employees:</strong> ${escapeHtml(size)}</div>
+      <div><strong>Data Type:</strong> ${escapeHtml(dataType)}</div>
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
     </div>
+
+    <table class="summary-table">
+      <caption style="font-weight:bold;text-align:left;margin-bottom:4px;">Annex A Controls Summary</caption>
+      <tr><th>YES</th><th>PARTIAL</th><th>NO</th><th>N/A</th></tr>
+      <tr>
+        <td>${annexAYes}%</td>
+        <td>${annexAPartial}%</td>
+        <td>${annexANo}%</td>
+        <td>${annexANA}%</td>
+      </tr>
+    </table>
+    <table class="summary-table">
+      <caption style="font-weight:bold;text-align:left;margin-bottom:4px;">Mandatory Clauses Summary</caption>
+      <tr><th>YES</th><th>PARTIAL</th><th>NO</th></tr>
+      <tr>
+        <td>${mandatoryYes}%</td>
+        <td>${mandatoryPartial}%</td>
+        <td>${mandatoryNo}%</td>
+      </tr>
+    </table>
+
     ${body}
     <script>
       window.print();
@@ -817,7 +899,7 @@ export default function RecommendationsPage() {
   }, []);
 
   const normalizedRecommendations = useMemo(() => {
-    // Convert raw backend recommendations into a stable UI shape.
+    // Use only recommendations for NO or PARTIAL from backend
     const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
     return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);

@@ -53,3 +53,114 @@ export function getControlComplianceState(questionAnswers) {
   if (avg > 0) return "PARTIALLY_COMPLIANT";
   return "NOT_COMPLIANT";
 }
+
+// --- ISO/IEC 27001 Rule-based Compliance Evaluation System ---
+
+// 1. CONTROL GROUP DEFINITIONS
+const CONTROL_GROUPS = [
+  {
+    name: "SUPPLIER MANAGEMENT",
+    type: "CONTEXTUAL",
+    parent: "A.5.19",
+    children: ["A.5.20", "A.5.21", "A.5.22"],
+  },
+  {
+    name: "CLOUD SERVICES",
+    type: "CONTEXTUAL",
+    parent: "A.5.23",
+    children: ["A.5.23.1", "A.5.23.2", "A.5.23.3"], // Replace with actual cloud sub-questions
+  },
+  {
+    name: "SOFTWARE DEVELOPMENT",
+    type: "CONTEXTUAL",
+    parent: "A.8.25",
+    children: ["A.8.26", "A.8.27", "A.8.28", "A.8.29", "A.8.31", "A.8.33"],
+  },
+  {
+    name: "INCIDENT MANAGEMENT",
+    type: "MANDATORY",
+    parent: "A.5.24",
+    children: ["A.5.25", "A.5.26", "A.5.27", "A.5.28"],
+  },
+  {
+    name: "NETWORK SECURITY",
+    type: "MANDATORY",
+    parent: "A.8.20",
+    children: ["A.8.21"],
+  },
+];
+
+// 2. SCORING MODEL
+const SCORE_MAP = {
+  YES: 1.0,
+  PARTIAL: 0.5,
+  NO: 0.0,
+  IMPLICIT_NO: 0.0,
+};
+
+// 3. GATEWAY LOGIC IMPLEMENTATION
+function applyGatewayLogic(answers) {
+  // answers: { [controlId]: { answer: 'YES'|'NO'|'PARTIAL'|... } }
+  const excludedControls = new Set(); // TRUE_NA
+  const implicitFailures = new Set(); // IMPLICIT_NO
+  const patchedAnswers = { ...answers };
+
+  for (const group of CONTROL_GROUPS) {
+    const parentAns = normalizeAnswer(answers[group.parent]?.answer);
+    if (parentAns === "NO") {
+      if (group.type === "CONTEXTUAL") {
+        for (const child of group.children) {
+          patchedAnswers[child] = { answer: "TRUE_NA" };
+          excludedControls.add(child);
+        }
+      } else if (group.type === "MANDATORY") {
+        for (const child of group.children) {
+          patchedAnswers[child] = { answer: "IMPLICIT_NO" };
+          implicitFailures.add(child);
+        }
+      }
+    }
+  }
+  return { patchedAnswers, excludedControls, implicitFailures };
+}
+
+// 4. CALCULATION RULES
+function calculateScores(answers, weights = {}) {
+  // answers: { [controlId]: { answer: ... } }
+  // weights: { [controlId]: number }
+  const controlScores = {};
+  let numerator = 0;
+  let denominator = 0;
+
+  for (const [controlId, { answer }] of Object.entries(answers)) {
+    if (answer === "TRUE_NA") continue; // Exclude from all calcs
+    const score = SCORE_MAP[normalizeAnswer(answer)] ?? null;
+    if (score === null) continue; // skip unanswered
+    const weight = weights[controlId] ?? 1;
+    controlScores[controlId] = score;
+    numerator += score * weight;
+    denominator += weight;
+  }
+  const finalScore = denominator > 0 ? (numerator / denominator) : null;
+  return { finalScore, controlScores };
+}
+
+// 5. MAIN EVALUATION FUNCTION
+/**
+ * Evaluate ISO/IEC 27001 compliance with gateway logic and scoring.
+ * @param {Object} answers - { [controlId]: { answer: 'YES'|'NO'|'PARTIAL'|... } }
+ * @param {Object} weights - { [controlId]: number } (optional)
+ * @returns {Object} { finalScore, controlScores, excludedControls, implicitFailures }
+ */
+export function evaluateCompliance(answers, weights = {}) {
+  // 1. Apply gateway logic
+  const { patchedAnswers, excludedControls, implicitFailures } = applyGatewayLogic(answers);
+  // 2. Calculate scores
+  const { finalScore, controlScores } = calculateScores(patchedAnswers, weights);
+  return {
+    finalScore,
+    controlScores,
+    excludedControls: Array.from(excludedControls),
+    implicitFailures: Array.from(implicitFailures),
+  };
+}

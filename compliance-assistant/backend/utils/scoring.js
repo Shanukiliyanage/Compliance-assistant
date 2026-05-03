@@ -2,7 +2,6 @@
 // Normalizes answers, applies applicability rules, and computes stage + overall scores.
 import { SCORE_RULES } from "../rules/scoreRules.js";
 import { getControlComplianceState } from "../rules/complianceRules.js";
-import { getMaturityLevelFromAverage } from "../rules/maturityRules.js";
 import { getNotApplicableControlIds } from "./applicability.js";
 import { getControlWeight } from "../rules/sectorWeights.js";
 
@@ -244,7 +243,6 @@ export function calculateStageScore(stageId, answers, sector = null) {
   };
 }
 
-// Combines stage scores into a single overall score and maturity label.
 export function calculateOverallScore(stageScores) {
   // Add all points from all stages.
   const totalRaw = Object.values(stageScores).reduce(
@@ -259,14 +257,12 @@ export function calculateOverallScore(stageScores) {
   const averageScore = totalMax > 0 ? totalRaw / totalMax : 0;
   const percent = Math.round(averageScore * 100);
 
-  const maturityLevel = getMaturityLevelFromAverage(averageScore);
 
   return {
     totalScore: totalRaw,
     maxPossibleScore: totalMax,
     averageScore,
     percent,
-    maturityLevel,
     // Back-compat
     raw: totalRaw,
     max: totalMax,

@@ -126,7 +126,7 @@ function Stage3People() {
 
   const handleBack = () => navigate("/assessment/organizational");
 
-  // ✅ Display title logic:
+  // Display title logic:
   // 1) If it says "Control 1", replace with your topic title using index
   // 2) If it contains "A.6.x", strip it
   const getDisplayTitle = (control, idx) => {
