@@ -40,35 +40,23 @@ export function generateRecommendations(details) {
     // 1. Exclude fully compliant and Not Applicable (True N/A) controls
     if (data.score >= 0.99 || data.status === "na") return;
 
-    // 2. Grouping logic: "4.1" or "4.2" -> "4"
-    let groupId = id;
-    let label = `Control ${id}`;
-
+    let label = data.type === "clause" || /^\d+(\.\d+)*$/.test(id) ? `Clause ${id}` : `Control ${id}`;
+    let baseClause = id;
     if (data.type === "clause" || /^\d+(\.\d+)*$/.test(id)) {
-        groupId = id.split(".")[0];
-        label = `Clause ${groupId}`;
+        baseClause = id.split(".")[0];
     }
 
     const priority = (data.weight || 1.0) * (1 - data.score);
     
-    if (!recommendationsMap.has(groupId)) {
-        recommendationsMap.set(groupId, {
-            id: groupId,
-            control: label,
-            priority: priority,
-            riskLevel: getRiskLevel(priority),
-            recommendation: RECOMMENDATION_TEMPLATES[groupId] || `Strengthen compliance for ${label} to reduce organizational risk.`,
-            score: data.score,
-            weight: data.weight || 1.0
-        });
-    } else {
-        // If multiple items in same group, take the highest priority
-        const existing = recommendationsMap.get(groupId);
-        if (priority > existing.priority) {
-            existing.priority = priority;
-            existing.riskLevel = getRiskLevel(priority);
-        }
-    }
+    recommendationsMap.set(id, {
+        id: id,
+        control: label,
+        priority: priority,
+        riskLevel: getRiskLevel(priority),
+        recommendation: RECOMMENDATION_TEMPLATES[baseClause] || RECOMMENDATION_TEMPLATES[id] || `Strengthen compliance for ${label} to reduce organizational risk.`,
+        score: data.score,
+        weight: data.weight || 1.0
+    });
   });
 
   return Array.from(recommendationsMap.values())
