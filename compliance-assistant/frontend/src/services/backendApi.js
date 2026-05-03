@@ -55,7 +55,25 @@ export async function getAssessmentResult(assessmentId) {
   } catch (err) {
     throw new Error(formatNetworkErrorMessage(baseUrl));
   }
-  return parseJsonResponse(res);
+  
+  try {
+    return await parseJsonResponse(res);
+  } catch (err) {
+    if (err.message && err.message.includes("Assessment not found")) {
+      try {
+        const local = localStorage.getItem("assessmentResult");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed.assessmentId === assessmentId) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    throw err;
+  }
 }
 
 export async function getAssessmentReport(assessmentId) {
@@ -67,5 +85,23 @@ export async function getAssessmentReport(assessmentId) {
   } catch (err) {
     throw new Error(formatNetworkErrorMessage(baseUrl));
   }
-  return parseJsonResponse(res);
+  
+  try {
+    return await parseJsonResponse(res);
+  } catch (err) {
+    if (err.message && err.message.includes("Assessment not found")) {
+      try {
+        const local = localStorage.getItem("assessmentResult");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed.assessmentId === assessmentId) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    throw err;
+  }
 }
