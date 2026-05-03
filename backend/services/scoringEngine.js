@@ -7,7 +7,6 @@ import { getControlWeight } from "./weightEngine.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load data files
 const loadJson = (filename) => JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", filename), "utf8"));
 
 const mandatoryData = loadJson("mandatory.json");
@@ -16,15 +15,26 @@ const peopleData = loadJson("people.json");
 const physicalData = loadJson("physical.json");
 const technologicalData = loadJson("technological.json");
 
-function getScore(val) {
-  if (val === "yes") return 1;
-  if (val === "partial") return 0.5;
-  return 0; // Default to No (Implicit No)
+/**
+ * MASTER SCORING MODEL
+ * Yes = 1.0, Partial = 0.5, No = 0.0
+ */
+function getResponseScore(val) {
+  const v = String(val || "").toLowerCase().trim();
+  if (v === "yes") return 1.0;
+  if (v === "partial") return 0.5;
+  return 0.0;
 }
 
-function classifyScore(avg) {
-  if (avg === 1) return "yes";
-  if (avg > 0) return "partial";
+/**
+ * CONTROL STATUS CLASSIFICATION
+ * If score == 1 -> Yes
+ * If score > 0 and < 1 -> Partial
+ * If score == 0 -> No
+ */
+function classifyStatus(score) {
+  if (score >= 0.99) return "yes";
+  if (score > 0) return "partial";
   return "no";
 }
 
@@ -44,99 +54,102 @@ export function calculateScores(answers, smeProfile = {}) {
     weightedScores: {}
   };
 
-  // --- STAGE 1: MANDATORY (Audit-Ready Logic) ---
+  console.log("\n==================================================");
+  console.log("DASHBOARD PERCENTAGE CALCULATION AUDIT");
+  console.log("==================================================");
+
+  // --- STAGE 1: MANDATORY (7 Clauses) ---
   const stage1Answers = answers.stage1 || {};
   const s1Groups = { "4": [], "5": [], "6": [], "7": [], "8": [], "9": [], "10": [] };
   
   mandatoryData.forEach(q => {
     const clauseId = String(q.clause || "").split(".")[0];
     if (s1Groups[clauseId]) {
-      const score = getScore(stage1Answers[q.clause] || stage1Answers[q.id]);
-      s1Groups[clauseId].push(score);
+      s1Groups[clauseId].push(getResponseScore(stage1Answers[q.clause] || stage1Answers[q.id]));
     }
   });
 
-  console.log("--- MANDATORY CLAUSE AUDIT ---");
   Object.entries(s1Groups).forEach(([clauseId, scores]) => {
     const avg = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-    const status = classifyScore(avg);
-    
+    const status = classifyStatus(avg);
     results.summary.stage1[status]++;
-    results.details[clauseId] = { 
-      score: avg, 
-      status, 
-      weight: getControlWeight(clauseId, industry),
-      type: "clause"
-    };
-    
-    console.log(`Clause ${clauseId}: Avg=${avg.toFixed(2)}, Status=${status.toUpperCase()} (${scores.length} questions)`);
+    results.details[clauseId] = { score: avg, status, weight: getControlWeight(clauseId, industry), type: "clause" };
   });
   
-  const s1 = results.summary.stage1;
-  console.log(`TOTALS: Y=${s1.yes}, P=${s1.partial}, N=${s1.no} (Total=${s1.yes + s1.partial + s1.no}/7)`);
-  console.log("------------------------------");
+  logStageAudit("Mandatory Clauses", results.summary.stage1);
 
   // --- ANNEX A STAGES (2-5) ---
   const annexAStages = [
-    { key: "stage2", data: organizationalData },
-    { key: "stage3", data: peopleData },
-    { key: "stage4", data: physicalData },
-    { key: "stage5", data: technologicalData }
+    { key: "stage2", label: "Organizational", data: organizationalData },
+    { key: "stage3", label: "People", data: peopleData },
+    { key: "stage4", label: "Physical", data: physicalData },
+    { key: "stage5", label: "Technological", data: technologicalData }
   ];
 
   annexAStages.forEach(stage => {
     const stageAnswers = answers[stage.key] || {};
     const controls = stage.data.controls ? (Array.isArray(stage.data.controls) ? stage.data.controls : Object.values(stage.data.controls)) : Object.entries(stage.data);
 
-    if (Array.isArray(controls)) {
-        controls.forEach(c => {
-            const controlId = c.control || c[0];
-            if (naControls.has(controlId)) {
-                results.summary[stage.key].na++;
-                return;
-            }
-            const qs = c.questions || (c[1] ? c[1].questions : []);
-            const scores = qs.map(q => getScore(stageAnswers[q.id]));
-            const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-            const status = classifyScore(avg);
-            results.summary[stage.key][status]++;
-            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry), type: "control" };
-        });
-    } else {
-        Object.entries(stage.data).forEach(([controlId, data]) => {
-            if (controlId.includes("_Gateway")) return;
-            if (naControls.has(controlId)) {
-                results.summary[stage.key].na++;
-                return;
-            }
-            const scores = data.questions.map(q => getScore(stageAnswers[q.id]));
-            const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-            const status = classifyScore(avg);
-            results.summary[stage.key][status]++;
-            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry), type: "control" };
-        });
-    }
-  });
+    controls.forEach(c => {
+        const controlId = c.control || (Array.isArray(c) ? c[0] : null);
+        if (!controlId) return;
 
-  // Calculate Weighted Scores
-  const calculateWeightedStageScore = (stageKey, controlPrefix) => {
-    const stageDetails = Object.entries(results.details).filter(([id, detail]) => {
-      if (stageKey === "stage1") return ["4","5","6","7","8","9","10"].includes(id);
-      return id.startsWith(controlPrefix);
+        if (naControls.has(controlId)) {
+            results.summary[stage.key].na++;
+            results.details[controlId] = { score: 0, status: "na", weight: 0, type: "control" };
+            return;
+        }
+
+        const qs = c.questions || (Array.isArray(c) && c[1] ? c[1].questions : []);
+        const scores = qs.map(q => getResponseScore(stageAnswers[q.id]));
+        const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+        const status = classifyStatus(avg);
+        
+        results.summary[stage.key][status]++;
+        results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry), type: "control" };
     });
     
-    let weightedSum = 0;
-    let totalWeight = 0;
-    stageDetails.forEach(([id, detail]) => {
-      weightedSum += (detail.score * detail.weight);
-      totalWeight += detail.weight;
-    });
-    return totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
+    logStageAudit(stage.label, results.summary[stage.key]);
+  });
+
+  // Calculate Weighted Scores for thesis-grade overall compliance
+  const calculateWeightedStageScore = (stageKey) => {
+    const ids = stageKey === "stage1" ? ["4","5","6","7","8","9","10"] : Object.keys(results.details).filter(k => k.startsWith("A."));
+    if (stageKey === "annexA") {
+        const annexAIds = Object.keys(results.details).filter(k => k.startsWith("A."));
+        let sum = 0, weight = 0;
+        annexAIds.forEach(id => {
+            if (results.details[id].status !== "na") {
+                sum += (results.details[id].score * results.details[id].weight);
+                weight += results.details[id].weight;
+            }
+        });
+        return weight > 0 ? (sum / weight) * 100 : 0;
+    } else {
+        const s1Ids = ["4","5","6","7","8","9","10"];
+        let sum = 0, weight = 0;
+        s1Ids.forEach(id => {
+            sum += (results.details[id].score * results.details[id].weight);
+            weight += results.details[id].weight;
+        });
+        return weight > 0 ? (sum / weight) * 100 : 0;
+    }
   };
 
-  results.weightedScores.stage1 = calculateWeightedStageScore("stage1", "");
-  results.weightedScores.annexA = calculateWeightedStageScore("annexA", "A");
+  results.weightedScores.stage1 = calculateWeightedStageScore("stage1");
+  results.weightedScores.annexA = calculateWeightedStageScore("annexA");
   results.weightedScores.overall = (results.weightedScores.stage1 + results.weightedScores.annexA) / 2;
 
+  console.log("==================================================");
   return results;
+}
+
+function logStageAudit(name, s) {
+  const T = s.total;
+  const Yp = ((s.yes / T) * 100).toFixed(1);
+  const Pp = ((s.partial / T) * 100).toFixed(1);
+  const Np = ((s.no / T) * 100).toFixed(1);
+  const NAp = ((s.na / T) * 100).toFixed(1);
+  
+  console.log(`${name.padEnd(20)} | Y:${s.yes} (${Yp}%) | P:${s.partial} (${Pp}%) | N:${s.no} (${Np}%) | NA:${s.na} (${NAp}%) | T:${T}`);
 }

@@ -80,29 +80,19 @@ function Summary() {
     );
   }
 
-  // --- DATA EXTRACTION ---
-  const extractStageStats = (stageKey) => {
-    let source = assessment.scores?.[stageKey] || assessment.scores?.stageScores?.[stageKey] || {};
+  /**
+   * PURE RENDERING LOGIC
+   * No calculations here. Just formatting backend values for display.
+   */
+  const formatStats = (stageKey) => {
+    const s = assessment.scores?.[stageKey] || {};
+    const T = s.total || 1; 
     
-    // Use new flat summary structure if available
-    const yesCount = Number(source?.yes ?? source?.breakdown?.counts?.yes ?? 0);
-    const partialCount = Number(source?.partial ?? source?.breakdown?.counts?.partial ?? 0);
-    const noCount = Number(source?.no ?? source?.breakdown?.counts?.no ?? 0);
-    const naCount = Number(source?.na ?? source?.notApplicableCount ?? 0);
-
-    const total = yesCount + partialCount + noCount + naCount;
-    
-    // Return counts for the chart and percentages for the box
-    const getPct = (val) => total === 0 ? 0 : parseFloat(((val / total) * 100).toFixed(1));
-
     return {
-      counts: { yes: yesCount, partial: partialCount, no: noCount, na: naCount },
-      percentages: {
-        yes: getPct(yesCount),
-        partial: getPct(partialCount),
-        no: getPct(noCount),
-        na: getPct(naCount)
-      }
+      yes: ((s.yes / T) * 100).toFixed(1),
+      partial: ((s.partial / T) * 100).toFixed(1),
+      no: ((s.no / T) * 100).toFixed(1),
+      na: ((s.na / T) * 100).toFixed(1)
     };
   };
 
@@ -113,21 +103,6 @@ function Summary() {
     { key: "stage4", title: "Physical Controls" },
     { key: "stage5", title: "Technological Controls" },
   ];
-
-  // Prepare all stage data first to ensure sync
-  const stageDataMap = {};
-  stages.forEach(s => {
-    stageDataMap[s.key] = extractStageStats(s.key);
-  });
-
-  // Chart data sync
-  const mandatoryChartData = stageDataMap.stage1.counts;
-  const annexAChartData = {
-    yes: stageDataMap.stage2.counts.yes + stageDataMap.stage3.counts.yes + stageDataMap.stage4.counts.yes + stageDataMap.stage5.counts.yes,
-    partial: stageDataMap.stage2.counts.partial + stageDataMap.stage3.counts.partial + stageDataMap.stage4.counts.partial + stageDataMap.stage5.counts.partial,
-    no: stageDataMap.stage2.counts.no + stageDataMap.stage3.counts.no + stageDataMap.stage4.counts.no + stageDataMap.stage5.counts.no,
-    na: stageDataMap.stage2.counts.na + stageDataMap.stage3.counts.na + stageDataMap.stage4.counts.na + stageDataMap.stage5.counts.na,
-  };
 
   return (
     <div style={{ padding: "40px 20px", width: "100%", display: "flex", justifyContent: "center", backgroundColor: "#07090f", minHeight: "100vh" }}>
@@ -164,7 +139,7 @@ function Summary() {
               <ComplianceBox 
                 key={stage.key} 
                 title={stage.title} 
-                stats={stageDataMap[stage.key].percentages} 
+                stats={formatStats(stage.key)} 
                 isMandatory={stage.key === "stage1"} 
               />
             ))}
@@ -173,8 +148,8 @@ function Summary() {
 
         {/* PIE CHARTS */}
         <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
-          <PieChartCard title="Mandatory Controls Distribution" data={mandatoryChartData} showNA={false} />
-          <PieChartCard title="Annex A Controls Distribution" data={annexAChartData} showNA={true} />
+          <PieChartCard title="Mandatory Controls Distribution" data={assessment.charts?.mandatory} showNA={false} />
+          <PieChartCard title="Annex A Controls Distribution" data={assessment.charts?.annexA} showNA={true} />
         </div>
 
         {/* BOTTOM ACTIONS */}
