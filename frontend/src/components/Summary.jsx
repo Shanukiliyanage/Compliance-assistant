@@ -122,20 +122,28 @@ const ComplianceBox = ({ title, stats, isMandatory = false }) => (
     <div style={{ display: "grid", gap: "14px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Yes</span>
-        <span style={{ fontWeight: 800, color: COLORS.yes, fontSize: "1rem" }}>{stats.yes}%</span>
+        <span style={{ fontWeight: 800, color: COLORS.yes, fontSize: "1rem" }}>
+          {stats.yes}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.yesCount}/{stats.total})</span>
+        </span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Partial</span>
-        <span style={{ fontWeight: 800, color: COLORS.partial, fontSize: "1rem" }}>{stats.partial}%</span>
+        <span style={{ fontWeight: 800, color: COLORS.partial, fontSize: "1rem" }}>
+          {stats.partial}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.partialCount}/{stats.total})</span>
+        </span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>No</span>
-        <span style={{ fontWeight: 800, color: COLORS.no, fontSize: "1rem" }}>{stats.no}%</span>
+        <span style={{ fontWeight: 800, color: COLORS.no, fontSize: "1rem" }}>
+          {stats.no}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.noCount}/{stats.total})</span>
+        </span>
       </div>
       {!isMandatory && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Not applicable</span>
-          <span style={{ fontWeight: 800, color: COLORS.na, fontSize: "1rem" }}>{stats.na}%</span>
+          <span style={{ fontWeight: 800, color: COLORS.na, fontSize: "1rem" }}>
+            {stats.na}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.naCount}/{stats.total})</span>
+          </span>
         </div>
       )}
     </div>
