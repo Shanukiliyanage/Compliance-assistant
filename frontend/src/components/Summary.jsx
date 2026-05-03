@@ -15,10 +15,11 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+/* ─────────────── Helpers ─────────────── */
+
 function getMandatoryItems(data) {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.default)) return data.default;
-
   if (data && typeof data === "object") {
     const flattened = [];
     for (const v of Object.values(data)) {
@@ -56,104 +57,142 @@ function largestRemainderRound(counts, total) {
   return floors;
 }
 
-function getMaturityLevelFromPercent(overallPercent) {
-  const n = Number(overallPercent);
-  const percent = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
+/* ─────────────── Per-Stage Percentage Builder ─────────────── */
 
-  if (percent <= 20) return "Initial";
-  if (percent <= 40) return "Basic";
-  if (percent <= 60) return "Developing";
-  if (percent <= 80) return "Managed";
-  return "Optimized";
+function buildStagePercentages(stageCounts, isMandatory = false) {
+  if (!stageCounts) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0 };
+
+  const yesCount = Number(stageCounts.yes ?? 0);
+  const partialCount = Number(stageCounts.partial ?? 0);
+  const noCount = Number(stageCounts.no ?? 0);
+  const naCount = Number(stageCounts.na ?? 0);
+  const total = Number(stageCounts.total ?? (yesCount + partialCount + noCount + naCount));
+
+  if (isMandatory) {
+    // Mandatory: 3-way (Yes, Partial, No) — no N/A
+    const applicable = yesCount + partialCount + noCount;
+    const [yesPct, partialPct, noPct] = largestRemainderRound([yesCount, partialCount, noCount], applicable || total);
+    return { yes: yesPct, partial: partialPct, no: noPct, na: 0, total: applicable || total, yesCount, partialCount, noCount, naCount: 0 };
+  } else {
+    // Annex A stages: 4-way (Yes, Partial, No, N/A)
+    const fullTotal = yesCount + partialCount + noCount + naCount;
+    const [yesPct, partialPct, noPct, naPct] = largestRemainderRound([yesCount, partialCount, noCount, naCount], fullTotal || total);
+    return { yes: yesPct, partial: partialPct, no: noPct, na: naPct, total: fullTotal || total, yesCount, partialCount, noCount, naCount };
+  }
 }
 
-function buildThreeWaySummary(counts, total) {
-  if (!counts) return null;
-  const fullyCount = Number(counts.yes ?? 0);
-  const partialCount = Number(counts.partial ?? 0);
-  const nonAssessed = Number(counts.no ?? 0);
-  const assessedTotal = Number(counts.total ?? fullyCount + partialCount + nonAssessed);
+/* ─────────────── Color Constants ─────────────── */
 
-  const t = Number(total || 0);
-  const missing = Math.max(0, t - assessedTotal);
-  const nonCount = nonAssessed + missing;
+const COLORS = {
+  yes: "#16a34a",
+  partial: "#f59e0b",
+  no: "#dc2626",
+  na: "#9ca3af"
+};
 
-  const [fullyPercent, partialPercent, nonPercent] = largestRemainderRound(
-    [fullyCount, partialCount, nonCount],
-    t
-  );
+/* ─────────────── ComplianceBox — One card per stage ─────────────── */
 
-  return { total: t, fullyCount, partialCount, nonCount, fullyPercent, partialPercent, nonPercent };
-}
-
-function buildAnnexSummaryWithNotApplicable(counts, total, notApplicableCount) {
-  if (!counts) return null;
-  const t = Number(total || 0);
-  const na = Math.max(0, Number(notApplicableCount || 0));
-  const fullyCount = Math.max(0, Number(counts.yes ?? 0));
-  const partialCount = Math.max(0, Number(counts.partial ?? 0));
-  const nonCount = Math.max(0, t - na - fullyCount - partialCount);
-
-  const [fullyPercent, partialPercent, nonPercent, notApplicablePercent] =
-    largestRemainderRound([fullyCount, partialCount, nonCount, na], t);
-
-  return {
-    total: t, fullyCount, partialCount, nonCount, notApplicableCount: na,
-    fullyPercent, partialPercent, nonPercent, notApplicablePercent,
-  };
-}
-
-function buildPieData(summary) {
-  if (!summary) return null;
-  return {
-    labels: [`Fully compliant (${summary.fullyCount})`, `Partially compliant (${summary.partialCount})`, `Not compliant (${summary.nonCount})`],
-    datasets: [{
-      data: [summary.fullyCount, summary.partialCount, summary.nonCount],
-      backgroundColor: ["#16a34a", "#facc15", "#dc2626"],
-      borderWidth: 0,
-    }],
-  };
-}
-
-function buildAnnexPieData(summary) {
-  if (!summary) return null;
-  return {
-    labels: [
-      `Fully compliant (${summary.fullyCount})`,
-      `Partially compliant (${summary.partialCount})`,
-      `Not compliant (${summary.nonCount})`,
-      `Not applicable (${summary.notApplicableCount})`,
-    ],
-    datasets: [{
-      data: [summary.fullyCount, summary.partialCount, summary.nonCount, summary.notApplicableCount],
-      backgroundColor: ["#16a34a", "#facc15", "#dc2626", "#6b7280"],
-      borderWidth: 0,
-    }],
-  };
-}
-
-const SummaryCard = ({ title, value, subtitle, icon, color }) => (
+const ComplianceBox = ({ title, stats, isMandatory = false }) => (
   <div style={{
     background: "white",
-    padding: "24px",
-    borderRadius: "20px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-    border: "1px solid #f1f5f9",
+    padding: "28px 22px",
+    borderRadius: "18px",
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+    height: "100%",
     display: "flex",
     flexDirection: "column",
-    gap: "8px"
   }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ fontSize: "24px" }}>{icon}</span>
-      <span style={{ fontSize: "12px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>{title}</span>
+    <div style={{
+      color: "#0F172A",
+      marginBottom: "16px",
+      fontSize: "1rem",
+      fontWeight: 800,
+    }}>
+      {title}
     </div>
-    <div style={{ fontSize: "28px", fontWeight: 800, color: "#1e293b" }}>{value}</div>
-    <div style={{ fontSize: "13px", color: "#94a3b8" }}>{subtitle}</div>
-    <div style={{ height: "4px", width: "100%", background: "#f1f5f9", borderRadius: "2px", marginTop: "8px", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: typeof value === 'string' && value.includes('%') ? value : '100%', background: color }}></div>
+
+    <div style={{ display: "grid", gap: "14px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Yes</span>
+        <span style={{ fontWeight: 800, color: COLORS.yes, fontSize: "1rem" }}>{stats.yes}%</span>
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Partial</span>
+        <span style={{ fontWeight: 800, color: COLORS.partial, fontSize: "1rem" }}>{stats.partial}%</span>
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>No</span>
+        <span style={{ fontWeight: 800, color: COLORS.no, fontSize: "1rem" }}>{stats.no}%</span>
+      </div>
+      {!isMandatory && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Not applicable</span>
+          <span style={{ fontWeight: 800, color: COLORS.na, fontSize: "1rem" }}>{stats.na}%</span>
+        </div>
+      )}
     </div>
   </div>
 );
+
+/* ─────────────── PieChartCard ─────────────── */
+
+const PieChartCard = ({ title, data, showNA = false }) => {
+  const stats = {
+    yes: data?.yes ?? 0,
+    partial: data?.partial ?? 0,
+    no: data?.no ?? 0,
+    na: data?.na ?? 0,
+  };
+
+  const pieData = {
+    labels: showNA ? ["Yes", "Partial", "No", "N/A"] : ["Yes", "Partial", "No"],
+    datasets: [{
+      data: showNA ? [stats.yes, stats.partial, stats.no, stats.na] : [stats.yes, stats.partial, stats.no],
+      backgroundColor: showNA ? [COLORS.yes, COLORS.partial, COLORS.no, COLORS.na] : [COLORS.yes, COLORS.partial, COLORS.no],
+      borderWidth: 0,
+    }],
+  };
+
+  const options = {
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          color: "#4b5563",
+          font: { weight: "bold" },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => ` ${context.label}: ${context.raw}`,
+        },
+      },
+    },
+    maintainAspectRatio: false,
+  };
+
+  return (
+    <div style={{
+      background: "white",
+      padding: "24px",
+      borderRadius: "20px",
+      boxShadow: "0 10px 25px rgba(0,0,0,0.10)",
+      border: "1px solid #e5e7eb",
+      flex: 1,
+      minWidth: "300px",
+    }}>
+      <h3 style={{ fontSize: "1.1rem", marginBottom: "20px", color: "#0F172A", textAlign: "center", fontWeight: 700 }}>
+        {title}
+      </h3>
+      <div style={{ height: "250px" }}>
+        <Pie data={pieData} options={options} />
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────── Main Summary Component ─────────────── */
 
 function Summary() {
   const { assessmentId } = useParams();
@@ -189,32 +228,51 @@ function Summary() {
     return () => { cancelled = true; };
   }, [assessmentId]);
 
-  const scores = assessment?.scores || null;
+  /* ── Extract data from backend response ── */
+
+  const scores = assessment?.scores || {};
   const profile = assessment?.smeProfile || {};
-  const mandatoryCounts = scores?.complianceBreakdownMandatory?.counts || null;
-  const annexCounts = scores?.complianceBreakdownAnnexA?.counts || null;
 
-  const mandatorySummary = buildThreeWaySummary(mandatoryCounts, mandatoryCounts?.total || totals.stage1Total);
-  const annexNotApplicableTotal = assessment?.excludedControls?.length || 0;
-  const annexSummary = buildAnnexSummaryWithNotApplicable(annexCounts, annexCounts?.total || totals.annexATotal, annexNotApplicableTotal);
+  // Per-stage counts from the backend scoring engine
+  const stage1 = scores.stage1 || { yes: 0, partial: 0, no: 0, na: 0, total: totals.stage1Total };
+  const stage2 = scores.stage2 || { yes: 0, partial: 0, no: 0, na: 0, total: totals.stage2Total };
+  const stage3 = scores.stage3 || { yes: 0, partial: 0, no: 0, na: 0, total: totals.stage3Total };
+  const stage4 = scores.stage4 || { yes: 0, partial: 0, no: 0, na: 0, total: totals.stage4Total };
+  const stage5 = scores.stage5 || { yes: 0, partial: 0, no: 0, na: 0, total: totals.stage5Total };
 
-  const mandatoryPieData = buildPieData(mandatorySummary);
-  const annexPieData = buildAnnexPieData(annexSummary);
+  // Build display percentages for each of the 5 cards
+  const mandatoryStats = buildStagePercentages(stage1, true);
+  const orgStats = buildStagePercentages(stage2, false);
+  const peopleStats = buildStagePercentages(stage3, false);
+  const physicalStats = buildStagePercentages(stage4, false);
+  const techStats = buildStagePercentages(stage5, false);
 
-  const compliancePercent = (scores?.complianceScores?.overall ?? 0).toFixed(1);
-  const annexPercent = (scores?.complianceScores?.annexA ?? 0).toFixed(1);
-  const riskScore = (scores?.weightedScores?.overall ?? 0).toFixed(1);
-  
-  const applicableCount = totals.annexATotal - annexNotApplicableTotal;
-  const excludedCount = annexNotApplicableTotal;
+  // Aggregate for pie charts
+  const mandatoryPieCounts = {
+    yes: mandatoryStats.yesCount,
+    partial: mandatoryStats.partialCount,
+    no: mandatoryStats.noCount,
+  };
+
+  const annexACombined = {
+    yes: orgStats.yesCount + peopleStats.yesCount + physicalStats.yesCount + techStats.yesCount,
+    partial: orgStats.partialCount + peopleStats.partialCount + physicalStats.partialCount + techStats.partialCount,
+    no: orgStats.noCount + peopleStats.noCount + physicalStats.noCount + techStats.noCount,
+    na: orgStats.naCount + peopleStats.naCount + physicalStats.naCount + techStats.naCount,
+  };
+
+  /* ── Loading / Error states ── */
 
   if (loading) return <div style={{ padding: "100px", textAlign: "center", color: "white", background: "#07090f", minHeight: "100vh" }}>Loading...</div>;
   if (error || !assessment) return <div style={{ padding: "100px", textAlign: "center", color: "white", background: "#07090f", minHeight: "100vh" }}>{error || "No data found"}</div>;
 
+  /* ── RENDER — SAME LAYOUT FOR EVERY SECTOR ── */
+
   return (
     <div style={{ padding: "60px 20px", backgroundColor: "#07090f", minHeight: "100vh", color: "#f1f5f9" }}>
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+
+        {/* ── HEADER ── */}
         <div style={{ textAlign: "center", marginBottom: "50px" }}>
           <h1 style={{ fontSize: "2.8rem", fontWeight: 800, marginBottom: "10px" }}>
             {profile.organizationName || "Organization"} Compliance Results
@@ -226,65 +284,42 @@ function Summary() {
           </div>
         </div>
 
-        {/* TOP METRIC CARDS - ALL 8 METRICS */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px", marginBottom: "40px" }}>
-          <SummaryCard title="Normal Compliance" value={`${compliancePercent}%`} subtitle="Simple Average Score" icon="🛡️" color="#6366f1" />
-          <SummaryCard title="Weighted Compliance" value={`${riskScore}%`} subtitle="Risk-Adjusted Score" icon="⚖️" color="#8b5cf6" />
-          <SummaryCard title="Annex A Maturity" value={getMaturityLevelFromPercent(annexPercent)} subtitle={`${annexPercent}% Implementation`} icon="📊" color="#10b981" />
-          <SummaryCard title="High Priority Gaps" value={assessment?.recommendations?.filter(r => r.priority > 1.5).length || 0} subtitle="Critical Remediation Items" icon="⚠️" color="#ef4444" />
-          <SummaryCard title="Applicable Controls" value={applicableCount} subtitle="Total Controls in Scope" icon="✅" color="#3b82f6" />
-          <SummaryCard title="Excluded Controls" value={excludedCount} subtitle="True N/A Exclusions" icon="🚫" color="#64748b" />
-          <SummaryCard title="Mandatory Status" value={mandatorySummary.fullyPercent + "%"} subtitle="Full Compliance Level" icon="🔑" color="#a855f7" />
-          <SummaryCard title="Annex A Status" value={annexSummary.fullyPercent + "%"} subtitle="Full Implementation Level" icon="📋" color="#ec4899" />
+        {/* ── 5 COMPLIANCE CARDS — ALWAYS THE SAME 5 ── */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, 1fr)",
+          gap: "16px",
+          marginBottom: "40px",
+        }}>
+          <ComplianceBox title="Mandatory Clauses" stats={mandatoryStats} isMandatory={true} />
+          <ComplianceBox title="Organizational Controls" stats={orgStats} isMandatory={false} />
+          <ComplianceBox title="People Controls" stats={peopleStats} isMandatory={false} />
+          <ComplianceBox title="Physical Controls" stats={physicalStats} isMandatory={false} />
+          <ComplianceBox title="Technological Controls" stats={techStats} isMandatory={false} />
         </div>
 
-        {/* CHARTS SECTION */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", gap: "30px", marginBottom: "40px" }}>
-          {/* Mandatory */}
-          <div style={{ background: "white", padding: "35px", borderRadius: "24px", color: "#1e293b", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "25px", borderBottom: "1px solid #f1f5f9", paddingBottom: "15px" }}>Mandatory Clauses</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
-              <div style={{ width: "220px" }}><Pie data={mandatoryPieData} options={{ plugins: { legend: { display: false } } }} /></div>
-              <div style={{ flex: 1, display: "grid", gap: "12px" }}>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Fully compliant</span> <strong>{mandatorySummary.fullyPercent}%</strong></div>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Partially compliant</span> <strong>{mandatorySummary.partialPercent}%</strong></div>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Not compliant</span> <strong>{mandatorySummary.nonPercent}%</strong></div>
-                 <div style={{ marginTop: "10px", padding: "10px", background: "#f8fafc", borderRadius: "12px", fontSize: "0.9rem" }}>
-                    Total: {mandatorySummary.total} Clauses
-                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Annex A */}
-          <div style={{ background: "white", padding: "35px", borderRadius: "24px", color: "#1e293b", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "25px", borderBottom: "1px solid #f1f5f9", paddingBottom: "15px" }}>Annex A Controls</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
-              <div style={{ width: "220px" }}><Pie data={annexPieData} options={{ plugins: { legend: { display: false } } }} /></div>
-              <div style={{ flex: 1, display: "grid", gap: "12px" }}>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Fully compliant</span> <strong>{annexSummary.fullyPercent}%</strong></div>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Partially compliant</span> <strong>{annexSummary.partialPercent}%</strong></div>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Not compliant</span> <strong>{annexSummary.nonPercent}%</strong></div>
-                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Not applicable</span> <strong>{annexSummary.notApplicablePercent}%</strong></div>
-                 <div style={{ marginTop: "10px", padding: "10px", background: "#f8fafc", borderRadius: "12px", fontSize: "0.9rem" }}>
-                    Total: {annexSummary.total} Controls
-                 </div>
-              </div>
-            </div>
-          </div>
+        {/* ── 2 PIE CHARTS — ALWAYS THE SAME 2 ── */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "24px",
+          marginBottom: "40px",
+        }}>
+          <PieChartCard title="Mandatory Controls Distribution" data={mandatoryPieCounts} showNA={false} />
+          <PieChartCard title="Annex A Controls Distribution" data={annexACombined} showNA={true} />
         </div>
 
-        {/* ACTIONS */}
+        {/* ── ACTION BUTTONS ── */}
         <div style={{ display: "flex", justifyContent: "center", gap: "25px", marginTop: "20px" }}>
-          <button 
-            onClick={() => navigate("/")} 
-            style={{ 
-              padding: "16px 45px", 
-              borderRadius: "100px", 
-              border: "1px solid #334155", 
-              background: "transparent", 
-              color: "white", 
-              cursor: "pointer", 
+          <button
+            onClick={() => navigate("/")}
+            style={{
+              padding: "16px 45px",
+              borderRadius: "100px",
+              border: "1px solid #334155",
+              background: "transparent",
+              color: "white",
+              cursor: "pointer",
               fontWeight: 700,
               fontSize: "1rem",
               transition: "all 0.2s"
@@ -292,15 +327,15 @@ function Summary() {
           >
             Exit Assessment
           </button>
-          <button 
-            onClick={() => navigate(`/assessment/recommendations/${assessmentId}`)} 
-            style={{ 
-              padding: "16px 45px", 
-              borderRadius: "100px", 
-              border: "none", 
-              background: "linear-gradient(135deg, #6366f1, #a855f7)", 
-              color: "white", 
-              cursor: "pointer", 
+          <button
+            onClick={() => navigate(`/assessment/recommendations/${assessmentId}`)}
+            style={{
+              padding: "16px 45px",
+              borderRadius: "100px",
+              border: "none",
+              background: "linear-gradient(135deg, #6366f1, #a855f7)",
+              color: "white",
+              cursor: "pointer",
               fontWeight: 700,
               fontSize: "1rem",
               boxShadow: "0 4px 15px rgba(99, 102, 241, 0.4)"

@@ -324,6 +324,17 @@ function Stage4Physical() {
           )}
         </div>
 
+        {/* Render Questions */}
+        {questions
+          .filter((q) => q.answer === "No" || q.answer === "Partial")
+          .map((q, index) => (
+            <div key={index} style={{ marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "1.1rem", color: "#f1f5f9" }}>
+                Q{index + 1} - {q.text}
+              </h3>
+            </div>
+          ))}
+
         {/* Bottom buttons */}
         <div
           style={{
