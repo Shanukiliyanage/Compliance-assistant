@@ -340,7 +340,7 @@ function Summary() {
               transition: "all 0.2s"
             }}
           >
-            Exit Assessment
+            Back
           </button>
           <button
             onClick={() => navigate(`/assessment/recommendations/${assessmentId}`)}
