@@ -130,7 +130,7 @@ export function calculateScores(answers, smeProfile = {}) {
     const controls = stage.data.controls ? (Array.isArray(stage.data.controls) ? stage.data.controls : Object.values(stage.data.controls)) : Object.entries(stage.data);
 
     controls.forEach(c => {
-        const controlId = c.control || (Array.isArray(c) ? c[0] : null);
+        const controlId = c.controlId || c.control || (Array.isArray(c) ? c[0] : null);
         if (!controlId) return;
 
         // 1. Check True N/A (Exclude from Denominator)
@@ -149,7 +149,8 @@ export function calculateScores(answers, smeProfile = {}) {
             } else if (controlId.startsWith("A8.25") || controlId.startsWith("A8.26") || controlId.startsWith("A8.27") || controlId.startsWith("A8.28") || controlId.startsWith("A8.29") || controlId.startsWith("A8.31") || controlId.startsWith("A8.33")) {
                 reason = "Organization does not perform software development (SDLC)";
             }
-            results.excludedControls.push({ id: controlId, name: c.control || controlId, reason });
+            const controlName = c.controlName || c.control || (Array.isArray(c) && c[1] ? c[1].control : null) || controlId;
+            results.excludedControls.push({ id: controlId, name: controlName, reason });
             return;
         }
 
