@@ -13,6 +13,7 @@ import {
   isFirestoreEnabled,
   getAssessmentResultFromFirestore,
 } from "../utils/firestore.js";
+import { getFullSummary } from "../services/summaryEngine.js";
 
 // Assessment API routes.
 // Note: results can be stored in JSON (default) or Firestore (optional), and older

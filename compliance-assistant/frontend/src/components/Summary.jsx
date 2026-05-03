@@ -80,19 +80,30 @@ function Summary() {
     );
   }
 
-  /**
-   * PURE RENDERING LOGIC
-   * No calculations here. Just formatting backend values for display.
-   */
-  const formatStats = (stageKey) => {
-    const s = assessment.scores?.[stageKey] || {};
-    const T = s.total || 1; 
+  // --- DATA EXTRACTION ---
+  const extractStageStats = (stageKey) => {
+    // Check multiple locations for scores (handles both current and legacy structures)
+    const s = assessment.scores?.[stageKey] || 
+              assessment.scores?.stageScores?.[stageKey] || 
+              assessment.stageScores?.[stageKey] || 
+              {};
     
+    const yesCount = Number(s?.yes ?? s?.breakdown?.counts?.yes ?? 0);
+    const partialCount = Number(s?.partial ?? s?.breakdown?.counts?.partial ?? 0);
+    const noCount = Number(s?.no ?? s?.breakdown?.counts?.no ?? 0);
+    const naCount = Number(s?.na ?? s?.notApplicableCount ?? 0);
+    const T = Number(s?.total ?? 1) || (yesCount + partialCount + noCount + naCount) || 1;
+    
+    const getPct = (val) => ((val / T) * 100).toFixed(1);
+
     return {
-      yes: ((s.yes / T) * 100).toFixed(1),
-      partial: ((s.partial / T) * 100).toFixed(1),
-      no: ((s.no / T) * 100).toFixed(1),
-      na: ((s.na / T) * 100).toFixed(1)
+      counts: { yes: yesCount, partial: partialCount, no: noCount, na: naCount },
+      percentages: {
+        yes: getPct(yesCount),
+        partial: getPct(partialCount),
+        no: getPct(noCount),
+        na: getPct(naCount)
+      }
     };
   };
 
@@ -135,14 +146,17 @@ function Summary() {
         <div style={{ marginBottom: "40px" }}>
           <h2 style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#f1f5f9", fontWeight: 700 }}>Stage Compliance</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
-            {stages.map((stage) => (
-              <ComplianceBox 
-                key={stage.key} 
-                title={stage.title} 
-                stats={formatStats(stage.key)} 
-                isMandatory={stage.key === "stage1"} 
-              />
-            ))}
+            {stages.map((stage) => {
+              const data = extractStageStats(stage.key);
+              return (
+                <ComplianceBox 
+                  key={stage.key} 
+                  title={stage.title} 
+                  stats={data.percentages} 
+                  isMandatory={stage.key === "stage1"} 
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -151,6 +165,23 @@ function Summary() {
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
             <PieChartCard title="Mandatory Controls Distribution" data={assessment.charts.mandatory} showNA={false} />
             <PieChartCard title="Annex A Controls Distribution" data={assessment.charts.annexA} showNA={true} />
+          </div>
+        )}
+
+        {/* FALLBACK CHARTS (if backend charts missing) */}
+        {!assessment.charts && (
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "40px" }}>
+            <PieChartCard title="Mandatory Controls Distribution" data={extractStageStats("stage1").counts} showNA={false} />
+            <PieChartCard 
+              title="Annex A Controls Distribution" 
+              data={{
+                yes: extractStageStats("stage2").counts.yes + extractStageStats("stage3").counts.yes + extractStageStats("stage4").counts.yes + extractStageStats("stage5").counts.yes,
+                partial: extractStageStats("stage2").counts.partial + extractStageStats("stage3").counts.partial + extractStageStats("stage4").counts.partial + extractStageStats("stage5").counts.partial,
+                no: extractStageStats("stage2").counts.no + extractStageStats("stage3").counts.no + extractStageStats("stage4").counts.no + extractStageStats("stage5").counts.no,
+                na: extractStageStats("stage2").counts.na + extractStageStats("stage3").counts.na + extractStageStats("stage4").counts.na + extractStageStats("stage5").counts.na,
+              }} 
+              showNA={true} 
+            />
           </div>
         )}
 
