@@ -4,8 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 
-import { calculateComplianceResults } from "../utils/complianceCalculation.js";
 import { readJsonArray, writeJson, ensureJsonFile } from "../utils/jsonStore.js";
+import { getFullSummary } from "./summaryEngine.js";
 import {
   isFirestoreEnabled,
   saveAssessmentResultToFirestore,
@@ -42,46 +42,15 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
   const assessmentId = uuidv4();
   const timestamp = new Date().toISOString();
 
-  if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] userId:", userId);
-    console.log("[analyze] answers type:", answersType);
-  }
+  // ENGINE ANALYSIS
+  const summary = getFullSummary(answers, smeProfile);
+  summary.assessmentId = assessmentId;
+  summary.userId = userId;
 
-  // Extract sector for sector-specific weights.
-  const sector = String(smeProfile?.sector || "").trim() || null;
-
-  // Compose controls array from answers (flatten all stages)
-  const controls = [];
-  if (answers && typeof answers === "object") {
-    Object.entries(answers).forEach(([stageKey, stageAnswers]) => {
-      if (stageAnswers && typeof stageAnswers === "object") {
-        Object.entries(stageAnswers).forEach(([qId, value]) => {
-          controls.push({
-            id: qId,
-            status: value,
-            // TODO: Add isApplicable, isImplicitNo, subQuestions if available from frontend
-          });
-        });
-      }
-    });
-  }
-
-  // Calculate standardized compliance results
-  const complianceResults = calculateComplianceResults(controls, sector);
-  if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] complianceResults:", complianceResults);
-  }
-
-  // Result returned to the frontend (save all required fields)
+  // Result returned to the frontend.
   const result = {
-    assessmentId,
-    userId,
+    ...summary,
     timestamp,
-    smeProfile: smeProfile || {},
-    sector,
-    responses: answers,
-    complianceResults,
-    recommendations: complianceResults.recommendations,
   };
 
   // Persistence

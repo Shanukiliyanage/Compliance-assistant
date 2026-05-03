@@ -60,9 +60,14 @@ export function getNotApplicableControlIds(stageId, stageAnswers) {
       notApplicable.add("A.5.23");
     }
 
+    // Note: incident management follow-up controls (A5.25-28) are NOT marked N/A when
+    // A5.24.Q1 = "no". The frontend sets them to "no" so they score as NOT_COMPLIANT.
   }
 
   if (stageId === "stage5") {
+    // Note: network security follow-up controls (A8.21-22) are NOT marked N/A when
+    // A8.20_Q1 = "no". The frontend sets them to "no" so they score as NOT_COMPLIANT.
+
     // Secure development controls apply only if SDLC/software development is in scope.
     if (!isYesAnswer(stage["SDLC_GATE_Q1"])) {
       // Exclude the SDLC-dependent controls.

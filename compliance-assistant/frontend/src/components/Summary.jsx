@@ -19,7 +19,6 @@ function getMandatoryItems(data) {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.default)) return data.default;
 
-  // Legacy shape support
   if (data && typeof data === "object") {
     const flattened = [];
     for (const v of Object.values(data)) {
@@ -27,7 +26,6 @@ function getMandatoryItems(data) {
     }
     if (flattened.length) return flattened;
   }
-
   return [];
 }
 
@@ -36,7 +34,6 @@ function isAnnexControlKey(key, prefix) {
   if (!key.startsWith(prefix + ".")) return false;
   const rest = key.slice(prefix.length + 1);
   if (!rest) return false;
-  // Strip optional _suffix (e.g. "A5.19_Gateway" → numPart "19")
   const numPart = rest.split("_")[0];
   const n = Number(numPart);
   return Number.isInteger(n) && String(n) === numPart;
@@ -46,8 +43,6 @@ function countAnnexControls(stageObject, prefix) {
   return Object.keys(stageObject || {}).filter((k) => isAnnexControlKey(k, prefix)).length;
 }
 
-// Distributes counts as percentages that always sum to exactly 100
-// using the largest-remainder (Hamilton) method.
 function largestRemainderRound(counts, total) {
   if (!total) return counts.map(() => 0);
   const raws = counts.map((c) => (c / total) * 100);
@@ -74,7 +69,6 @@ function getMaturityLevelFromPercent(overallPercent) {
 
 function buildThreeWaySummary(counts, total) {
   if (!counts) return null;
-
   const fullyCount = Number(counts.yes ?? 0);
   const partialCount = Number(counts.partial ?? 0);
   const nonAssessed = Number(counts.no ?? 0);
@@ -89,62 +83,35 @@ function buildThreeWaySummary(counts, total) {
     t
   );
 
-  return {
-    total: t,
-    fullyCount,
-    partialCount,
-    nonCount,
-    fullyPercent,
-    partialPercent,
-    nonPercent,
-  };
+  return { total: t, fullyCount, partialCount, nonCount, fullyPercent, partialPercent, nonPercent };
 }
 
 function buildAnnexSummaryWithNotApplicable(counts, total, notApplicableCount) {
   if (!counts) return null;
-
   const t = Number(total || 0);
   const na = Math.max(0, Number(notApplicableCount || 0));
-
   const fullyCount = Math.max(0, Number(counts.yes ?? 0));
   const partialCount = Math.max(0, Number(counts.partial ?? 0));
-
-  // Backend breakdown for Annex A is computed on the "applicable" set only
-  // (expected total minus NOT_APPLICABLE controls).
-  // "Not compliant" bucket against the full 93 total.
   const nonCount = Math.max(0, t - na - fullyCount - partialCount);
 
   const [fullyPercent, partialPercent, nonPercent, notApplicablePercent] =
     largestRemainderRound([fullyCount, partialCount, nonCount, na], t);
 
   return {
-    total: t,
-    fullyCount,
-    partialCount,
-    nonCount,
-    notApplicableCount: na,
-    fullyPercent,
-    partialPercent,
-    nonPercent,
-    notApplicablePercent,
+    total: t, fullyCount, partialCount, nonCount, notApplicableCount: na,
+    fullyPercent, partialPercent, nonPercent, notApplicablePercent,
   };
 }
 
 function buildPieData(summary) {
   if (!summary) return null;
   return {
-    labels: [
-      `Fully compliant (${summary.fullyCount})`,
-      `Partially compliant (${summary.partialCount})`,
-      `Not compliant (${summary.nonCount})`,
-    ],
-    datasets: [
-      {
-        data: [summary.fullyCount, summary.partialCount, summary.nonCount],
-        backgroundColor: ["#16a34a", "#facc15", "#dc2626"],
-        borderWidth: 0,
-      },
-    ],
+    labels: [`Fully compliant (${summary.fullyCount})`, `Partially compliant (${summary.partialCount})`, `Not compliant (${summary.nonCount})`],
+    datasets: [{
+      data: [summary.fullyCount, summary.partialCount, summary.nonCount],
+      backgroundColor: ["#16a34a", "#facc15", "#dc2626"],
+      borderWidth: 0,
+    }],
   };
 }
 
@@ -157,20 +124,36 @@ function buildAnnexPieData(summary) {
       `Not compliant (${summary.nonCount})`,
       `Not applicable (${summary.notApplicableCount})`,
     ],
-    datasets: [
-      {
-        data: [
-          summary.fullyCount,
-          summary.partialCount,
-          summary.nonCount,
-          summary.notApplicableCount,
-        ],
-        backgroundColor: ["#16a34a", "#facc15", "#dc2626", "#6b7280"],
-        borderWidth: 0,
-      },
-    ],
+    datasets: [{
+      data: [summary.fullyCount, summary.partialCount, summary.nonCount, summary.notApplicableCount],
+      backgroundColor: ["#16a34a", "#facc15", "#dc2626", "#6b7280"],
+      borderWidth: 0,
+    }],
   };
 }
+
+const SummaryCard = ({ title, value, subtitle, icon, color }) => (
+  <div style={{
+    background: "white",
+    padding: "24px",
+    borderRadius: "20px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+    border: "1px solid #f1f5f9",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px"
+  }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <span style={{ fontSize: "24px" }}>{icon}</span>
+      <span style={{ fontSize: "12px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>{title}</span>
+    </div>
+    <div style={{ fontSize: "28px", fontWeight: 800, color: "#1e293b" }}>{value}</div>
+    <div style={{ fontSize: "13px", color: "#94a3b8" }}>{subtitle}</div>
+    <div style={{ height: "4px", width: "100%", background: "#f1f5f9", borderRadius: "2px", marginTop: "8px", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: typeof value === 'string' && value.includes('%') ? value : '100%', background: color }}></div>
+    </div>
+  </div>
+);
 
 function Summary() {
   const { assessmentId } = useParams();
@@ -179,42 +162,21 @@ function Summary() {
   const [assessment, setAssessment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [downloading, setDownloading] = useState(false);
 
   const totals = useMemo(() => {
-    // Count unique clause groups (e.g. 4.2 + 4.3 both belong to clause "4")
-    // so 14 questions -> 7 clauses, matching how the backend scores stage1.
-    const stage1Total = new Set(
-      getMandatoryItems(mandatoryData).map((item) =>
-        String(item.clause || "").split(".")[0]
-      )
-    ).size;
-
-    // ISO/IEC 27001:2022 Annex A totals are expected to be 93 in total.
+    const stage1Total = new Set(getMandatoryItems(mandatoryData).map((item) => String(item.clause || "").split(".")[0])).size;
     const stage2Total = countAnnexControls(organizationalData, "A5");
     const stage3Total = Array.isArray(peopleData?.controls) ? peopleData.controls.length : 0;
     const stage4Total = countAnnexControls(physicalData, "A7");
     const stage5Total = countAnnexControls(technologicalData, "A8");
-    const annexATotal = stage2Total + stage3Total + stage4Total + stage5Total;
-
-    return {
-      stage1Total,
-      stage2Total,
-      stage3Total,
-      stage4Total,
-      stage5Total,
-      annexATotal,
-    };
+    return { stage1Total, stage2Total, stage3Total, stage4Total, stage5Total, annexATotal: stage2Total + stage3Total + stage4Total + stage5Total };
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       if (!assessmentId) return;
       setLoading(true);
-      setError("");
-
       try {
         const result = await getAssessmentResult(assessmentId);
         if (!cancelled) setAssessment(result);
@@ -224,501 +186,130 @@ function Summary() {
         if (!cancelled) setLoading(false);
       }
     })();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [assessmentId]);
 
   const scores = assessment?.scores || null;
-
-  // Backend can mark some controls as NOT_APPLICABLE; totals are adjusted accordingly.
-  const adjustedTotals = useMemo(() => {
-    const na2 = Number(scores?.stageScores?.stage2?.notApplicableCount ?? 0);
-    const na3 = Number(scores?.stageScores?.stage3?.notApplicableCount ?? 0);
-    const na4 = Number(scores?.stageScores?.stage4?.notApplicableCount ?? 0);
-    const na5 = Number(scores?.stageScores?.stage5?.notApplicableCount ?? 0);
-
-    const stage2Total = Math.max(0, totals.stage2Total - na2);
-    const stage3Total = Math.max(0, totals.stage3Total - na3);
-    const stage4Total = Math.max(0, totals.stage4Total - na4);
-    const stage5Total = Math.max(0, totals.stage5Total - na5);
-
-    return {
-      stage1Total: totals.stage1Total,
-      stage2Total,
-      stage3Total,
-      stage4Total,
-      stage5Total,
-      annexATotal: stage2Total + stage3Total + stage4Total + stage5Total,
-    };
-  }, [scores, totals]);
-
-  const stageNames = {
-    stage1: "Mandatory Clauses",
-    stage2: "Organizational Controls",
-    stage3: "People Controls",
-    stage4: "Physical Controls",
-    stage5: "Technological Controls",
-  };
-
+  const profile = assessment?.smeProfile || {};
   const mandatoryCounts = scores?.complianceBreakdownMandatory?.counts || null;
-  const annexCounts =
-    scores?.complianceBreakdownAnnexA?.counts || scores?.complianceBreakdown?.counts || null;
+  const annexCounts = scores?.complianceBreakdownAnnexA?.counts || null;
 
-  const mandatorySummary = buildThreeWaySummary(mandatoryCounts, totals.stage1Total);
-  const annexNotApplicableTotal =
-    Number(scores?.stageScores?.stage2?.notApplicableCount ?? 0) +
-    Number(scores?.stageScores?.stage3?.notApplicableCount ?? 0) +
-    Number(scores?.stageScores?.stage4?.notApplicableCount ?? 0) +
-    Number(scores?.stageScores?.stage5?.notApplicableCount ?? 0);
-  const annexSummary = buildAnnexSummaryWithNotApplicable(
-    annexCounts,
-    totals.annexATotal,
-    annexNotApplicableTotal
-  );
+  const mandatorySummary = buildThreeWaySummary(mandatoryCounts, mandatoryCounts?.total || totals.stage1Total);
+  const annexNotApplicableTotal = assessment?.excludedControls?.length || 0;
+  const annexSummary = buildAnnexSummaryWithNotApplicable(annexCounts, annexCounts?.total || totals.annexATotal, annexNotApplicableTotal);
 
   const mandatoryPieData = buildPieData(mandatorySummary);
   const annexPieData = buildAnnexPieData(annexSummary);
 
-  const annexAOverall = scores?.overallAnnexA || null;
-  const annexAPercent = (() => {
-    const totalScore = Number(annexAOverall?.totalScore ?? annexAOverall?.raw ?? 0);
-    const max = Number(
-      (annexAOverall?.maxPossibleScore ?? annexAOverall?.max) ?? adjustedTotals.annexATotal ?? 0
-    );
-    return max ? Math.round((totalScore / max) * 100) : 0;
-  })();
-  const annexAMaturityLevel = getMaturityLevelFromPercent(annexAPercent);
+  const compliancePercent = (scores?.complianceScores?.overall ?? 0).toFixed(1);
+  const annexPercent = (scores?.complianceScores?.annexA ?? 0).toFixed(1);
+  const riskScore = (scores?.weightedScores?.overall ?? 0).toFixed(1);
+  
+  const applicableCount = totals.annexATotal - annexNotApplicableTotal;
+  const excludedCount = annexNotApplicableTotal;
 
-  const handleDownloadReport = async () => {
-    if (!assessmentId) return;
-    setDownloading(true);
-    setError("");
-
-    try {
-      const report = await getAssessmentReport(assessmentId);
-      const blob = new Blob([JSON.stringify(report, null, 2)], {
-        type: "application/json;charset=utf-8",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `assessment-${assessmentId}-report.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      setError(e?.message || "Failed to download report");
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", minHeight: "100vh", background: "#07090f", color: "#f1f5f9" }}>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", minHeight: "100vh", background: "#07090f", color: "#f1f5f9" }}>
-        <p style={{ color: "#b91c1c" }}>{error}</p>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            marginTop: "14px",
-            padding: "12px 28px",
-            borderRadius: "999px",
-            background: "linear-gradient(135deg, #2563eb, #14b8a6)",
-            border: "none",
-            color: "white",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
-          Go to Home
-        </button>
-      </div>
-    );
-  }
-
-  if (!assessment) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", minHeight: "100vh", background: "#07090f", color: "#f1f5f9" }}>
-        <p>No assessment data found</p>
-      </div>
-    );
-  }
+  if (loading) return <div style={{ padding: "100px", textAlign: "center", color: "white", background: "#07090f", minHeight: "100vh" }}>Loading...</div>;
+  if (error || !assessment) return <div style={{ padding: "100px", textAlign: "center", color: "white", background: "#07090f", minHeight: "100vh" }}>{error || "No data found"}</div>;
 
   return (
-    <div
-      style={{
-        padding: "40px 20px",
-        width: "100%",
-        display: "flex",
-        justifyContent: "center",
-        backgroundColor: "#07090f",
-        minHeight: "100vh",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: "900px" }}>
-        {/* TOP ACTIONS */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "12px",
-            marginBottom: "18px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            onClick={() => navigate("/assessment/profile")}
-            style={{
-              padding: "12px 28px",
-              borderRadius: "999px",
-              background: "transparent",
-              border: "2px solid rgba(255,255,255,0.2)",
-              color: "#f1f5f9",
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: "1rem",
-            }}
-          >
-            Start New Assessment
-          </button>
-
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              padding: "12px 28px",
-              borderRadius: "999px",
-              background: "linear-gradient(135deg, #2563eb, #14b8a6)",
-              border: "none",
-              color: "white",
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: "1rem",
-            }}
-          >
-            Go to Home
-          </button>
-        </div>
-
-        {/* HEADER */}
-        <div style={{ marginBottom: "30px", textAlign: "center" }}>
-          <h1 style={{ fontSize: "2.5rem", color: "#f1f5f9", marginBottom: "8px" }}>
-            Assessment Complete
+    <div style={{ padding: "60px 20px", backgroundColor: "#07090f", minHeight: "100vh", color: "#f1f5f9" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        
+        <div style={{ textAlign: "center", marginBottom: "50px" }}>
+          <h1 style={{ fontSize: "2.8rem", fontWeight: 800, marginBottom: "10px" }}>
+            {profile.organizationName || "Organization"} Compliance Results
           </h1>
-          <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>
-            Here are your ISO 27001 compliance results
-          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "20px", fontSize: "1.1rem", color: "#94a3b8" }}>
+            <span>Sector: {profile.sector || profile.industry || "General"}</span>
+            <span>•</span>
+            <span>Date: {new Date(assessment.timestamp).toLocaleDateString()}</span>
+          </div>
         </div>
 
-        {/* Mandatory first */}
-        {mandatorySummary && mandatoryPieData && (
-          <div
-            style={{
-              background: "white",
-              padding: "28px",
-              borderRadius: "20px",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.10)",
-              border: "1px solid #e5e7eb",
-              marginBottom: "30px",
-            }}
-          >
-            <h2 style={{ fontSize: "1.5rem", marginBottom: "6px", color: "#0F172A" }}>
-              Overall ISO 27001 Mandatory Clauses Compliance
-            </h2>
-            <p style={{ color: "#6b7280", marginBottom: "18px" }}>
-              Based on {totals.stage1Total} mandatory clauses
-            </p>
+        {/* TOP METRIC CARDS - ALL 8 METRICS */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px", marginBottom: "40px" }}>
+          <SummaryCard title="Normal Compliance" value={`${compliancePercent}%`} subtitle="Simple Average Score" icon="🛡️" color="#6366f1" />
+          <SummaryCard title="Weighted Compliance" value={`${riskScore}%`} subtitle="Risk-Adjusted Score" icon="⚖️" color="#8b5cf6" />
+          <SummaryCard title="Annex A Maturity" value={getMaturityLevelFromPercent(annexPercent)} subtitle={`${annexPercent}% Implementation`} icon="📊" color="#10b981" />
+          <SummaryCard title="High Priority Gaps" value={assessment?.recommendations?.filter(r => r.priority > 1.5).length || 0} subtitle="Critical Remediation Items" icon="⚠️" color="#ef4444" />
+          <SummaryCard title="Applicable Controls" value={applicableCount} subtitle="Total Controls in Scope" icon="✅" color="#3b82f6" />
+          <SummaryCard title="Excluded Controls" value={excludedCount} subtitle="True N/A Exclusions" icon="🚫" color="#64748b" />
+          <SummaryCard title="Mandatory Status" value={mandatorySummary.fullyPercent + "%"} subtitle="Full Compliance Level" icon="🔑" color="#a855f7" />
+          <SummaryCard title="Annex A Status" value={annexSummary.fullyPercent + "%"} subtitle="Full Implementation Level" icon="📋" color="#ec4899" />
+        </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1.1fr 0.9fr",
-                gap: "18px",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <div style={{ display: "grid", gap: "10px" }}>
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Fully compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#16a34a" }}>
-                      {mandatorySummary.fullyCount} / {mandatorySummary.total} ({mandatorySummary.fullyPercent}%)
-                    </div>
-                  </div>
-
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Partially compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#d97706" }}>
-                      {mandatorySummary.partialCount} / {mandatorySummary.total} ({mandatorySummary.partialPercent}%)
-                    </div>
-                  </div>
-
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Not compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#dc2626" }}>
-                      {mandatorySummary.nonCount} / {mandatorySummary.total} ({mandatorySummary.nonPercent}%)
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ width: "100%", maxWidth: "360px", margin: "0 auto" }}>
-                <Pie data={mandatoryPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#0F172A" } } } }} />
+        {/* CHARTS SECTION */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", gap: "30px", marginBottom: "40px" }}>
+          {/* Mandatory */}
+          <div style={{ background: "white", padding: "35px", borderRadius: "24px", color: "#1e293b", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+            <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "25px", borderBottom: "1px solid #f1f5f9", paddingBottom: "15px" }}>Mandatory Clauses</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
+              <div style={{ width: "220px" }}><Pie data={mandatoryPieData} options={{ plugins: { legend: { display: false } } }} /></div>
+              <div style={{ flex: 1, display: "grid", gap: "12px" }}>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Fully compliant</span> <strong>{mandatorySummary.fullyPercent}%</strong></div>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Partially compliant</span> <strong>{mandatorySummary.partialPercent}%</strong></div>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Not compliant</span> <strong>{mandatorySummary.nonPercent}%</strong></div>
+                 <div style={{ marginTop: "10px", padding: "10px", background: "#f8fafc", borderRadius: "12px", fontSize: "0.9rem" }}>
+                    Total: {mandatorySummary.total} Clauses
+                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Annex A second */}
-        {annexSummary && annexPieData && (
-          <div
-            style={{
-              background: "white",
-              padding: "28px",
-              borderRadius: "20px",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.10)",
-              border: "1px solid #e5e7eb",
-              marginBottom: "30px",
-            }}
-          >
-            <h2 style={{ fontSize: "1.5rem", marginBottom: "6px", color: "#0F172A" }}>
-              Overall ISO 27001 Annex A Compliance
-            </h2>
-            <p style={{ color: "#6b7280", marginBottom: "18px" }}>
-              Based on {totals.annexATotal} total controls
-            </p>
-            <p style={{ color: "#0F172A", fontWeight: 700, marginBottom: "18px" }}>
-              Maturity: {annexAMaturityLevel}
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1.1fr 0.9fr",
-                gap: "18px",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <div style={{ display: "grid", gap: "10px" }}>
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Fully compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#16a34a" }}>
-                      {annexSummary.fullyCount} / {annexSummary.total} ({annexSummary.fullyPercent}%)
-                    </div>
-                  </div>
-
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Partially compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#d97706" }}>
-                      {annexSummary.partialCount} / {annexSummary.total} ({annexSummary.partialPercent}%)
-                    </div>
-                  </div>
-
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Not compliant</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#dc2626" }}>
-                      {annexSummary.nonCount} / {annexSummary.total} ({annexSummary.nonPercent}%)
-                    </div>
-                  </div>
-
-                  <div style={{ border: "1px solid #e5e7eb", borderRadius: "16px", padding: "16px", background: "#f9fafb" }}>
-                    <p style={{ color: "#6b7280", marginBottom: "6px" }}>Not applicable</p>
-                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#9ca3af" }}>
-                      {annexSummary.notApplicableCount} / {annexSummary.total} ({annexSummary.notApplicablePercent}%)
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ width: "100%", maxWidth: "360px", margin: "0 auto" }}>
-                <Pie data={annexPieData} options={{ plugins: { legend: { position: "bottom", labels: { color: "#0F172A" } } } }} />
+          {/* Annex A */}
+          <div style={{ background: "white", padding: "35px", borderRadius: "24px", color: "#1e293b", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+            <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "25px", borderBottom: "1px solid #f1f5f9", paddingBottom: "15px" }}>Annex A Controls</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
+              <div style={{ width: "220px" }}><Pie data={annexPieData} options={{ plugins: { legend: { display: false } } }} /></div>
+              <div style={{ flex: 1, display: "grid", gap: "12px" }}>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Fully compliant</span> <strong>{annexSummary.fullyPercent}%</strong></div>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Partially compliant</span> <strong>{annexSummary.partialPercent}%</strong></div>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Not compliant</span> <strong>{annexSummary.nonPercent}%</strong></div>
+                 <div style={{ display: "flex", justifyContent: "space-between" }}><span>Not applicable</span> <strong>{annexSummary.notApplicablePercent}%</strong></div>
+                 <div style={{ marginTop: "10px", padding: "10px", background: "#f8fafc", borderRadius: "12px", fontSize: "0.9rem" }}>
+                    Total: {annexSummary.total} Controls
+                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Stage Compliance */}
-        {scores?.stageScores && (
-          <div style={{ marginBottom: "30px" }}>
-            <h2 style={{ fontSize: "1.5rem", marginBottom: "20px", color: "#f1f5f9" }}>
-              Stage Compliance
-            </h2>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {Object.entries(scores.stageScores).map(([stageKey, stageScore]) => {
-                const totalByStage = {
-                  stage1: totals.stage1Total,
-                  stage2: totals.stage2Total,
-                  stage3: totals.stage3Total,
-                  stage4: totals.stage4Total,
-                  stage5: totals.stage5Total,
-                };
-
-                const isMandatoryStage = stageKey === "stage1";
-
-                const stageTotalRaw =
-                  totalByStage[stageKey] ??
-                  stageScore?.breakdown?.counts?.total ??
-                  0;
-
-                const notApplicableCount = isMandatoryStage
-                  ? 0
-                  : Number(stageScore?.notApplicableCount ?? 0);
-
-                // Use stageTotalRaw as the single denominator for all categories
-                // so that Yes + Partial + No + Not applicable = 100%.
-                const fullyCount = Math.max(0, Number(stageScore?.breakdown?.counts?.yes ?? 0));
-                const partialCount = Math.max(0, Number(stageScore?.breakdown?.counts?.partial ?? 0));
-                const nonCount = Math.max(0, stageTotalRaw - notApplicableCount - fullyCount - partialCount);
-
-                const [fullyPct, partialPct, nonPct, notApplicablePct] =
-                  largestRemainderRound(
-                    [fullyCount, partialCount, nonCount, notApplicableCount],
-                    stageTotalRaw
-                  );
-
-                const summary = stageTotalRaw
-                  ? {
-                      total: stageTotalRaw,
-                      fullyCount,
-                      partialCount,
-                      nonCount,
-                      fullyPercent: fullyPct,
-                      partialPercent: partialPct,
-                      nonPercent: nonPct,
-                    }
-                  : null;
-
-                const notApplicablePercent = notApplicablePct;
-
-                return (
-                  <div
-                    key={stageKey}
-                    style={{
-                      background: "white",
-                      padding: "24px",
-                      borderRadius: "16px",
-                      border: "1px solid #e5e7eb",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        color: "#0F172A",
-                        marginBottom: "12px",
-                        fontSize: "0.95rem",
-                        fontWeight: 800,
-                      }}
-                    >
-                      {stageNames[stageKey] || stageKey}
-                    </div>
-
-                    <div style={{ display: "grid", gap: "10px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: "#6b7280" }}>Yes</span>
-                        <span style={{ fontWeight: 800, color: "#16a34a" }}>
-                          {Number(summary?.fullyPercent ?? 0)}%
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: "#6b7280" }}>Partial</span>
-                        <span style={{ fontWeight: 800, color: "#d97706" }}>
-                          {Number(summary?.partialPercent ?? 0)}%
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ color: "#6b7280" }}>No</span>
-                        <span style={{ fontWeight: 800, color: "#dc2626" }}>
-                          {Number(summary?.nonPercent ?? 0)}%
-                        </span>
-                      </div>
-
-                      {!isMandatoryStage && (
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span style={{ color: "#6b7280" }}>Not applicable</span>
-                          <span style={{ fontWeight: 800, color: "#9ca3af" }}>
-                            {Number(notApplicablePercent ?? 0)}%
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Bottom actions */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-            marginTop: "18px",
-            paddingBottom: "10px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              padding: "12px 28px",
-              borderRadius: "999px",
-              background: "transparent",
-              color: "#f1f5f9",
-              border: "1px solid rgba(255,255,255,0.15)",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-              fontWeight: 600,
-            }}
-          >
-            Back
-          </button>
-
-          <button
-            onClick={() =>
-              navigate(`/assessment/recommendations/${assessmentId}`, {
-                state: { assessment },
-              })
-            }
-            style={{
-              padding: "12px 28px",
-              borderRadius: "999px",
-              background: "transparent",
-              border: "1px solid rgba(255,255,255,0.15)",
-              color: "#f1f5f9",
-              cursor: "pointer",
-              fontWeight: 600,
+        {/* ACTIONS */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "25px", marginTop: "20px" }}>
+          <button 
+            onClick={() => navigate("/")} 
+            style={{ 
+              padding: "16px 45px", 
+              borderRadius: "100px", 
+              border: "1px solid #334155", 
+              background: "transparent", 
+              color: "white", 
+              cursor: "pointer", 
+              fontWeight: 700,
               fontSize: "1rem",
+              transition: "all 0.2s"
+            }}
+          >
+            Exit Assessment
+          </button>
+          <button 
+            onClick={() => navigate(`/assessment/recommendations/${assessmentId}`)} 
+            style={{ 
+              padding: "16px 45px", 
+              borderRadius: "100px", 
+              border: "none", 
+              background: "linear-gradient(135deg, #6366f1, #a855f7)", 
+              color: "white", 
+              cursor: "pointer", 
+              fontWeight: 700,
+              fontSize: "1rem",
+              boxShadow: "0 4px 15px rgba(99, 102, 241, 0.4)"
             }}
           >
             View Recommendations
           </button>
         </div>
+
       </div>
     </div>
   );

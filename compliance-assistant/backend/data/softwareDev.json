@@ -1,0 +1,50 @@
+{
+  "SD_Gateway": {
+    "control": "Software development applicability check",
+    "questions": [
+      {
+        "id": "SD.GW1",
+        "question": "Does your organization develop or significantly customize software, either internally or using third party developers?",
+        "explanation": ""
+      }
+    ],
+    "gatewayFor": ["SD_SecureLifecycle"]
+  },
+
+  "SD_SecureLifecycle": {
+    "control": "Secure software development lifecycle",
+    "questions": [
+      {
+        "id": "SD.1.Q1",
+        "question": "Do you follow a defined software development lifecycle (for example requirements, design, development, testing, release)?",
+        "explanation": "A defined lifecycle ensures that changes to applications follow a consistent and controlled process."
+      },
+      {
+        "id": "SD.1.Q2",
+        "question": "Are security requirements and risks considered at each stage of the software development lifecycle?",
+        "explanation": "Integrating security into each stage reduces vulnerabilities introduced during design and development."
+      },
+      {
+        "id": "SD.1.Q3",
+        "question": "Do internal or third party developers receive guidance or standards for secure coding?",
+        "explanation": "Secure coding guidelines help developers avoid common vulnerabilities such as injection and insecure authentication."
+      }
+    ]
+  },
+
+  "SD_Cloud": {
+    "control": "Cloud services used for applications",
+    "questions": [
+      {
+        "id": "SD.2.Q1",
+        "question": "Do you use cloud services (for example IaaS, PaaS, or SaaS) to host or run your applications?",
+        "explanation": "Cloud services introduce shared responsibility and require clear understanding of security roles."
+      },
+      {
+        "id": "SD.2.Q2",
+        "question": "Do you have defined processes for selecting, using, managing, and exiting from cloud services?",
+        "explanation": "Lifecycle management of cloud services reduces lock in and ensures data protection at each stage."
+      }
+    ]
+  }
+}

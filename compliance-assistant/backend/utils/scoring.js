@@ -3,7 +3,6 @@
 import { SCORE_RULES } from "../rules/scoreRules.js";
 import { getControlComplianceState } from "../rules/complianceRules.js";
 import { getNotApplicableControlIds } from "./applicability.js";
-import { getControlWeight } from "../rules/sectorWeights.js";
 
 // How many Annex A controls exist per stage (ISO 27001:2022).
 // Used so missing/hidden controls count as NOT COMPLIANT.
@@ -59,6 +58,10 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
     return !isYesAnswer(stage["A5.23.Q1"]);
   }
 
+  // Note: incident follow-up (A5.25-28) and network follow-up (A8.21-22) are NOT suppressed
+  // here. The frontend sets them to "no" when the gateway is "no", so they should score as
+  // NOT_COMPLIANT and generate recommendations.
+
   // Stage 5: secure development controls only apply if SDLC gateway is "yes".
   if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
     return !isYesAnswer(stage["SDLC_GATE_Q1"]);
@@ -97,8 +100,8 @@ function groupStageAnswersByControl(stageId, stageAnswers) {
     if (isSuppressedByStage2Gates(key, stageAnswers)) continue;
 
     // Stage 1 is clauses 4–10 (not Annex A).
-    // Group by clause number so both questions in a clause (e.g. "4.2" and "4.3")
-    // are averaged into one clause score - giving each clause equal weight.
+    // Group by major clause number so both questions in a clause (e.g. "4.2" and "4.3")
+    // are averaged into one clause score — giving 7 controls, not 14.
     const controlId = stageId === "stage1"
       ? String(key || "").trim().split(".")[0]  // "4.2" -> "4", "4.3" -> "4"
       : normalizeControlId(key);
@@ -181,8 +184,7 @@ function buildBreakdownWithExpectedTotal(groupedStageAnswers, expectedTotal) {
   return base;
 }
 // Scores one stage and returns points + percent + breakdown.
-// Pass `sector` (e.g. "Healthcare") to apply sector-specific control weights.
-export function calculateStageScore(stageId, answers, sector = null) {
+export function calculateStageScore(stageId, answers) {
   const stageAnswers = getStageAnswers(stageId, answers);
   const notApplicableControlIds = getNotApplicableControlIds(stageId, stageAnswers);
   const grouped = groupStageAnswersByControl(stageId, stageAnswers);
@@ -200,49 +202,37 @@ export function calculateStageScore(stageId, answers, sector = null) {
     ? buildBreakdownWithExpectedTotal(grouped, expectedTotal)
     : buildBreakdown(grouped);
 
-  // Turn compliance state into weighted points.
-  // When a sector is provided, each control's contribution is scaled by its
-  // sector-specific weight (see rules/sectorWeights.js).
-  // Missing/unanswered controls retain weight 1 and score 0.
-  const yesWeight = Number(SCORE_RULES.YES ?? 1);
-  let weightedRaw = 0;
-  let weightedMax = 0;
-
-  for (const [controlId, questionAnswers] of Object.entries(grouped)) {
+  // Turn compliance state into points.
+  let raw = 0;
+  for (const questionAnswers of Object.values(grouped)) {
     const state = getControlComplianceState(questionAnswers);
-    let score;
-    if (state === "FULLY_COMPLIANT") score = yesWeight;
-    else if (state === "PARTIALLY_COMPLIANT") score = Number(SCORE_RULES.PARTIAL ?? 0);
-    else score = Number(SCORE_RULES.NO ?? 0);
-
-    const w = getControlWeight(controlId, sector);
-    weightedRaw += score * w;
-    weightedMax += yesWeight * w;
+    if (state === "FULLY_COMPLIANT") raw += SCORE_RULES.YES ?? 0;
+    else if (state === "PARTIALLY_COMPLIANT") raw += SCORE_RULES.PARTIAL ?? 0;
+    else raw += SCORE_RULES.NO ?? 0;
   }
 
-  // Missing controls (expected but not in answers) count as NO with default weight 1.
-  const answeredCount = Object.keys(grouped).length;
-  const missingCount = expectedTotal ? Math.max(0, expectedTotal - answeredCount) : 0;
-  weightedMax += missingCount * yesWeight;
+  // Max score = (number of items) * (max points per item).
+  const yesWeight = Number(SCORE_RULES.YES ?? 1);
+  const maxScore = (expectedTotal ?? Object.keys(grouped).length) * yesWeight;
 
-  // Guard against divide-by-zero (e.g. fully N/A stage).
-  const averageScore = weightedMax > 0 ? weightedRaw / weightedMax : 0;
+  const averageScore = maxScore > 0 ? raw / maxScore : 0;
   const percent = Math.round(averageScore * 100);
 
   // Return a friendly shape for the frontend (plus older aliases).
   return {
-    totalScore: weightedRaw,
-    maxPossibleScore: weightedMax,
+    totalScore: raw,
+    maxPossibleScore: maxScore,
     averageScore,
     percent,
     breakdown,
     notApplicableCount: notApplicableControlIds.size,
     // Back-compat
-    raw: weightedRaw,
-    max: weightedMax,
+    raw,
+    max: maxScore,
   };
 }
 
+// Combines stage scores into a single overall score and maturity label.
 export function calculateOverallScore(stageScores) {
   // Add all points from all stages.
   const totalRaw = Object.values(stageScores).reduce(
@@ -257,12 +247,14 @@ export function calculateOverallScore(stageScores) {
   const averageScore = totalMax > 0 ? totalRaw / totalMax : 0;
   const percent = Math.round(averageScore * 100);
 
+  const maturityLevel = getMaturityLevelFromAverage(averageScore);
 
   return {
     totalScore: totalRaw,
     maxPossibleScore: totalMax,
     averageScore,
     percent,
+    maturityLevel,
     // Back-compat
     raw: totalRaw,
     max: totalMax,
@@ -270,15 +262,14 @@ export function calculateOverallScore(stageScores) {
 }
 
 // Main scoring entry point used by the API.
-// `sector` is optional (e.g. "Healthcare") — enables sector-weighted scoring.
-export function calculateAllScores(answers, sector = null) {
+export function calculateAllScores(answers) {
   const stageScores = {};
   const mandatoryCounts = { yes: 0, partial: 0, no: 0, unanswered: 0, total: 0 };
   const annexACounts = { yes: 0, partial: 0, no: 0, unanswered: 0, total: 0 };
 
   // Score each stage and accumulate combined breakdowns.
   ["stage1", "stage2", "stage3", "stage4", "stage5"].forEach((stageId) => {
-    stageScores[stageId] = calculateStageScore(stageId, answers, sector);
+    stageScores[stageId] = calculateStageScore(stageId, answers);
 
     const stageCounts = stageScores[stageId].breakdown?.counts;
     if (stageCounts) {

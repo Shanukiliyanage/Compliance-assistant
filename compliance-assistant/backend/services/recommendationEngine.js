@@ -29,13 +29,18 @@ function getRiskLevel(priority) {
   return "LOW";
 }
 
+/**
+ * Generates a list of recommendations based on control scores and weights.
+ * Excludes fully compliant (>= 0.99) and Not Applicable (na) controls.
+ */
 export function generateRecommendations(details) {
   const recommendationsMap = new Map();
 
   Object.entries(details).forEach(([id, data]) => {
-    if (data.score >= 0.99) return; // Already compliant
+    // 1. Exclude fully compliant and Not Applicable (True N/A) controls
+    if (data.score >= 0.99 || data.status === "na") return;
 
-    // Grouping logic: "4.1" or "4.2" -> "4"
+    // 2. Grouping logic: "4.1" or "4.2" -> "4"
     let groupId = id;
     let label = `Control ${id}`;
 

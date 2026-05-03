@@ -242,97 +242,51 @@ router.get("/result/:assessmentId", (req, res) => {
     });
 });
 
-// GET /api/assessment/report/:assessmentId
-// Returns: answers + per-control compliance status (including compliant controls)
-router.get("/report/:assessmentId", (req, res) => {
-  // Builds a report payload (profile, scores, answers, and per-control status list).
+// GET /api/assessment/summary/:assessmentId
+router.get("/summary/:assessmentId", (req, res) => {
   const { assessmentId } = req.params;
-  if (!assessmentId) {
-    return res.status(400).json({ error: "Missing assessmentId" });
-  }
+  const match = readJsonArray(resultsPath).find(r => r.assessmentId === assessmentId);
+  if (!match) return res.status(404).json({ error: "Summary not found" });
+  return res.json(match);
+});
 
-  const readFromJson = () => {
-    ensureJsonFile(resultsPath, []);
-    ensureJsonFile(assessmentsPath, []);
+// GET /api/assessment/recommendations/:assessmentId
+router.get("/recommendations/:assessmentId", (req, res) => {
+  const { assessmentId } = req.params;
+  const results = readJsonArray(resultsPath);
+  const assessments = readJsonArray(assessmentsPath);
+  
+  const result = results.find(r => r.assessmentId === assessmentId);
+  const assessment = assessments.find(a => a.assessmentId === assessmentId);
+  
+  if (!result || !assessment) return res.status(404).json({ error: "Assessment not found" });
+  
+  const recommendations = generateRecommendations(assessment.answers);
+  return res.json({
+    companyName: result.smeProfile?.organizationName || "Organization",
+    recommendations
+  });
+});
 
-    const results = readJsonArray(resultsPath);
-    const assessments = readJsonArray(assessmentsPath);
-
-    const result = results.find((r) => r && r.assessmentId === assessmentId) || null;
-    const assessment = assessments.find((a) => a && a.assessmentId === assessmentId) || null;
-    const answers = assessment?.answers && typeof assessment.answers === "object" ? assessment.answers : null;
-
-    return { result, assessment, answers };
-  };
-
-  const buildPayload = ({ result, assessment, answers }) => {
-    // Merge result + assessment + answers into one downloadable payload.
-    if (!result) return null;
-    const resolvedAnswers = answers || (result.answers && typeof result.answers === "object" ? result.answers : null);
-    if (!resolvedAnswers) return null;
-
-    const orgName = String(
-      result?.smeProfile?.organizationName || assessment?.smeProfile?.organizationName || ""
-    ).trim();
-
-    // Export-specific: use the stored answers object as-is.
-    // Gateway/showIf rules are handled via applicability logic so suppressed questions/controls
-    // appear as N/A (and do not produce irrelevant recommendations).
-    const exportAnswers = buildAnswersForExport(resolvedAnswers);
-
-    const controlStatuses = buildControlStatusSummary(exportAnswers, {
-      orgName: orgName || "The organization",
-      includeSuppressed: true,
-      includeGatewayQuestions: true,
-    });
-
-    // Per-question recommendations (matches UI output), including gateway-controlled follow-ups.
-    const recommendations = generateRecommendations(exportAnswers);
-
-    return {
-      assessmentId,
-      smeProfile: result.smeProfile || assessment?.smeProfile || {},
-      scores: result.scores || {},
-      answers: exportAnswers,
-      controlStatuses,
-      recommendations,
-    };
-  };
-
-  if (!isFirestoreEnabled()) {
-    const data = readFromJson();
-    const payload = buildPayload(data);
-    if (!payload) return res.status(404).json({ error: "Assessment not found" });
-    return res.json(payload);
-  }
-
-  getAssessmentResultFromFirestore(assessmentId)
-    .then((doc) => {
-      if (doc) {
-        const fromJson = readFromJson();
-        const payload = buildPayload({
-          result: doc,
-          assessment: fromJson.assessment,
-          answers:
-            (doc.answers && typeof doc.answers === "object" ? doc.answers : null) ||
-            fromJson.answers,
-        });
-        if (!payload) return res.status(404).json({ error: "Assessment not found" });
-        return res.json(payload);
-      }
-
-      const data = readFromJson();
-      const payload = buildPayload(data);
-      if (!payload) return res.status(404).json({ error: "Assessment not found" });
-      return res.json(payload);
-    })
-    .catch((err) => {
-      console.error("[firestore] report read failed, falling back to JSON:", err);
-      const data = readFromJson();
-      const payload = buildPayload(data);
-      if (!payload) return res.status(404).json({ error: "Assessment not found" });
-      return res.json(payload);
-    });
+// GET /api/assessment/report/:assessmentId
+router.get("/report/:assessmentId", (req, res) => {
+  const { assessmentId } = req.params;
+  const results = readJsonArray(resultsPath);
+  const assessments = readJsonArray(assessmentsPath);
+  
+  const result = results.find(r => r.assessmentId === assessmentId);
+  const assessment = assessments.find(a => a.assessmentId === assessmentId);
+  
+  if (!result || !assessment) return res.status(404).json({ error: "Assessment not found" });
+  
+  const fullSummary = getFullSummary(assessment.answers, result.smeProfile);
+  
+  return res.json({
+    ...fullSummary,
+    assessmentId,
+    timestamp: assessment.timestamp,
+    answers: assessment.answers
+  });
 });
 
 export default router;
