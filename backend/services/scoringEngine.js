@@ -40,25 +40,41 @@ export function calculateScores(answers, smeProfile = {}) {
       stage4: { yes: 0, partial: 0, no: 0, na: 0, total: 14 },
       stage5: { yes: 0, partial: 0, no: 0, na: 0, total: 34 },
     },
-    details: {}, // Stores control-level results for recommendations
-    weightedScores: {} // Scores adjusted by importance
+    details: {}, 
+    weightedScores: {}
   };
 
-  // --- STAGE 1: MANDATORY ---
+  // --- STAGE 1: MANDATORY (Audit-Ready Logic) ---
   const stage1Answers = answers.stage1 || {};
-  const s1Groups = {};
+  const s1Groups = { "4": [], "5": [], "6": [], "7": [], "8": [], "9": [], "10": [] };
+  
   mandatoryData.forEach(q => {
-    const clause = String(q.clause || "").split(".")[0];
-    if (!s1Groups[clause]) s1Groups[clause] = [];
-    s1Groups[clause].push(getScore(stage1Answers[q.clause] || stage1Answers[q.id]));
+    const clauseId = String(q.clause || "").split(".")[0];
+    if (s1Groups[clauseId]) {
+      const score = getScore(stage1Answers[q.clause] || stage1Answers[q.id]);
+      s1Groups[clauseId].push(score);
+    }
   });
 
+  console.log("--- MANDATORY CLAUSE AUDIT ---");
   Object.entries(s1Groups).forEach(([clauseId, scores]) => {
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const avg = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
     const status = classifyScore(avg);
+    
     results.summary.stage1[status]++;
-    results.details[clauseId] = { score: avg, status, weight: getControlWeight(clauseId, industry) };
+    results.details[clauseId] = { 
+      score: avg, 
+      status, 
+      weight: getControlWeight(clauseId, industry),
+      type: "clause"
+    };
+    
+    console.log(`Clause ${clauseId}: Avg=${avg.toFixed(2)}, Status=${status.toUpperCase()} (${scores.length} questions)`);
   });
+  
+  const s1 = results.summary.stage1;
+  console.log(`TOTALS: Y=${s1.yes}, P=${s1.partial}, N=${s1.no} (Total=${s1.yes + s1.partial + s1.no}/7)`);
+  console.log("------------------------------");
 
   // --- ANNEX A STAGES (2-5) ---
   const annexAStages = [
@@ -73,7 +89,6 @@ export function calculateScores(answers, smeProfile = {}) {
     const controls = stage.data.controls ? (Array.isArray(stage.data.controls) ? stage.data.controls : Object.values(stage.data.controls)) : Object.entries(stage.data);
 
     if (Array.isArray(controls)) {
-        // Stage 3, 4 often have a different structure
         controls.forEach(c => {
             const controlId = c.control || c[0];
             if (naControls.has(controlId)) {
@@ -85,10 +100,9 @@ export function calculateScores(answers, smeProfile = {}) {
             const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
             const status = classifyScore(avg);
             results.summary[stage.key][status]++;
-            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry) };
+            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry), type: "control" };
         });
     } else {
-        // Stage 2, 5 often entries
         Object.entries(stage.data).forEach(([controlId, data]) => {
             if (controlId.includes("_Gateway")) return;
             if (naControls.has(controlId)) {
@@ -99,14 +113,18 @@ export function calculateScores(answers, smeProfile = {}) {
             const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
             const status = classifyScore(avg);
             results.summary[stage.key][status]++;
-            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry) };
+            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry), type: "control" };
         });
     }
   });
 
   // Calculate Weighted Scores
   const calculateWeightedStageScore = (stageKey, controlPrefix) => {
-    const stageDetails = Object.entries(results.details).filter(([id]) => id.startsWith(controlPrefix) || (stageKey === "stage1" && ["4","5","6","7","8","9","10"].includes(id)));
+    const stageDetails = Object.entries(results.details).filter(([id, detail]) => {
+      if (stageKey === "stage1") return ["4","5","6","7","8","9","10"].includes(id);
+      return id.startsWith(controlPrefix);
+    });
+    
     let weightedSum = 0;
     let totalWeight = 0;
     stageDetails.forEach(([id, detail]) => {
