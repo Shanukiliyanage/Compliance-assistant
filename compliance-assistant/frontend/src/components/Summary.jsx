@@ -163,8 +163,8 @@ function Summary() {
   };
 
   return (
-    <div style={{ padding: "40px 20px", width: "100%", display: "flex", justifyContent: "center", backgroundColor: "#07090f", minHeight: "100vh" }}>
-      <div style={{ width: "100%", maxWidth: "1000px" }}>
+    <div style={{ padding: "60px 20px", width: "100%", display: "flex", justifyContent: "center", backgroundColor: "#07090f", minHeight: "100vh" }}>
+      <div style={{ width: "100%", maxWidth: "1200px" }}>
         {/* TOP ACTIONS */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginBottom: "30px" }}>
           <button onClick={() => navigate("/assessment/profile")} style={{ padding: "10px 24px", borderRadius: "999px", background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "#f1f5f9", cursor: "pointer", fontWeight: 600 }}>
@@ -190,9 +190,9 @@ function Summary() {
         </div>
 
         {/* STAGE COMPLIANCE BOXES */}
-        <div style={{ marginBottom: "40px" }}>
-          <h2 style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#f1f5f9", fontWeight: 700 }}>Stage Compliance</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+        <div style={{ marginBottom: "50px" }}>
+          <h2 style={{ fontSize: "1.5rem", marginBottom: "24px", color: "#f1f5f9", fontWeight: 700 }}>Stage Compliance</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "20px" }}>
             {stages.map((stage) => {
               const data = stageData[stage.key];
               return (
