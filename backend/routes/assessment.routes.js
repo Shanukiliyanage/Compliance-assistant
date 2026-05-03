@@ -125,17 +125,9 @@ function hasOutdatedTechnologicalControlTemplates(result) {
 }
 
 function tryBackfillRecommendationsFromJson(result) {
-  // If recommendations are missing/outdated, regenerate them from stored answers.
-  if (
-    !result ||
-    (!hasEmptyRecommendations(result) &&
-      !hasLegacyRecommendationsShape(result) &&
-      !hasGenericFallbackRecommendations(result) &&
-      !hasOutdatedPeopleControlTemplates(result) &&
-      !hasOutdatedTechnologicalControlTemplates(result))
-  ) {
-    return result;
-  }
+  // FORCE REGENERATION: We have migrated to a Clause-level recommendation engine.
+  // We must regenerate to ensure old question-level "ghost" recs are removed.
+  if (!result) return result;
 
   // Prefer answers embedded in the stored result (Firestore may include it).
   const embeddedAnswers = result.answers && typeof result.answers === "object" ? result.answers : null;
