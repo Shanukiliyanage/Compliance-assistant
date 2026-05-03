@@ -345,7 +345,8 @@ function normalizeRecommendation(rec, textIndex) {
       controlId,
       complianceState: rec.complianceState || (rec.score === 1 ? "FULLY_COMPLIANT" : rec.score > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT"),
       priority: riskLevel,
-      title: controlId ? `Control ${controlId}.` : "Recommendation",
+      // Use the 'control' label from the backend if it exists (e.g. "Clause 4")
+      title: rec.control ? `${rec.control}.` : (controlId ? `Control ${controlId}.` : "Recommendation"),
       subtitle: rec.id || "",
       description: rec.recommendation,
       stageLabel,
