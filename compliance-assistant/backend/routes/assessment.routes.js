@@ -259,7 +259,9 @@ router.get("/report/:assessmentId", (req, res) => {
     const results = readJsonArray(resultsPath);
     const assessments = readJsonArray(assessmentsPath);
 
-    const result = results.find((r) => r && r.assessmentId === assessmentId) || null;
+    let result = results.find((r) => r && r.assessmentId === assessmentId) || null;
+    result = tryBackfillRecommendationsFromJson(result);
+    
     const assessment = assessments.find((a) => a && a.assessmentId === assessmentId) || null;
     const answers = assessment?.answers && typeof assessment.answers === "object" ? assessment.answers : null;
 
@@ -352,12 +354,13 @@ router.get("/report/:assessmentId", (req, res) => {
   getAssessmentResultFromFirestore(assessmentId)
     .then((doc) => {
       if (doc) {
+        const hydratedDoc = tryBackfillRecommendationsFromJson(doc);
         const fromJson = readFromJson();
         const payload = buildPayload({
-          result: doc,
+          result: hydratedDoc,
           assessment: fromJson.assessment,
           answers:
-            (doc.answers && typeof doc.answers === "object" ? doc.answers : null) ||
+            (hydratedDoc.answers && typeof hydratedDoc.answers === "object" ? hydratedDoc.answers : null) ||
             fromJson.answers,
         });
         if (!payload) return res.status(404).json({ error: "Assessment not found" });
