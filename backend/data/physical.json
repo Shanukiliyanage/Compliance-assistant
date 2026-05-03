@@ -1,0 +1,180 @@
+{
+  "A7.1": {
+    "control": "Physical security",
+    "questions": [
+      {
+        "id": "A7.1_Q1",
+        "question": "Have you defined clear physical boundaries around areas containing sensitive information and systems (for example perimeters, fences, walls, gates)?",
+        "explanation": "Physical boundaries help prevent unauthorized access to sensitive areas."
+      },
+      {
+        "id": "A7.1_Q2",
+        "question": "Do you control and monitor access to these secure areas?",
+        "explanation": "Access control ensures only authorized personnel can enter secure areas."
+      }
+    ]
+  },
+
+  "A7.2": {
+    "control": "Physical entry",
+    "questions": [
+      {
+        "id": "A7.2_Q1",
+        "question": "Are access points to secure areas controlled (for example through doors, gates, reception areas)?",
+        "explanation": "This means making sure that only people who are supposed to be in certain areas can actually get in. For example, having a locked door, a keycard reader, or a staffed reception desk that checks who is entering."
+      },
+      {
+        "id": "A7.2_Q2",
+        "question": "Do you keep a record of who enters the premises other than employees?",
+        "explanation": "Keeping a record of visitors, such as a sign-in sheet or digital log, means you always know who has been on your premises. If something goes missing or an incident occurs, you can check who was there and when."
+      }
+    ]
+  },
+
+  "A7.3": {
+    "control": "Securing offices, rooms and facilities",
+    "questions": [
+      {
+        "id": "A7.3_Q1",
+        "question": "Is your organization's physical security designed to prevent unauthorized access to offices, rooms and facilities?",
+        "explanation": "Proper design reduces the likelihood of physical security breaches."
+      },
+      {
+        "id": "A7.3_Q2",
+        "question": "Are there appropriate locks, barriers and monitoring systems in place?",
+        "explanation": "Locks and monitoring systems help protect facilities."
+      }
+    ]
+  },
+
+  "A7.4": {
+    "control": "Physical security monitoring",
+    "questions": [
+      {
+        "id": "A7.4_Q1",
+        "question": "Do you have continuous monitoring systems (for example CCTV, intrusion detection, alarms) to detect unauthorized physical access?",
+        "explanation": "This checks whether continuous monitoring is in place to detect and respond to unauthorized physical access."
+      }
+    ]
+  },
+
+  "A7.5": {
+    "control": "Protecting against physical and environmental threats",
+    "questions": [
+      {
+        "id": "A7.5_Q1",
+        "question": "Do you have measures in place to protect your facilities and IT equipment from physical and environmental threats?",
+        "explanation": "This can include fire detection or extinguishers, protection against flooding, surge protectors or UPS for power issues, temperature or humidity control, and secure building structures."
+      }
+    ]
+  },
+
+  "A7.6": {
+    "control": "Working in secure areas",
+    "questions": [
+      {
+        "id": "A7.6_Q1",
+        "question": "Are secure areas restricted so that only authorized people can enter and work there?",
+        "explanation": "For example, locked rooms, access cards or keys, visitor sign in, escorts for visitors, and supervision when working in sensitive areas."
+      }
+    ]
+  },
+
+  "A7.7": {
+    "control": "Clear desk and clear screen",
+    "questions": [
+      {
+        "id": "A7.7_Q1",
+        "question": "Do you have a clear desk policy requiring monitors to be locked or screens turned off when not in use?",
+        "explanation": "A clear desk policy means sensitive documents should not be left out unattended, and computer screens should be locked when you step away from your desk. This prevents others from seeing or accessing information they should not."
+      },
+      {
+        "id": "A7.7_Q2",
+        "question": "Do you have a documented clear screen policy in place within the organization?",
+        "explanation": "Documented policies help enforce consistent behavior."
+      }
+    ]
+  },
+
+  "A7.8": {
+    "control": "Equipment siting and protection",
+    "questions": [
+      {
+        "id": "A7.8_Q1",
+        "question": "Is IT equipment located securely and protected against damage, theft, or unauthorized handling?",
+        "explanation": "This checks whether equipment is sited and protected to reduce the risk of theft, tampering, or accidental damage."
+      }
+    ]
+  },
+
+  "A7.9": {
+    "control": "Security of assets off-premises",
+    "questions": [
+      {
+        "id": "A7.9_Q1",
+        "question": "When company equipment is taken off-site (for example laptops taken out of office), do you have security measures in place?",
+        "explanation": "This checks whether appropriate safeguards exist for off-premises assets to reduce loss, theft, or unauthorized access."
+      },
+      {
+        "id": "A7.9_Q2",
+        "question": "Are employees trained on protecting assets while working remotely?",
+        "explanation": "Training helps reduce loss and theft risks."
+      }
+    ]
+  },
+
+  "A7.10": {
+    "control": "Storage media",
+    "questions": [
+      {
+        "id": "A7.10_Q1",
+        "question": "Do you manage storage media securely throughout its life cycle, including use, storage, and disposal?",
+        "explanation": "This checks whether storage media (for example USB drives and disks) is protected from loss or misuse and handled securely through use, storage, and disposal."
+      }
+    ]
+  },
+
+  "A7.11": {
+    "control": "Supporting utilities",
+    "questions": [
+      {
+        "id": "A7.11_Q1",
+        "question": "Do you have protection in place to ensure power and other supporting utilities do not disrupt IT systems?",
+        "explanation": "For example, UPS, generators, surge protection, or backup power arrangements."
+      }
+    ]
+  },
+
+  "A7.12": {
+    "control": "Cabling security",
+    "questions": [
+      {
+        "id": "A7.12_Q1",
+        "question": "Are power and data cables protected to prevent damage, interference, or unauthorized access?",
+        "explanation": "For example, cables routed away from public areas, protected conduits, or secured cable rooms."
+      }
+    ]
+  },
+
+  "A7.13": {
+    "control": "Equipment maintenance",
+    "questions": [
+      {
+        "id": "A7.13_Q1",
+        "question": "Is IT equipment regularly maintained to ensure it works securely and reliably?",
+        "explanation": "For example, scheduled maintenance, repairs, updates, or servicing of equipment."
+      }
+    ]
+  },
+
+  "A7.14": {
+    "control": "Secure disposal or re-use of equipment",
+    "questions": [
+      {
+        "id": "A7.14_Q1",
+        "question": "Before IT equipment is disposed of or re-used, is all sensitive data securely removed or destroyed?",
+        "explanation": "For example, data wiping, secure deletion, or physical destruction of storage devices."
+      }
+    ]
+  }
+}

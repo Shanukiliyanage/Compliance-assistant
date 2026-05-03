@@ -147,7 +147,7 @@ const STAGE5_SDLC_DEPENDENT_CONTROLS = (
 ).map(canonicalizeAnnexId);
 
 // Decide if a question should be shown / counted.
-// Some controls are “gateway controlled”: if the gateway question is NO, the follow-up controls are not applicable.
+// Some controls are ΓÇ£gateway controlledΓÇ¥: if the gateway question is NO, the follow-up controls are not applicable.
 function isQuestionApplicable(stageId, controlId, question, answersByStage) {
   const stageAnswers = answersByStage?.[stageId] || {};
 
@@ -225,7 +225,7 @@ function mapStageObjectToControls(stageObject) {
 }
 
 function getAllStageControls() {
-  // Builds a single “control list” for every stage so we can:
+  // Builds a single ΓÇ£control listΓÇ¥ for every stage so we can:
   // - display control names
   // - print all questions + answers in the report
   return {
@@ -281,7 +281,7 @@ function compareLexicographicNumberArrays(a, b) {
 
 function compareBySeverity(a, b) {
   // Sort NOT_COMPLIANT before PARTIALLY_COMPLIANT.
-  // (If backend didn’t provide complianceState, fall back to old "severity" field.)
+  // (If backend didnΓÇÖt provide complianceState, fall back to old "severity" field.)
   const rank = (rec) => {
     const cs = String(rec?.complianceState || "").toUpperCase();
     if (cs === "NOT_COMPLIANT") return 0;
@@ -321,6 +321,10 @@ function getStageIdFromRecommendation(rec) {
 }
 
 function normalizeRecommendation(rec, textIndex) {
+  // Normalizes backend vs older UI recommendation formats into one shape for rendering.
+  // Support both old UI shape and current backend shape:
+  // - backend: { controlId, stageId, complianceState, recommendation }
+  // - older:  { severity, title/message, description, stage }
   if (!rec || typeof rec !== "object") {
     return {
       stageId: "",
@@ -333,45 +337,161 @@ function normalizeRecommendation(rec, textIndex) {
     };
   }
 
-  // Handle new backend shape
-  if (rec.recommendation) {
+  if (typeof rec.recommendation === "string") {
+    const complianceState = String(rec.complianceState || "");
+    const priority = normalizePriority(rec.priority, complianceState);
     const stageId = getStageIdFromRecommendation(rec);
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
+
     const controlId = rec.controlId ? String(rec.controlId) : "";
-    const riskLevel = rec.riskLevel || (rec.priority > 1.5 ? "CRITICAL" : rec.priority > 1.0 ? "HIGH" : rec.priority > 0.5 ? "MEDIUM" : "LOW");
+    // Skip stale/malformed recommendations with no real control identifier.
+    if (!controlId || controlId === "undefined") return null;
+    const questionId = rec.questionId ? String(rec.questionId) : "";
+    const clauseTitle = mandatoryClauseTitles[controlId];
+
+    // Prefer question text (more specific than control id).
+    const questionTitle =
+      questionId && stageId && textIndex?.get
+        ? String(textIndex.get(`${stageId}::${questionId}`) || "")
+        : "";
+
+    const parseQuestionNumber = (qid) => {
+      const s = String(qid || "").trim();
+      const m = /(?:^|[._-])Q(\d+)$/i.exec(s);
+      return m ? Number(m[1]) : null;
+    };
+
+    // Stage 1 legacy ids like "6.1.Q2" need mapping to the real clause question text.
+    // We keep the *displayed control* as the base ("6.1"), but fetch the correct question
+    // from mandatory.json (e.g. 6.1.Q2 maps to clause 6.2).
+    const stage1LegacyMap = {
+      "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
+      "5.1": { 1: "5.1", 2: "5.2" },
+      "6.1": { 1: "6.1", 2: "6.2" },
+      "7.1": { 1: "7.1", 2: "7.2", 3: "7.3" },
+      "8.1": { 1: "8.1", 2: "8.2" },
+      "9.1": { 1: "9.1", 2: "9.2" },
+      "10.1": { 1: "10.1", 2: "10.2" },
+    };
+
+    // Stage 1: show full clause title (e.g. "Clause 5: Leadership"), not sub-numbers.
+    if (stageId === "stage1") {
+      const idStr = String(controlId || "").trim();
+
+      const clauseFullTitles = {
+        "4": "Clause 4: Context of the Organization",
+        "5": "Clause 5: Leadership",
+        "6": "Clause 6: Planning",
+        "7": "Clause 7: Support",
+        "8": "Clause 8: Operation",
+        "9": "Clause 9: Performance Evaluation",
+        "10": "Clause 10: Improvement",
+      };
+
+      // Build question ordinal map (clause id ΓåÆ 1-based position within its clause group)
+      // so that "4.2" shows as Q1, "4.3" as Q2, "5.1" as Q1, etc.
+      const clauseOrdinalMap = (() => {
+        const items = getMandatoryItems(mandatoryData);
+        const grouped = {};
+        for (const q of items) {
+          const cl = String(q?.clause ?? "").trim();
+          const maj = getMajorClause(cl);
+          if (!Number.isFinite(maj)) continue;
+          if (!grouped[maj]) grouped[maj] = [];
+          grouped[maj].push(cl);
+        }
+        const map = {};
+        for (const list of Object.values(grouped)) {
+          list.forEach((cl, idx) => { map[cl] = idx + 1; });
+        }
+        return map;
+      })();
+
+      // Path A: question-level ids like "5.1.Q2" or "6.1.Q1".
+      const m = /^(\d+)\.(\d+)[._-]Q(\d+)$/i.exec(idStr);
+      if (m) {
+        const majorClause = m[1];
+        const base = `${m[1]}.${m[2]}`;
+        const qn = Number(m[3]);
+        const mappedClause = stage1LegacyMap?.[base]?.[qn] || base;
+        const mappedQuestionText =
+          mappedClause && textIndex?.get
+            ? String(textIndex.get(`${stageId}::${mappedClause}`) || "")
+            : "";
+        const displayQn = clauseOrdinalMap[mappedClause] ?? qn;
+
+        return {
+          stageId,
+          controlId,
+          questionId: idStr,
+          complianceState,
+          priority,
+          title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
+          subtitle: mappedQuestionText ? `Q${displayQn} - ${mappedQuestionText}` : `Q${displayQn}`,
+          description: rec.recommendation,
+          stageLabel,
+        };
+      }
+
+      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3".
+      const n = /^(\d+)\.(\d+)$/.exec(idStr);
+      if (n) {
+        const majorClause = n[1];
+        const displayQn = clauseOrdinalMap[idStr] ?? Number(n[2]);
+        const qText = textIndex?.get ? String(textIndex.get(`${stageId}::${idStr}`) || "") : "";
+        return {
+          stageId,
+          controlId,
+          questionId: idStr,
+          complianceState,
+          priority,
+          title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
+          subtitle: qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`,
+          description: rec.recommendation,
+          stageLabel,
+        };
+      }
+    }
 
     return {
       stageId,
       controlId,
-      complianceState: rec.complianceState || (rec.score === 1 ? "FULLY_COMPLIANT" : rec.score > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT"),
-      priority: riskLevel,
-      title: controlId ? `Control ${controlId}.` : "Recommendation",
-      subtitle: rec.id || "",
+      questionId,
+      complianceState,
+      priority,
+      title: controlId ? `Control ${controlId}.` : clauseTitle || "Recommendation",
+      subtitle: questionTitle
+        ? `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`
+        : "",
       description: rec.recommendation,
       stageLabel,
     };
   }
 
-  // Fallback for older shapes
   const stageId = getStageIdFromRecommendation(rec);
+  const inferredComplianceState =
+    typeof rec.complianceState === "string" && rec.complianceState
+      ? String(rec.complianceState)
+      : String(rec.severity || "").toLowerCase() === "high"
+        ? "NOT_COMPLIANT"
+        : "PARTIALLY_COMPLIANT";
+  const priority = normalizePriority(rec.priority, inferredComplianceState);
   return {
     stageId,
     controlId: rec.controlId ? String(rec.controlId) : "",
-    complianceState: rec.complianceState || "NOT_COMPLIANT",
-    priority: rec.priority || "HIGH",
+    complianceState: inferredComplianceState,
+    priority,
     title: rec.title || rec.message || "Recommendation",
     subtitle: "",
-    description: rec.description || rec.recommendation || "",
-    stageLabel: stageId ? stageNames[stageId] || "" : (rec.stageLabel || rec.stage || ""),
+    description: rec.description || "",
+    stageLabel: stageId ? stageNames[stageId] || "" : (rec.stageLabel || rec.stage || rec.stageName || ""),
   };
 }
 
 function getPriorityPill(priority) {
   const p = String(priority || "").toUpperCase();
-  if (p === "CRITICAL") return { label: "CRITICAL RISK", bgColor: "#7f1d1d", textColor: "#ffffff" };
-  if (p === "HIGH") return { label: "HIGH RISK", bgColor: "#fee2e2", textColor: "#dc2626" };
-  if (p === "MEDIUM") return { label: "MEDIUM RISK", bgColor: "#fef3c7", textColor: "#d97706" };
-  if (p === "LOW") return { label: "LOW RISK", bgColor: "#ecfdf5", textColor: "#059669" };
+  if (p === "HIGH") return { label: "HIGH PRIORITY", bgColor: "#fee2e2", textColor: "#dc2626" };
+  if (p === "MEDIUM") return { label: "MEDIUM PRIORITY", bgColor: "#fef3c7", textColor: "#d97706" };
   return { label: "", bgColor: "#f3f4f6", textColor: "#0F172A" };
 }
 
@@ -478,7 +598,7 @@ export default function RecommendationsPage() {
   }, [assessmentId]);
 
   const handleDownloadReport = async () => {
-    // Fetch a “report” from backend (answers + per-control compliance + recommendations),
+    // Fetch a ΓÇ£reportΓÇ¥ from backend (answers + per-control compliance + recommendations),
     // then build a printable HTML page and trigger the browser print dialog.
     setDownloading(true);
     setError("");
@@ -585,7 +705,7 @@ export default function RecommendationsPage() {
       };
 
       const formatQuestionCellHtml = ({ stageId, control, qid, questionText }) => {
-        // Match the on-screen “written way”:
+        // Match the on-screen ΓÇ£written wayΓÇ¥:
         // Control X.
         // Qn - <question>
         const qidStr = String(qid || "").trim();
@@ -693,7 +813,7 @@ export default function RecommendationsPage() {
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
               const isNotApplicableAnswer = answerLabel === "N/A";
 
-              // Stage 1 is grouped for display (Clause 4–10), but recommendations must be per-question.
+              // Stage 1 is grouped for display (Clause 4ΓÇô10), but recommendations must be per-question.
               const qidStr = String(qid || "").trim();
               const qidClause = extractClause(qidStr) || qidStr;
               const rowStatus =
@@ -978,7 +1098,7 @@ export default function RecommendationsPage() {
             }}
             title="Opens a printable report (Save as PDF)"
           >
-            {downloading ? "Preparing…" : "Download Report"}
+            {downloading ? "PreparingΓÇª" : "Download Report"}
           </button>
         </div>
 

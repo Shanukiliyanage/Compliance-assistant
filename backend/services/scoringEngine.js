@@ -1,0 +1,124 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { getApplicability } from "./gatewayEngine.js";
+import { getControlWeight } from "./weightEngine.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load data files
+const loadJson = (filename) => JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", filename), "utf8"));
+
+const mandatoryData = loadJson("mandatory.json");
+const organizationalData = loadJson("organizational.json");
+const peopleData = loadJson("people.json");
+const physicalData = loadJson("physical.json");
+const technologicalData = loadJson("technological.json");
+
+function getScore(val) {
+  if (val === "yes") return 1;
+  if (val === "partial") return 0.5;
+  return 0; // Default to No (Implicit No)
+}
+
+function classifyScore(avg) {
+  if (avg === 1) return "yes";
+  if (avg > 0) return "partial";
+  return "no";
+}
+
+export function calculateScores(answers, smeProfile = {}) {
+  const naControls = getApplicability(answers);
+  const industry = smeProfile.industry || "Standard";
+
+  const results = {
+    summary: {
+      stage1: { yes: 0, partial: 0, no: 0, na: 0, total: 7 },
+      stage2: { yes: 0, partial: 0, no: 0, na: 0, total: 37 },
+      stage3: { yes: 0, partial: 0, no: 0, na: 0, total: 8 },
+      stage4: { yes: 0, partial: 0, no: 0, na: 0, total: 14 },
+      stage5: { yes: 0, partial: 0, no: 0, na: 0, total: 34 },
+    },
+    details: {}, // Stores control-level results for recommendations
+    weightedScores: {} // Scores adjusted by importance
+  };
+
+  // --- STAGE 1: MANDATORY ---
+  const stage1Answers = answers.stage1 || {};
+  const s1Groups = {};
+  mandatoryData.forEach(q => {
+    const clause = String(q.clause || "").split(".")[0];
+    if (!s1Groups[clause]) s1Groups[clause] = [];
+    s1Groups[clause].push(getScore(stage1Answers[q.clause] || stage1Answers[q.id]));
+  });
+
+  Object.entries(s1Groups).forEach(([clauseId, scores]) => {
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const status = classifyScore(avg);
+    results.summary.stage1[status]++;
+    results.details[clauseId] = { score: avg, status, weight: getControlWeight(clauseId, industry) };
+  });
+
+  // --- ANNEX A STAGES (2-5) ---
+  const annexAStages = [
+    { key: "stage2", data: organizationalData },
+    { key: "stage3", data: peopleData },
+    { key: "stage4", data: physicalData },
+    { key: "stage5", data: technologicalData }
+  ];
+
+  annexAStages.forEach(stage => {
+    const stageAnswers = answers[stage.key] || {};
+    const controls = stage.data.controls ? (Array.isArray(stage.data.controls) ? stage.data.controls : Object.values(stage.data.controls)) : Object.entries(stage.data);
+
+    if (Array.isArray(controls)) {
+        // Stage 3, 4 often have a different structure
+        controls.forEach(c => {
+            const controlId = c.control || c[0];
+            if (naControls.has(controlId)) {
+                results.summary[stage.key].na++;
+                return;
+            }
+            const qs = c.questions || (c[1] ? c[1].questions : []);
+            const scores = qs.map(q => getScore(stageAnswers[q.id]));
+            const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+            const status = classifyScore(avg);
+            results.summary[stage.key][status]++;
+            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry) };
+        });
+    } else {
+        // Stage 2, 5 often entries
+        Object.entries(stage.data).forEach(([controlId, data]) => {
+            if (controlId.includes("_Gateway")) return;
+            if (naControls.has(controlId)) {
+                results.summary[stage.key].na++;
+                return;
+            }
+            const scores = data.questions.map(q => getScore(stageAnswers[q.id]));
+            const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+            const status = classifyScore(avg);
+            results.summary[stage.key][status]++;
+            results.details[controlId] = { score: avg, status, weight: getControlWeight(controlId, industry) };
+        });
+    }
+  });
+
+  // Calculate Weighted Scores
+  const calculateWeightedStageScore = (stageKey, controlPrefix) => {
+    const stageDetails = Object.entries(results.details).filter(([id]) => id.startsWith(controlPrefix) || (stageKey === "stage1" && ["4","5","6","7","8","9","10"].includes(id)));
+    let weightedSum = 0;
+    let totalWeight = 0;
+    stageDetails.forEach(([id, detail]) => {
+      weightedSum += (detail.score * detail.weight);
+      totalWeight += detail.weight;
+    });
+    return totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
+  };
+
+  results.weightedScores.stage1 = calculateWeightedStageScore("stage1", "");
+  results.weightedScores.annexA = calculateWeightedStageScore("annexA", "A");
+  results.weightedScores.overall = (results.weightedScores.stage1 + results.weightedScores.annexA) / 2;
+
+  return results;
+}

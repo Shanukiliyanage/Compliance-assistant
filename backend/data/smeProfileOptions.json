@@ -1,0 +1,35 @@
+{
+  "sectors": [
+    "Banking / Finance / Insurance",
+    "IT / Software Development",
+    "Education",
+    "Healthcare",
+    "Manufacturing",
+    "Retail / E-commerce",
+    "Other"
+  ],
+  "sizes": [
+    "1–10",
+    "11–50",
+    "51–100",
+    "101–250"
+  ],
+  "dataSensitivity": [
+    "Basic business data",
+    "Personal data",
+    "Financial data",
+    "Sensitive personal data"
+  ],
+  "securityPractices": [
+    "None",
+    "Informal practices",
+    "Documented policies",
+    "Certified standard"
+  ],
+  "assessmentIntent": [
+    "Internal improvement",
+    "Certification preparation",
+    "Customer requirement",
+    "Risk awareness"
+  ]
+}

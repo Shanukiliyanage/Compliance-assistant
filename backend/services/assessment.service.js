@@ -4,9 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 
-import { calculateAllScores } from "../utils/scoring.js";
-import { generateRecommendations } from "../utils/recommendations.js";
 import { readJsonArray, writeJson, ensureJsonFile } from "../utils/jsonStore.js";
+import { getFullSummary } from "./summaryEngine.js";
 import {
   isFirestoreEnabled,
   saveAssessmentResultToFirestore,
@@ -43,33 +42,15 @@ export function analyzeAssessment({ userId, answers, smeProfile }) {
   const assessmentId = uuidv4();
   const timestamp = new Date().toISOString();
 
-  if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] userId:", userId);
-    console.log("[analyze] answers type:", answersType);
-  }
-
-  const scores = calculateAllScores(answers);
-  if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] scores:", scores);
-  }
-
-  // Recommendations can be personalized using organization name.
-  const orgName = String(smeProfile?.organizationName || "").trim();
-  const recommendations = generateRecommendations(answers, {
-    orgName: orgName || "The organization",
-  });
-  if (process.env.DEBUG_BACKEND) {
-    console.log("[analyze] recommendations count:", recommendations.length);
-  }
+  // THESIS-GRADE ANALYSIS
+  const summary = getFullSummary(answers, smeProfile);
+  summary.assessmentId = assessmentId;
+  summary.userId = userId;
 
   // Result returned to the frontend.
   const result = {
-    assessmentId,
-    userId,
+    ...summary,
     timestamp,
-    smeProfile: smeProfile || {},
-    scores,
-    recommendations,
   };
 
   // Persistence

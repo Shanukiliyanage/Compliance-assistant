@@ -1,0 +1,58 @@
+{
+  "A5.24_Gateway": {
+    "control": "Information security incident management",
+    "questions": [
+      {
+        "id": "A5.24.GW1",
+        "question": "Does your organization have a defined mechanism for identifying, reporting, and handling information security incidents?",
+        "explanation": ""
+      }
+    ],
+    "gatewayFor": ["A5.25", "A5.26", "A5.27", "A5.28"]
+  },
+
+  "A5.25": {
+    "control": "Assessment and decision on information security events",
+    "questions": [
+      {
+        "id": "A5.25.Q1",
+        "question": "When a security event occurs, is it assessed and classified to determine if it qualifies as a security incident?",
+        "explanation": "Proper classification helps prioritize responses and prevents missing critical incidents."
+      }
+    ]
+  },
+
+  "A5.26": {
+    "control": "Response to information security incidents",
+    "questions": [
+      {
+        "id": "A5.26.Q1",
+        "question": "When an incident is confirmed, do you follow defined steps to contain, respond, and limit damage?",
+        "explanation": "Incident response procedures ensure damage is minimized and recovery begins quickly."
+      }
+    ]
+  },
+
+  "A5.27": {
+    "control": "Learning from information security incidents",
+    "questions": [
+      {
+        "id": "A5.27.Q1",
+        "question": "After an incident, do you review what happened and update controls to prevent similar incidents?",
+        "explanation": "Learning from incidents helps strengthen your information security management system."
+      }
+    ]
+  },
+
+  "A5.28": {
+    "control": "Collection of evidence",
+    "questions": [
+      {
+        "id": "A5.28.Q1",
+        "question": "Do you collect and preserve evidence from serious incidents in a manner that supports investigations?",
+        "explanation": "Proper evidence handling supports legal and forensic requirements."
+      }
+    ]
+  }
+}
+
