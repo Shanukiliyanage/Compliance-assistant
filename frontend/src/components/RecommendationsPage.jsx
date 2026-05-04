@@ -637,9 +637,11 @@ export default function RecommendationsPage() {
         ? report.allRecommendations
         : Array.isArray(report?.recommendations)
           ? report.recommendations
-          : Array.isArray(assessment?.recommendations)
-            ? assessment.recommendations
-            : [];
+          : Array.isArray(assessment?.allRecommendations)
+            ? assessment.allRecommendations
+            : Array.isArray(assessment?.recommendations)
+              ? assessment.recommendations
+              : [];
       if (!recommendationSource.length) {
         try {
           const fresh = await getAssessmentResult(assessmentId);
@@ -803,30 +805,21 @@ export default function RecommendationsPage() {
             ? `${escapeHtml(control.controlName || "")}`
             : `${escapeHtml(control.controlId)} - ${escapeHtml(control.controlName || "")}`;
           body += `<h3>${heading}</h3>`;
-          const statusLabel = complianceLabel(status?.complianceState) || "";
-          body += `<p><strong>Status:</strong> <span class="${badgeClassForLabel(statusLabel)}">${escapeHtml(statusLabel)}</span></p>`;
-          if (priorityLabel && priorityLabel !== "NONE") {
-            body += `<p><strong>Priority:</strong> <span class="${badgeClassForLabel(priorityLabel)}">${escapeHtml(priorityLabel)}</span></p>`;
-          }
-
           const qs = Array.isArray(control.questions) ? control.questions : [];
           if (qs.length) {
-            body += `<table><thead><tr><th style="width:55%">Question</th><th style="width:15%">Answer</th><th>Recommendation</th></tr></thead><tbody>`;
+            body += `<table><thead><tr><th style="width:45%">Question</th><th style="width:15%">Answer</th><th>Recommendation</th></tr></thead><tbody>`;
             for (const q of qs) {
               const qid = q?.id;
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
               let answerValue = answers?.[qid] || answers?.[stageId]?.[qid];
-              // If a question was hidden by a gateway/showIf rule, treat it as NOT APPLICABLE
-              // in the exported report (so we don't show irrelevant recommendations).
+              
               if ((answerValue == null || answerValue === "") && !applicableByRules) {
                 answerValue = "na";
               }
               const questionText = q?.question || q?.text || "";
               const answerLabel = normalizeAnswerLabel(answerValue);
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
-              const isNotApplicableAnswer = answerLabel === "N/A";
 
-              // Stage 1 is grouped for display (Clause 4ΓÇô10), but recommendations must be per-question.
               const qidStr = String(qid || "").trim();
               const qidClause = extractClause(qidStr) || qidStr;
               const rowStatus =
@@ -835,7 +828,7 @@ export default function RecommendationsPage() {
                     (qidClause !== qidStr ? statusIndex.get(`${stageId}::${qidClause}`) : null) ||
                     status
                   : status;
-              // Prefer per-question recommendation; fallback to backend controlStatus.
+
               let rowRecommendationText = getRecommendationForQuestionRow({
                 stageId,
                 qidStr: qidStr || qidClause,
@@ -845,13 +838,15 @@ export default function RecommendationsPage() {
               body += `<tr>`;
               body += `<td>${formatQuestionCellHtml({ stageId, control, qid, questionText })}</td>`;
               body += `<td><span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span></td>`;
-              body += `<td>${escapeHtml(isNotApplicableAnswer ? "-" : showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
+              // NA and YES should not have any recommendation text in the cell.
+              body += `<td>${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "")}</td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
           } else {
-            // If there are no questions to render, still show recommendation at control level.
-            body += `<p><strong>Recommendation:</strong> ${escapeHtml(recommendationText || "-")}</p>`;
+            // If there are no questions to render, still show recommendation at control level if applicable.
+            const showMainRec = statusLabel === "NO" || statusLabel === "PARTIAL";
+            body += `<p><strong>Recommendation:</strong> ${escapeHtml(showMainRec ? (recommendationText || "-") : "")}</p>`;
           }
 
           body += `</section>`;
