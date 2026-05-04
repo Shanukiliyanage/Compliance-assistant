@@ -51,9 +51,9 @@ function escapeHtml(value) {
 
 function normalizeAnswerLabel(value) {
   const v = String(value ?? "").trim().toLowerCase();
-  if (v === "yes") return "YES";
-  if (v === "no") return "NO";
-  if (v === "partial" || v === "partially") return "PARTIAL";
+  if (v === "yes" || v === "1" || v === "1.0") return "YES";
+  if (v === "no" || v === "0" || v === "0.0") return "NO";
+  if (v === "partial" || v === "partially" || v === "0.5") return "PARTIAL";
   if (v === "not applicable" || v === "n/a" || v === "na") return "N/A";
   return String(value ?? "");
 }
@@ -627,7 +627,13 @@ export default function RecommendationsPage() {
     try {
       const report = await getAssessmentReport(assessmentId);
       const controlsByStage = getAllStageControls();
-      const answers = report?.answers || {};
+      
+      // Use answers from report (backend fresh compute) or fall back to assessment (frontend state)
+      const answers = {
+        ...(assessment?.answers || {}),
+        ...(assessment?.report?.answers || {}),
+        ...(report?.answers || {})
+      };
 
       // Use the same per-question recommendation source as the UI.
       // The report endpoint returns controlStatuses, which may be aggregated by control.
