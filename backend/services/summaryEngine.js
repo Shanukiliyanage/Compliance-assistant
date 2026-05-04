@@ -8,8 +8,10 @@ import { buildControlStatusSummary } from "../utils/recommendations.js";
  */
 export function getFullSummary(answers, smeProfile = {}) {
   const scoring = calculateScores(answers, smeProfile);
+  const industry = smeProfile?.sector || smeProfile?.industry || "Standard";
   const recommendations = generateRecommendations(answers, {
-    orgName: smeProfile?.organizationName || smeProfile?.name
+    orgName: smeProfile?.organizationName || smeProfile?.name,
+    industry
   });
 
   const charts = {
@@ -27,7 +29,8 @@ export function getFullSummary(answers, smeProfile = {}) {
   };
 
   const controlStatuses = buildControlStatusSummary(answers, {
-    orgName: smeProfile?.organizationName || smeProfile?.name
+    orgName: smeProfile?.organizationName || smeProfile?.name,
+    industry
   });
 
   return {
