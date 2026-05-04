@@ -245,50 +245,128 @@ router.get("/result/:assessmentId", (req, res) => {
 // GET /api/assessment/summary/:assessmentId
 router.get("/summary/:assessmentId", (req, res) => {
   const { assessmentId } = req.params;
-  const match = readJsonArray(resultsPath).find(r => r.assessmentId === assessmentId);
-  if (!match) return res.status(404).json({ error: "Summary not found" });
-  return res.json(match);
+  if (!assessmentId) return res.status(400).json({ error: "Missing assessmentId" });
+
+  const readFromJson = () => {
+    return readJsonArray(resultsPath).find(r => r.assessmentId === assessmentId) || null;
+  };
+
+  if (!isFirestoreEnabled()) {
+    const match = readFromJson();
+    if (!match) return res.status(404).json({ error: "Summary not found" });
+    return res.json(match);
+  }
+
+  getAssessmentResultFromFirestore(assessmentId)
+    .then((doc) => {
+      if (doc) return res.json(doc);
+      const match = readFromJson();
+      if (!match) return res.status(404).json({ error: "Summary not found" });
+      return res.json(match);
+    })
+    .catch(() => {
+      const match = readFromJson();
+      if (!match) return res.status(404).json({ error: "Summary not found" });
+      return res.json(match);
+    });
 });
 
 // GET /api/assessment/recommendations/:assessmentId
 router.get("/recommendations/:assessmentId", (req, res) => {
   const { assessmentId } = req.params;
-  const results = readJsonArray(resultsPath);
-  const assessments = readJsonArray(assessmentsPath);
-  
-  const result = results.find(r => r.assessmentId === assessmentId);
-  const assessment = assessments.find(a => a.assessmentId === assessmentId);
-  
-  if (!result || !assessment) return res.status(404).json({ error: "Assessment not found" });
-  
-  const recommendations = generateRecommendations(assessment.answers, {
-    orgName: result.smeProfile?.organizationName || "Organization"
-  });
-  return res.json({
-    companyName: result.smeProfile?.organizationName || "Organization",
-    recommendations
-  });
+  if (!assessmentId) return res.status(400).json({ error: "Missing assessmentId" });
+
+  const getRecs = (resultData, answersData) => {
+    const recommendations = generateRecommendations(answersData, {
+      orgName: resultData.smeProfile?.organizationName || "Organization"
+    });
+    return {
+      companyName: resultData.smeProfile?.organizationName || "Organization",
+      recommendations
+    };
+  };
+
+  const readFromJson = () => {
+    const results = readJsonArray(resultsPath);
+    const assessments = readJsonArray(assessmentsPath);
+    const result = results.find(r => r.assessmentId === assessmentId);
+    const assessment = assessments.find(a => a.assessmentId === assessmentId);
+    if (!result || !assessment) return null;
+    return getRecs(result, assessment.answers);
+  };
+
+  if (!isFirestoreEnabled()) {
+    const data = readFromJson();
+    if (!data) return res.status(404).json({ error: "Assessment not found" });
+    return res.json(data);
+  }
+
+  getAssessmentResultFromFirestore(assessmentId)
+    .then((doc) => {
+      if (doc) {
+        const answers = doc.answers || {};
+        return res.json(getRecs(doc, answers));
+      }
+      const data = readFromJson();
+      if (!data) return res.status(404).json({ error: "Assessment not found" });
+      return res.json(data);
+    })
+    .catch(() => {
+      const data = readFromJson();
+      if (!data) return res.status(404).json({ error: "Assessment not found" });
+      return res.json(data);
+    });
 });
 
 // GET /api/assessment/report/:assessmentId
 router.get("/report/:assessmentId", (req, res) => {
   const { assessmentId } = req.params;
-  const results = readJsonArray(resultsPath);
-  const assessments = readJsonArray(assessmentsPath);
-  
-  const result = results.find(r => r.assessmentId === assessmentId);
-  const assessment = assessments.find(a => a.assessmentId === assessmentId);
-  
-  if (!result || !assessment) return res.status(404).json({ error: "Assessment not found" });
-  
-  const fullSummary = getFullSummary(assessment.answers, result.smeProfile);
-  
-  return res.json({
-    ...fullSummary,
-    assessmentId,
-    timestamp: assessment.timestamp,
-    answers: assessment.answers
-  });
+  if (!assessmentId) return res.status(400).json({ error: "Missing assessmentId" });
+
+  const getReportData = (resultData, answersData) => {
+    // Generate fresh summary/recommendations from the answers to ensure 
+    // latest rulebook logic is applied.
+    const fullSummary = getFullSummary(answersData, resultData.smeProfile || {});
+    return {
+      ...fullSummary,
+      assessmentId,
+      timestamp: resultData.timestamp || new Date().toISOString(),
+      answers: answersData
+    };
+  };
+
+  const readFromJson = () => {
+    const results = readJsonArray(resultsPath);
+    const assessments = readJsonArray(assessmentsPath);
+    const result = results.find(r => r.assessmentId === assessmentId);
+    const assessment = assessments.find(a => a.assessmentId === assessmentId);
+    if (!result || !assessment) return null;
+    return getReportData(result, assessment.answers);
+  };
+
+  if (!isFirestoreEnabled()) {
+    const report = readFromJson();
+    if (!report) return res.status(404).json({ error: "Assessment not found" });
+    return res.json(report);
+  }
+
+  getAssessmentResultFromFirestore(assessmentId)
+    .then((doc) => {
+      if (doc) {
+        // Firestore result usually contains embedded answers.
+        const answers = doc.answers || {};
+        return res.json(getReportData(doc, answers));
+      }
+      const report = readFromJson();
+      if (!report) return res.status(404).json({ error: "Assessment not found" });
+      return res.json(report);
+    })
+    .catch((err) => {
+      console.error("[report] Firestore read failed:", err);
+      const report = readFromJson();
+      if (!report) return res.status(404).json({ error: "Assessment not found" });
+      return res.json(report);
+    });
 });
 
 export default router;
