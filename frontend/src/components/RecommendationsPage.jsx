@@ -790,12 +790,12 @@ export default function RecommendationsPage() {
           const qs = Array.isArray(control.questions) ? control.questions : [];
           const statusLabel = complianceLabel(status?.complianceState);
           if (qs.length) {
-            body += `<table style="border:1px solid #ddd; margin-bottom:20px;">
+            body += `<table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
               <thead>
-                <tr style="background:#f8fafc;">
-                  <th style="width:40%; padding:12px; border:1px solid #ddd; font-weight:bold;">Question</th>
-                  <th style="width:15%; padding:12px; border:1px solid #ddd; font-weight:bold;">Answer</th>
-                  <th style="padding:12px; border:1px solid #ddd; font-weight:bold;">Recommendation</th>
+                <tr style="background:#f8fafc; border-bottom: 2px solid #e2e8f0;">
+                  <th style="width:45%; padding:15px; text-align:left; font-weight:bold; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Question</th>
+                  <th style="width:15%; padding:15px; text-align:left; font-weight:bold; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Answer</th>
+                  <th style="padding:15px; text-align:left; font-weight:bold; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Recommendation</th>
                 </tr>
               </thead>
               <tbody>`;
@@ -804,10 +804,11 @@ export default function RecommendationsPage() {
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
               let answerValue = answers?.[qid] || answers?.[stageId]?.[qid];
               
-              // Robust lookup for Stage 1 (try clause name, numeric ID, and legacy Q-prefixes)
+              // Aggressive lookup for Stage 1 (try clause name, numeric ID, and legacy Q-prefixes)
               if (stageId === "stage1" && (answerValue == null || answerValue === "")) {
                 const nId = q?.numericId || q?.id;
                 answerValue = answers?.[nId] || answers?.[stageId]?.[nId] || 
+                              answers?.[String(nId)] || answers?.[stageId]?.[String(nId)] ||
                               answers?.[`Q${nId}`] || answers?.[stageId]?.[`Q${nId}`];
               }
 
@@ -815,7 +816,12 @@ export default function RecommendationsPage() {
                 answerValue = "na";
               }
               const questionText = q?.question || q?.text || "";
-              const answerLabel = normalizeAnswerLabel(answerValue);
+              let answerLabel = normalizeAnswerLabel(answerValue);
+              
+              // Ensure we don't show an empty Answer column
+              if (!answerLabel || answerLabel === "UNKNOWN") {
+                answerLabel = "NO"; // Fallback to NO if mandatory and missing
+              }
               const isYesOrNA = answerLabel === "YES" || answerLabel === "N/A";
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
 
@@ -858,11 +864,13 @@ export default function RecommendationsPage() {
               body += `<tr>`;
               body += `<td style="padding:12px;">${escapeHtml(questionText)}</td>`;
               // Answer column: Plain text as per user request
-              body += `<td style="padding:15px; text-align:left; vertical-align:top; font-weight: 500;">
+              body += `<td style="padding:15px; text-align:left; vertical-align:top; font-weight: 600; color: #1e293b; border-bottom: 1px solid #f1f5f9;">
                 ${escapeHtml(answerLabel)}
               </td>`;
               // Recommendation column: Only show for NO or PARTIAL
-              body += `<td style="padding:15px; vertical-align:top; color: #334155; line-height: 1.6;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
+              body += `<td style="padding:15px; vertical-align:top; color: #475569; line-height: 1.6; border-bottom: 1px solid #f1f5f9;">
+                ${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}
+              </td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
