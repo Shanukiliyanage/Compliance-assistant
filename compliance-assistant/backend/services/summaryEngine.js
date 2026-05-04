@@ -52,6 +52,7 @@ export function getFullSummary(answers, smeProfile = {}) {
     allRecommendations: recommendations,
     controlStatuses,
     excludedControls: scoring.excludedControls,
-    charts
+    charts,
+    answers
   };
 }
