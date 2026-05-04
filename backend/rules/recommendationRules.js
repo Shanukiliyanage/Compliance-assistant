@@ -61,9 +61,33 @@ export function getRecommendationForControl(
         "7.1": "CL7_SUPPORT", "7.2": "CL7_SUPPORT", "7.3": "CL7_SUPPORT",
         "8.1": "CL8_OPERATION", "8.2": "CL8_OPERATION",
         "9.1": "CL9_EVALUATION", "9.2": "CL9_EVALUATION",
-        "10.1": "CL10_IMPROVEMENT", "10.2": "CL10_IMPROVEMENT"
+        "10.1": "CL10_IMPROVEMENT", "10.2": "CL10_IMPROVEMENT",
+        // Support for numeric IDs (ids from mandatory.json)
+        "15": "CL4_1", "1": "CL4_2", "2": "CL4_3",
+        "3": "CL5_LEADERSHIP", "4": "CL5_LEADERSHIP",
+        "5": "CL6_PLANNING", "6": "CL6_PLANNING",
+        "7": "CL7_SUPPORT", "8": "CL7_SUPPORT",
+        "9": "CL8_OPERATION", "10": "CL8_OPERATION",
+        "11": "CL9_EVALUATION", "12": "CL9_EVALUATION",
+        "13": "CL10_IMPROVEMENT", "14": "CL10_IMPROVEMENT"
       };
       return clMap[base] || base;
+    }
+
+    // Match numeric IDs directly
+    const mNumeric = /^(\d+)$/.exec(normalizedId);
+    if (mNumeric) {
+      const num = mNumeric[1];
+      const numericMap = {
+        "15": "CL4_1", "1": "CL4_2", "2": "CL4_3",
+        "3": "CL5_LEADERSHIP", "4": "CL5_LEADERSHIP",
+        "5": "CL6_PLANNING", "6": "CL6_PLANNING",
+        "7": "CL7_SUPPORT", "8": "CL7_SUPPORT",
+        "9": "CL8_OPERATION", "10": "CL8_OPERATION",
+        "11": "CL9_EVALUATION", "12": "CL9_EVALUATION",
+        "13": "CL10_IMPROVEMENT", "14": "CL10_IMPROVEMENT"
+      };
+      return numericMap[num] || num;
     }
 
     return normalizedId;
