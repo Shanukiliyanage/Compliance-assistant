@@ -633,11 +633,13 @@ export default function RecommendationsPage() {
       // The report endpoint returns controlStatuses, which may be aggregated by control.
       // `report.recommendations` is computed live from answers (preferred).
       const recommendationIndex = new Map();
-      let recommendationSource = Array.isArray(report?.recommendations)
-        ? report.recommendations
-        : Array.isArray(assessment?.recommendations)
-          ? assessment.recommendations
-          : [];
+      let recommendationSource = Array.isArray(report?.allRecommendations)
+        ? report.allRecommendations
+        : Array.isArray(report?.recommendations)
+          ? report.recommendations
+          : Array.isArray(assessment?.recommendations)
+            ? assessment.recommendations
+            : [];
       if (!recommendationSource.length) {
         try {
           const fresh = await getAssessmentResult(assessmentId);
@@ -813,7 +815,7 @@ export default function RecommendationsPage() {
             for (const q of qs) {
               const qid = q?.id;
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
-              let answerValue = answers?.[stageId]?.[qid];
+              let answerValue = answers?.[qid] || answers?.[stageId]?.[qid];
               // If a question was hidden by a gateway/showIf rule, treat it as NOT APPLICABLE
               // in the exported report (so we don't show irrelevant recommendations).
               if ((answerValue == null || answerValue === "") && !applicableByRules) {

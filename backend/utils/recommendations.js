@@ -1,89 +1,66 @@
-// Recommendation utilities.
-// Groups answers by control, derives compliance state, and selects recommendation text.
+import { 
+  getRecommendationForControl, 
+  aliasMandatoryQuestionId,
+  canonicalizeRuleKey
+} from "../rules/recommendationRules.js";
 
-import { getControlComplianceState } from "../rules/complianceRules.js";
-import { getRecommendationForControl } from "../rules/recommendationRules.js";
-import { getNotApplicableControlIds } from "./applicability.js";
-
-function getPriorityFromComplianceState(complianceState) {
-  // Minimal prioritization rule used by the report/UI.
-  const cs = String(complianceState || "").toUpperCase();
-  if (cs === "NOT_COMPLIANT") return "HIGH";
-  if (cs === "PARTIALLY_COMPLIANT") return "MEDIUM";
-  return "NONE";
+// Helper to determine compliance state from a single answer value.
+function getComplianceState(value) {
+  const v = String(value || "").toLowerCase().trim();
+  if (v === "yes" || v === "fully") return "FULLY_COMPLIANT";
+  if (v === "partial" || v === "partially") return "PARTIALLY_COMPLIANT";
+  if (v === "no" || v === "not") return "NOT_COMPLIANT";
+  return "NOT_APPLICABLE";
 }
 
-function mapAnswerToComplianceState(value) {
-  const v = String(value ?? "")
-    .trim()
-    .toLowerCase();
-  if (v === "yes") return "FULLY_COMPLIANT";
-  if (v === "no") return "NOT_COMPLIANT";
-  if (v === "partial" || v === "partially") return "PARTIALLY_COMPLIANT";
-  if (v === "not applicable" || v === "n/a" || v === "na") return "NOT_APPLICABLE";
-  return "";
+// Determines the overall compliance state for a control based on its question answers.
+function getControlComplianceState(answers) {
+  if (!Array.isArray(answers) || answers.length === 0) return "NOT_APPLICABLE";
+  
+  const states = answers.map(getComplianceState);
+  if (states.every(s => s === "FULLY_COMPLIANT")) return "FULLY_COMPLIANT";
+  if (states.some(s => s === "NOT_COMPLIANT")) return "NOT_COMPLIANT";
+  if (states.some(s => s === "PARTIALLY_COMPLIANT")) return "PARTIALLY_COMPLIANT";
+  return "FULLY_COMPLIANT"; // Default to fully if all are N/A or similar (shouldn't happen with filtering)
+}
+
+function getPriorityFromComplianceState(state) {
+  switch (state) {
+    case "NOT_COMPLIANT": return "HIGH";
+    case "PARTIALLY_COMPLIANT": return "MEDIUM";
+    case "FULLY_COMPLIANT": return "LOW";
+    default: return "NONE";
+  }
 }
 
 function shouldIgnoreAnswerKey(key) {
-  const k = String(key || "").trim();
-
-  // Ignore "gateway" questions that only decide if later questions apply.
-  if (/[._-]GW\d+$/i.test(k)) return true;
-
-  // Another gateway naming style used in the frontend.
-  if (/_gateway/i.test(k)) return true;
-
-  // Cloud applicability question: also a gate, not a scored control.
-  if (/^A5\.23\.Q1$/i.test(k)) return true;
-
-  // Stage 5 SDLC gateway: applicability only (not a scored control).
-  if (/^SDLC_GATE_Q1$/i.test(k)) return true;
-
-  return false;
-}
-
-function isYesAnswer(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase() === "yes";
+  return /_comment$/i.test(key) || /_evidence$/i.test(key) || key === "timestamp" || key === "userId";
 }
 
 function isSuppressedByStage2Gates(key, stageAnswers) {
-  const k = String(key || "").trim();
-  const stage = stageAnswers || {};
-
-  // If a gateway is "no", ignore answers for questions that were hidden.
-  if (/^A5\.(19|20|21|22)\./i.test(k)) {
-    return !isYesAnswer(stage["A5.19.GW1"]);
-  }
-
-  // Only consider cloud risk management if cloud use was "yes".
-  if (/^A5\.23\.Q2$/i.test(k)) {
-    return !isYesAnswer(stage["A5.23.Q1"]);
-  }
-
-  // Incident follow-up (A5.25-28) should be suppressed if the intro (A5.24.Q1) is "no".
-  if (/^A5\.(25|26|27|28)\./i.test(k)) {
-    return !isYesAnswer(stage["A5.24.Q1"]);
-  }
-
+  // ISO 27001 Annex A gateway logic: if a main control is "No", its sub-controls are suppressed.
+  if (key.startsWith("A.5.19") && key !== "A.5.19_Gateway" && stageAnswers["A.5.19_Gateway"] === "no") return true;
+  if (key.startsWith("A.5.21") && key !== "A.5.21_Gateway" && stageAnswers["A.5.21_Gateway"] === "no") return true;
+  if (key.startsWith("A.5.23") && key !== "A.5.23_Gateway" && stageAnswers["A.5.23_Gateway"] === "no") return true;
   return false;
 }
 
 function isSuppressedByStage5Gates(key, stageAnswers) {
-  const k = String(key || "").trim();
-  const stage = stageAnswers || {};
-
-  // Note: network security follow-up (A8.21-22) is NOT suppressed here.
-  // The frontend sets them to "no" when A8.20_Q1 = "no", so they should
-  // generate NOT_COMPLIANT recommendations.
-
-  // Secure development controls apply only if SDLC/software development is in scope.
-  if (/^A8\.(25|26|27|28|29|31|33)[._-]/i.test(k)) {
-    return !isYesAnswer(stage["SDLC_GATE_Q1"]);
-  }
-
+  // Technological controls gateway logic.
+  if (key.startsWith("A.8.11") && key !== "A.8.11_Gateway" && stageAnswers["A.8.11_Gateway"] === "no") return true;
+  if (key.startsWith("A.8.12") && key !== "A.8.12_Gateway" && stageAnswers["A.8.12_Gateway"] === "no") return true;
+  if (key.startsWith("A.8.16") && key !== "A.8.16_Gateway" && stageAnswers["A.8.16_Gateway"] === "no") return true;
   return false;
+}
+
+function getNotApplicableControlIds(stageId, stageAnswers) {
+  const na = new Set();
+  for (const [key, value] of Object.entries(stageAnswers || {})) {
+    if (getComplianceState(value) === "NOT_APPLICABLE") {
+      na.add(normalizeControlId(key));
+    }
+  }
+  return na;
 }
 
 function normalizeControlId(key) {
@@ -119,9 +96,7 @@ function groupStageAnswers(stageId, stageAnswers) {
   // Groups answers for one stage into { controlId: [answers...] }.
   const grouped = {};
 
-  // Stage 1 aliasing (compat fix): some builds stored the “risk treatment decisions mapped
-  // to controls/actions” question under 6.1.Q1, but the rule text is defined under 6.1.Q2.
-  // If Q2 is not present, treat Q1 as Q2.
+  // Stage 1 aliasing (compat fix)
   const stage1Aliases =
     stageId === "stage1" && stageAnswers && typeof stageAnswers === "object"
       ? {
@@ -151,9 +126,6 @@ function groupStageAnswers(stageId, stageAnswers) {
 
 export function generateRecommendations(answers, options = {}) {
   // Builds the recommendations list used in report/UI.
-  // Output supports question-level recommendations when they exist.
-  // If a question-specific recommendation rule is missing, we fall back to a single aggregated
-  // control-level recommendation (avoids duplicates).
   const recommendations = [];
   const orgName =
     typeof options?.orgName === "string" && options.orgName.trim()
@@ -163,38 +135,29 @@ export function generateRecommendations(answers, options = {}) {
   Object.entries(answers || {}).forEach(([stageId, stageAnswers]) => {
     const stage = stageAnswers || {};
     const notApplicableControlIds = getNotApplicableControlIds(stageId, stage);
-
-    // 1) Collect question-level recommendations where explicit question rules exist.
-    // Track controls that already have question-level recs so we can skip the control-level fallback.
     const controlsWithQuestionRecs = new Set();
 
-    for (const [questionIdRaw, answerValue] of Object.entries(stage)) {
-      const questionId = String(questionIdRaw || "").trim();
-      if (!questionId) continue;
-      if (answerValue == null) continue;
-      if (typeof answerValue === "string" && answerValue.trim() === "") continue;
-
+    // 1) Specific question-level recommendations.
+    for (const [questionId, answerValue] of Object.entries(stage)) {
       if (shouldIgnoreAnswerKey(questionId)) continue;
+      if (notApplicableControlIds.has(normalizeControlId(questionId))) continue;
       if (isSuppressedByStage2Gates(questionId, stage)) continue;
       if (stageId === "stage5" && isSuppressedByStage5Gates(questionId, stage)) continue;
 
-      const complianceState = mapAnswerToComplianceState(answerValue);
-      if (!complianceState || complianceState === "NOT_APPLICABLE" || complianceState === "FULLY_COMPLIANT") continue;
+      const complianceState = getComplianceState(answerValue);
+      if (complianceState === "FULLY_COMPLIANT") continue;
+      if (complianceState === "NOT_APPLICABLE") continue;
 
-      // For Annex A stages, normalize question IDs to the canonical controlId used by rules and N/A.
-      const controlId = normalizeForStage(stageId, questionId);
-      if (stageId !== "stage1" && notApplicableControlIds.has(controlId)) continue;
-
-      // Only emit a question-level recommendation when an explicit rule exists.
       const recommendation = getRecommendationForControl(questionId, complianceState, orgName);
-
-      const priority = getPriorityFromComplianceState(complianceState);
       if (recommendation) {
+        const controlId = normalizeForStage(stageId, questionId);
         controlsWithQuestionRecs.add(controlId);
+
+        const priority = getPriorityFromComplianceState(complianceState);
         recommendations.push({
           stageId,
-          controlId,
-          questionId,
+          controlId: controlId,
+          questionId: questionId,
           complianceState,
           priority,
           recommendation,
@@ -205,18 +168,18 @@ export function generateRecommendations(answers, options = {}) {
     // 2) Fallback: one aggregated recommendation per control where no question-level rules exist.
     const grouped = groupStageAnswers(stageId, stage);
     Object.entries(grouped).forEach(([controlId, questionAnswers]) => {
-      if (notApplicableControlIds.has(controlId)) return;
       if (controlsWithQuestionRecs.has(controlId)) return;
+      if (notApplicableControlIds.has(controlId)) return;
+
       const complianceState = getControlComplianceState(questionAnswers);
       if (complianceState === "FULLY_COMPLIANT") return;
 
-      const priority = getPriorityFromComplianceState(complianceState);
       const recommendation = getRecommendationForControl(controlId, complianceState, orgName);
-
       if (recommendation) {
+        const priority = getPriorityFromComplianceState(complianceState);
         recommendations.push({
-          controlId,
           stageId,
+          controlId,
           complianceState,
           priority,
           recommendation,
@@ -230,7 +193,6 @@ export function generateRecommendations(answers, options = {}) {
 
 export function buildControlStatusSummary(answers, options = {}) {
   // What: Build a full “status list” for the report.
-  // Difference vs generateRecommendations: includes controls even if recommendation is empty.
   const orgName =
     typeof options?.orgName === "string" && options.orgName.trim()
       ? options.orgName.trim()
@@ -241,6 +203,7 @@ export function buildControlStatusSummary(answers, options = {}) {
   Object.entries(answers || {}).forEach(([stageId, stageAnswers]) => {
     const notApplicableControlIds = getNotApplicableControlIds(stageId, stageAnswers);
     const grouped = groupStageAnswers(stageId, stageAnswers);
+    const stage1ClauseAnswers = {}; // Map of CL4_CONTEXT -> [answers...]
 
     Object.entries(grouped).forEach(([controlId, questionAnswers]) => {
       if (notApplicableControlIds.has(controlId)) return;
@@ -255,65 +218,67 @@ export function buildControlStatusSummary(answers, options = {}) {
         priority,
         recommendation: recommendation || null,
       });
+
+      // Track Stage 1 clause groups
+      if (stageId === "stage1") {
+        const m = /^(\d+)\./.exec(controlId);
+        if (m) {
+          const clauseNum = m[1];
+          const groupMap = {
+            "4": "CL4_CONTEXT", "5": "CL5_LEADERSHIP", "6": "CL6_PLANNING", "7": "CL7_SUPPORT",
+            "8": "CL8_OPERATION", "9": "CL9_EVALUATION", "10": "CL10_IMPROVEMENT"
+          };
+          const groupId = groupMap[clauseNum];
+          if (groupId) {
+            if (!stage1ClauseAnswers[groupId]) stage1ClauseAnswers[groupId] = [];
+            stage1ClauseAnswers[groupId].push(...questionAnswers);
+          }
+        }
+      }
     });
 
-    // Add explicit NOT_APPLICABLE controls so reports can show them as N/A.
-    for (const controlId of notApplicableControlIds) {
-      // Avoid duplicates if a control was somehow answered.
-      if (controls.some((c) => c.stageId === stageId && c.controlId === controlId)) continue;
+    // Add explicit group-level statuses for Stage 1.
+    Object.entries(stage1ClauseAnswers).forEach(([groupId, answersList]) => {
+      const complianceState = getControlComplianceState(answersList);
       controls.push({
-        stageId,
-        controlId,
-        complianceState: "NOT_APPLICABLE",
-        priority: "NONE",
-        recommendation: null,
+        stageId: "stage1",
+        controlId: groupId,
+        complianceState,
+        priority: getPriorityFromComplianceState(complianceState),
+        recommendation: null
       });
-    }
-  });
+    });
 
-  // Sort output so the report looks consistent.
-  const stageRank = { stage1: 1, stage2: 2, stage3: 3, stage4: 4, stage5: 5 };
-  controls.sort((a, b) => {
-    const ar = stageRank[a.stageId] ?? 999;
-    const br = stageRank[b.stageId] ?? 999;
-    if (ar !== br) return ar - br;
-    return String(a.controlId).localeCompare(String(b.controlId));
+    // Add explicit NOT_APPLICABLE controls.
+    notApplicableControlIds.forEach(id => {
+      if (!controls.find(c => c.stageId === stageId && c.controlId === id)) {
+        controls.push({
+          stageId,
+          controlId: id,
+          complianceState: "NOT_APPLICABLE",
+          priority: "NONE",
+          recommendation: null,
+        });
+      }
+    });
   });
 
   return controls;
 }
 
-// Named export expected by routes/assessment.routes.js
-export function buildAnswersForExport(assessment) {
-  // Return answers in a shape suitable for report/export.
-  // Current assessment schema stores answers as an object keyed by stage:
-  // { stage1: {...}, stage2: {...}, stage3: {...}, stage4: {...}, stage5: {...} }
-  // Older/legacy schemas may store answers as an array of response items.
-  if (!assessment) return {};
-
-  // If caller passed the answers object directly, keep it as-is.
-  // (This is the current usage from routes/assessment.routes.js)
-  if (!Array.isArray(assessment) && typeof assessment === "object") {
-    const hasStageKeys =
-      Object.prototype.hasOwnProperty.call(assessment, "stage1") ||
-      Object.prototype.hasOwnProperty.call(assessment, "stage2") ||
-      Object.prototype.hasOwnProperty.call(assessment, "stage3") ||
-      Object.prototype.hasOwnProperty.call(assessment, "stage4") ||
-      Object.prototype.hasOwnProperty.call(assessment, "stage5");
-
-    if (hasStageKeys) return assessment;
-  }
-
-  // If caller passed a whole assessment object, unwrap common fields.
-  if (assessment && typeof assessment === "object") {
-    if (assessment.answers && typeof assessment.answers === "object") return assessment.answers;
-    if (assessment.responses && typeof assessment.responses === "object") return assessment.responses;
-  }
-
-  // Legacy array shape.
-  if (Array.isArray(assessment)) return assessment;
-  if (Array.isArray(assessment?.answers)) return assessment.answers;
-  if (Array.isArray(assessment?.responses)) return assessment.responses;
-
-  return {};
+export function buildAnswersForExport(answers) {
+  // Returns a flat list of { id, value, label } for the report.
+  const list = [];
+  Object.entries(answers || {}).forEach(([stageId, stage]) => {
+    Object.entries(stage || {}).forEach(([qid, val]) => {
+      if (shouldIgnoreAnswerKey(qid)) return;
+      list.push({
+        stageId,
+        id: qid,
+        value: val,
+        label: getComplianceState(val).replace("_", " "),
+      });
+    });
+  });
+  return list;
 }

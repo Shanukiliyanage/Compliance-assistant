@@ -1,5 +1,6 @@
 import { calculateScores } from "./scoringEngine.js";
 import { generateRecommendations } from "./recommendationEngine.js";
+import { buildControlStatusSummary } from "../utils/recommendations.js";
 
 /**
  * Summary Engine
@@ -25,6 +26,10 @@ export function getFullSummary(answers, smeProfile = {}) {
     }
   };
 
+  const controlStatuses = buildControlStatusSummary(answers, {
+    orgName: smeProfile?.organizationName || smeProfile?.name
+  });
+
   return {
     assessmentId: null, 
     timestamp: new Date().toISOString(),
@@ -42,6 +47,7 @@ export function getFullSummary(answers, smeProfile = {}) {
     },
     recommendations: recommendations.slice(0, 10),
     allRecommendations: recommendations,
+    controlStatuses,
     excludedControls: scoring.excludedControls,
     charts
   };
