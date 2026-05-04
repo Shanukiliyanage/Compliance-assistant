@@ -841,7 +841,11 @@ export default function RecommendationsPage() {
                 stageId,
                 qidStr: qidStr || qidClause,
               });
-              if (!rowRecommendationText) rowRecommendationText = rowStatus?.recommendation ? String(rowStatus.recommendation) : "";
+              
+              // Fallback: If no question-level rec, use the broader control-level recommendation
+              if (!rowRecommendationText) {
+                rowRecommendationText = (rowStatus?.recommendation || status?.recommendation || recommendationText || "");
+              }
 
               body += `<tr>`;
               body += `<td style="padding:12px;">${escapeHtml(questionText)}</td>`;
