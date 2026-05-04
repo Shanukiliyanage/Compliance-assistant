@@ -127,6 +127,15 @@ export function getRecommendationForControl(
       return `A.${Number(underscore3Gw[1])}.${Number(underscore3Gw[2])}.${Number(underscore3Gw[3])}.Q1`;
     }
 
+    // New: Normalize base control ids (e.g. A5.1 -> A.5.1)
+    const flatBase = /^A(\d+)\.(\d+)(?:\.(\d+))?$/i.exec(id);
+    if (flatBase) {
+      const a = Number(flatBase[1]);
+      const b = Number(flatBase[2]);
+      const c = flatBase[3] != null ? Number(flatBase[3]) : null;
+      return c != null ? `A.${a}.${b}.${c}` : `A.${a}.${b}`;
+    }
+
     return id;
   };
 

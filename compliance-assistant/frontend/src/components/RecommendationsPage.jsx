@@ -956,8 +956,10 @@ export default function RecommendationsPage() {
 
   const normalizedRecommendations = useMemo(() => {
     // Convert raw backend recommendations into a stable UI shape.
-    const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
-    return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
+    // Prioritize allRecommendations (full list) over recommendations (top 10).
+    const recs = assessment?.allRecommendations || assessment?.recommendations || [];
+    const recArray = Array.isArray(recs) ? recs : [];
+    return recArray.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
 
   const stageCounts = useMemo(() => {
