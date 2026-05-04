@@ -12,61 +12,49 @@
 const DEFAULT_WEIGHTS = {
   // Mandatory Clauses (Always Critical for ALL sectors)
   "4": 2, "CL4_1": 2, "CL4_2": 2, "CL4_3": 2,
-  "5": 2, "6": 2, "7": 2, "8": 2, "9": 2, "10": 2,
+  "5": 2, "CL5_LEADERSHIP": 2,
+  "6": 2, "CL6_PLANNING": 2,
+  "7": 2, "CL7_SUPPORT": 2,
+  "8": 2, "CL8_OPERATION": 2,
+  "9": 2, "CL9_EVALUATION": 2,
+  "10": 2, "CL10_IMPROVEMENT": 2,
   
-  // Organizational
-  "A5.1": 1.5, "A5.15": 2, "A5.19": 1.5, "A5.24": 2, "A5.37": 1.5,
-  
-  // People
-  "A6.1": 1.5, "A6.3": 1.5, "A6.8": 1.5,
-  
-  // Physical
-  "A7.1": 1.5, "A7.10": 1,
-  
-  // Technological
-  "A8.1": 2, "A8.2": 2, "A8.5": 2, "A8.8": 2, "A8.12": 2, "A8.15": 1.5, "A8.20": 2, "A8.24": 2, "A8.28": 1.5
+  // GLOBAL RULE: All other Annex A controls default to 1.0
+  // (They don't need to be listed here if the lookup defaults to 1)
 };
 
 /**
  * Sector-specific weight overrides.
  * Keys MUST match the exact sector strings from smeProfileOptions.json.
- * Controls listed here get bumped to Critical (weight = 2) for that sector.
+ * Maps controlId -> weight (1.5 for Important, 2.0 for Critical).
  */
 const SECTOR_MODIFIERS = {
-  // Banking / Finance / Insurance — Transaction security, data integrity, access control
-  "Banking / Finance / Insurance": [
-    "A5.1", "A5.15", "A5.19", "A5.24",
-    "A8.2", "A8.5", "A8.10", "A8.12", "A8.20", "A8.24"
-  ],
+  // Banking / Finance / Insurance
+  "Banking / Finance / Insurance": {
+    "A.8.24": 2, "A.8.15": 2, "A.8.16": 2, "A.8.13": 2, "A.5.30": 2, "A.5.33": 2, // Critical
+    "A.8.2": 1.5, "A.8.18": 1.5, "A.5.12": 1.5, "A.5.34": 1.5 // Important
+  },
 
-  // IT / Software Development — SDLC, vulnerability management, network security
-  "IT / Software Development": [
-    "A8.1", "A8.2", "A8.5", "A8.8", "A8.9", "A8.12",
-    "A8.20", "A8.24", "A8.25", "A8.26", "A8.27", "A8.28"
-  ],
+  // IT / Software Development
+  "IT / Software Development": {
+    "A.5.7": 2, "A.8.25": 2, "A.8.27": 2, "A.8.28": 2, "A.8.29": 2, "A.8.31": 2, // Critical
+    "A.8.26": 1.5, "A.8.33": 1.5 // Important
+  },
 
-  // Healthcare — Data privacy, access control, encryption, physical security
-  "Healthcare": [
-    "A5.1", "A5.15", "A5.34",
-    "A7.1", "A7.2", "A7.4",
-    "A8.2", "A8.5", "A8.11", "A8.12", "A8.24"
-  ],
+  // Healthcare
+  "Healthcare": {
+    "A.8.24": 2, "A.8.3": 2, "A.5.34": 2, "A.5.29": 2, "A.5.30": 2, "A.8.13": 2, // Critical
+    "A.8.15": 1.5, "A.8.16": 1.5, "A.8.14": 1.5 // Important
+  },
 
-  // Manufacturing — Physical security, operational technology, supply chain
-  "Manufacturing": [
-    "A5.19", "A5.20", "A5.21", "A5.22",
-    "A7.1", "A7.2", "A7.3", "A7.4", "A7.8",
-    "A8.1", "A8.9", "A8.20"
-  ],
+  // Manufacturing
+  "Manufacturing": {
+    "A.7.1": 2, "A.7.2": 2, "A.5.19": 2, // Critical
+    "A.7.3": 1.5, "A.7.4": 1.5, "A.5.20": 1.5, "A.5.21": 1.5, "A.5.22": 1.5 // Important
+  },
 
-  // Retail / E-commerce — Payment security, customer data, web security
-  "Retail / E-commerce": [
-    "A5.1", "A5.15", "A5.19",
-    "A8.2", "A8.5", "A8.8", "A8.12", "A8.20", "A8.24", "A8.28"
-  ],
-
-  // Other / General — Use default weights only
-  "Other": []
+  // Other / General — ALL controls = 1.0 (defaults applied)
+  "Other": {}
 };
 
 // Legacy sector name mapping for backward compatibility
@@ -80,18 +68,41 @@ const SECTOR_ALIASES = {
   "General": "Other"
 };
 
-export function getControlWeight(controlId, industry = "Standard") {
-  let weight = DEFAULT_WEIGHTS[controlId] || 1;
+/**
+ * Normalizes control IDs for lookup.
+ * Some IDs might be passed as "A5.1" instead of "A.5.1".
+ */
+function normalizeId(id) {
+  if (typeof id !== "string") return id;
+  const match = /^A(\d+)\.(\d+)(?:\.(\d+))?$/.exec(id);
+  if (match) {
+    const a = match[1];
+    const b = match[2];
+    const c = match[3];
+    return c ? `A.${a}.${b}.${c}` : `A.${a}.${b}`;
+  }
+  return id;
+}
+
+export function getControlWeight(rawId, industry = "Standard") {
+  const controlId = normalizeId(rawId);
   
   // Resolve sector aliases
   const resolvedSector = SECTOR_ALIASES[industry] || industry;
   
-  // Apply sector modifier — bump to Critical if sector-critical
-  if (SECTOR_MODIFIERS[resolvedSector]?.includes(controlId)) {
-    weight = 2;
+  // 1. Check Sector-Specific Override
+  const sectorWeights = SECTOR_MODIFIERS[resolvedSector];
+  if (sectorWeights && sectorWeights[controlId]) {
+    return sectorWeights[controlId];
   }
   
-  return weight;
+  // 2. Check Global Mandatory/Default Weights
+  if (DEFAULT_WEIGHTS[controlId]) {
+    return DEFAULT_WEIGHTS[controlId];
+  }
+  
+  // 3. Global Default for everything else
+  return 1.0;
 }
 
 export function calculateWeightedScore(scores, weights) {
