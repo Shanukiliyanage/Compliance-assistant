@@ -62,9 +62,10 @@ function isSuppressedByStage2Gates(key, stageAnswers) {
     return !isYesAnswer(stage["A5.23.Q1"]);
   }
 
-  // Note: incident follow-up (A5.25-28) is NOT suppressed here.
-  // The frontend sets them to "no" when A5.24.Q1 = "no", so they should
-  // generate NOT_COMPLIANT recommendations.
+  // Incident follow-up (A5.25-28) should be suppressed if the intro (A5.24.Q1) is "no".
+  if (/^A5\.(25|26|27|28)\./i.test(k)) {
+    return !isYesAnswer(stage["A5.24.Q1"]);
+  }
 
   return false;
 }
@@ -178,7 +179,7 @@ export function generateRecommendations(answers, options = {}) {
       if (stageId === "stage5" && isSuppressedByStage5Gates(questionId, stage)) continue;
 
       const complianceState = mapAnswerToComplianceState(answerValue);
-      if (!complianceState || complianceState === "NOT_APPLICABLE") continue;
+      if (!complianceState || complianceState === "NOT_APPLICABLE" || complianceState === "FULLY_COMPLIANT") continue;
 
       // For Annex A stages, normalize question IDs to the canonical controlId used by rules and N/A.
       const controlId = normalizeForStage(stageId, questionId);
@@ -206,8 +207,9 @@ export function generateRecommendations(answers, options = {}) {
     Object.entries(grouped).forEach(([controlId, questionAnswers]) => {
       if (notApplicableControlIds.has(controlId)) return;
       if (controlsWithQuestionRecs.has(controlId)) return;
-
       const complianceState = getControlComplianceState(questionAnswers);
+      if (complianceState === "FULLY_COMPLIANT") return;
+
       const priority = getPriorityFromComplianceState(complianceState);
       const recommendation = getRecommendationForControl(controlId, complianceState, orgName);
 

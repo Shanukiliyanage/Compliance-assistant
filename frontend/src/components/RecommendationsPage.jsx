@@ -243,6 +243,15 @@ function getAllStageControls() {
   };
 }
 
+function getQuestionOrdinal(stageId, controlId, questionId) {
+  const allControls = getAllStageControls();
+  const controls = allControls[stageId] || [];
+  const ctrl = controls.find(c => c.controlId === controlId);
+  if (!ctrl || !Array.isArray(ctrl.questions)) return null;
+  const idx = ctrl.questions.findIndex(q => q.id === questionId);
+  return idx >= 0 ? idx + 1 : null;
+}
+
 function parseAnnexControlOrder(controlId) {
   const id = String(controlId || "").trim();
   // Matches: A.5.14, A.7.3, A.5.23.1
@@ -303,29 +312,19 @@ function getStageIdFromRecommendation(rec) {
   if (!rec || typeof rec !== "object") return "";
 
   const raw = rec.stageId || rec.stage || rec.stageKey || rec.stageName;
-  if (raw) {
-    const s = String(raw).trim().toLowerCase();
+  if (!raw) return "";
 
-    // Common variants
-    if (s === "stage1" || s === "1" || s.includes("mandatory")) return "stage1";
-    if (s === "stage2" || s === "2" || s.includes("organiz")) return "stage2";
-    if (s === "stage3" || s === "3" || s.includes("people")) return "stage3";
-    if (s === "stage4" || s === "4" || s.includes("physical")) return "stage4";
-    if (s === "stage5" || s === "5" || s.includes("technolog")) return "stage5";
+  const s = String(raw).trim().toLowerCase();
 
-    // If backend already gave stageId but in different case
-    if (s.startsWith("stage")) return s;
-  }
+  // Common variants
+  if (s === "stage1" || s === "1" || s.includes("mandatory")) return "stage1";
+  if (s === "stage2" || s === "2" || s.includes("organiz")) return "stage2";
+  if (s === "stage3" || s === "3" || s.includes("people")) return "stage3";
+  if (s === "stage4" || s === "4" || s.includes("physical")) return "stage4";
+  if (s === "stage5" || s === "5" || s.includes("technolog")) return "stage5";
 
-  // Fallback to inferring from controlId / id
-  const cid = String(rec.controlId || rec.id || "").trim();
-  if (!cid) return "";
-  
-  if (/^\d+(\.\d+)*$/.test(cid) || cid.startsWith("CL")) return "stage1";
-  if (cid.startsWith("A5.")) return "stage2";
-  if (cid.startsWith("A6.")) return "stage3";
-  if (cid.startsWith("A7.")) return "stage4";
-  if (cid.startsWith("A8.")) return "stage5";
+  // If backend already gave stageId but in different case
+  if (s.startsWith("stage")) return s;
 
   return "";
 }
@@ -350,13 +349,19 @@ function normalizeRecommendation(rec, textIndex) {
   if (typeof rec.recommendation === "string") {
     let complianceState = String(rec.complianceState || "");
     if (!complianceState && rec.score !== undefined) {
-      complianceState = rec.score > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
+      complianceState = rec.score > 0.99 ? "FULLY_COMPLIANT" : rec.score > 0 ? "PARTIALLY_COMPLIANT" : "NOT_COMPLIANT";
     }
-    const priority = normalizePriority(rec.priority || rec.riskLevel, complianceState);
+    
+    // Hide recommendations for Yes / Fully Compliant / N/A
+    const cs = complianceState.toUpperCase();
+    if (cs === "FULLY_COMPLIANT" || cs === "YES" || cs === "NOT_APPLICABLE" || cs === "NA" || cs === "N/A") {
+      return null;
+    }
+    const priority = normalizePriority(rec.priority, complianceState);
     const stageId = getStageIdFromRecommendation(rec);
     const stageLabel = stageId ? stageNames[stageId] || String(rec.stageId) : "";
 
-    const controlId = (rec.controlId || rec.id) ? String(rec.controlId || rec.id) : "";
+    const controlId = rec.controlId ? String(rec.controlId) : "";
     // Skip stale/malformed recommendations with no real control identifier.
     if (!controlId || controlId === "undefined") return null;
     const questionId = rec.questionId ? String(rec.questionId) : "";
@@ -446,11 +451,11 @@ function normalizeRecommendation(rec, textIndex) {
         };
       }
 
-      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3" or just "4", "5".
-      const n = /^(\d+)(?:\.(\d+))?$/.exec(idStr);
+      // Path B: plain clause ids like "5.1", "5.2", "4.2", "4.3".
+      const n = /^(\d+)\.(\d+)$/.exec(idStr);
       if (n) {
         const majorClause = n[1];
-        const displayQn = n[2] != null ? (clauseOrdinalMap[idStr] ?? Number(n[2])) : null;
+        const displayQn = clauseOrdinalMap[idStr] ?? Number(n[2]);
         const qText = textIndex?.get ? String(textIndex.get(`${stageId}::${idStr}`) || "") : "";
         return {
           stageId,
@@ -459,12 +464,15 @@ function normalizeRecommendation(rec, textIndex) {
           complianceState,
           priority,
           title: clauseFullTitles[majorClause] || `Clause ${majorClause}:`,
-          subtitle: displayQn != null ? (qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`) : qText,
+          subtitle: qText ? `Q${displayQn} - ${qText}` : `Q${displayQn}`,
           description: rec.recommendation,
           stageLabel,
         };
       }
     }
+
+    const ordinal = getQuestionOrdinal(stageId, controlId, questionId);
+    const displayQn = ordinal ? `Q${ordinal}` : "";
 
     return {
       stageId,
@@ -474,8 +482,8 @@ function normalizeRecommendation(rec, textIndex) {
       priority,
       title: controlId ? `Control ${controlId}.` : clauseTitle || "Recommendation",
       subtitle: questionTitle
-        ? `${parseQuestionNumber(questionId) ? `Q${parseQuestionNumber(questionId)} - ` : ""}${questionTitle}`
-        : "",
+        ? `${displayQn ? `${displayQn} - ` : ""}${questionTitle}`
+        : displayQn,
       description: rec.recommendation,
       stageLabel,
     };
@@ -718,22 +726,12 @@ export default function RecommendationsPage() {
       };
 
       const formatQuestionCellHtml = ({ stageId, control, qid, questionText }) => {
-        // Match the on-screen ΓÇ£written wayΓÇ¥:
-        // Control X.
-        // Qn - <question>
         const qidStr = String(qid || "").trim();
         const qText = String(questionText || "").trim();
-
-        if (stageId === "stage1") {
-          const clauseId = extractClause(qidStr) || qidStr;
-          const label = clauseId ? `Control ${clauseId}.` : "Control";
-          return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(`Q1 - ${qText || clauseId || ""}`)}</span>`;
-        }
-
         const controlId = String(control?.controlId || "").trim();
-        const qn = parseQuestionNumberForReport(qidStr);
+        const ordinal = getQuestionOrdinal(stageId, controlId, qidStr);
         const label = controlId ? `Control ${controlId}.` : "Control";
-        const qLine = qText ? `${qn ? `Q${qn} - ` : ""}${qText}` : qidStr;
+        const qLine = qText ? `${ordinal ? `Q${ordinal} - ` : ""}${qText}` : qidStr;
         return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(qLine)}</span>`;
       };
 
@@ -894,6 +892,19 @@ export default function RecommendationsPage() {
       <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
     </div>
+
+    <div style="margin-bottom: 25px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+      <h3 style="margin: 0 0 10px; color: #0F172A;">Compliance Summary</h3>
+      <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+        <li><strong>Overall Compliance:</strong> ${Number(report?.complianceScores?.overall || 0).toFixed(1)}%</li>
+        <li><strong>Mandatory Clauses:</strong> ${Number(report?.complianceScores?.stage1 || 0).toFixed(1)}%</li>
+        <li><strong>Organizational:</strong> ${Number(report?.complianceScores?.stage2 || 0).toFixed(1)}%</li>
+        <li><strong>People:</strong> ${Number(report?.complianceScores?.stage3 || 0).toFixed(1)}%</li>
+        <li><strong>Physical:</strong> ${Number(report?.complianceScores?.stage4 || 0).toFixed(1)}%</li>
+        <li><strong>Technological:</strong> ${Number(report?.complianceScores?.stage5 || 0).toFixed(1)}%</li>
+      </ul>
+    </div>
+
     ${body}
     <script>
       window.print();
@@ -943,7 +954,7 @@ export default function RecommendationsPage() {
 
   const normalizedRecommendations = useMemo(() => {
     // Convert raw backend recommendations into a stable UI shape.
-    const recs = Array.isArray(assessment?.allRecommendations) ? assessment.allRecommendations : (Array.isArray(assessment?.recommendations) ? assessment.recommendations : []);
+    const recs = Array.isArray(assessment?.recommendations) ? assessment.recommendations : [];
     return recs.map((r) => normalizeRecommendation(r, controlNameIndex)).filter(Boolean);
   }, [assessment, controlNameIndex]);
 

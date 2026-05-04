@@ -7,7 +7,9 @@ import { generateRecommendations } from "./recommendationEngine.js";
  */
 export function getFullSummary(answers, smeProfile = {}) {
   const scoring = calculateScores(answers, smeProfile);
-  const recommendations = generateRecommendations(scoring.details, smeProfile.sector);
+  const recommendations = generateRecommendations(answers, {
+    orgName: smeProfile?.organizationName || smeProfile?.name
+  });
 
   const charts = {
     annexA: {

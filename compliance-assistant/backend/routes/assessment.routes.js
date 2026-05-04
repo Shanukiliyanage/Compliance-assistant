@@ -143,7 +143,7 @@ function tryBackfillRecommendationsFromJson(result) {
   if (!answers || typeof answers !== "object") return result;
 
   const orgName = String(result?.smeProfile?.organizationName || match?.smeProfile?.organizationName || "").trim();
-  const recommendations = generateRecommendations(answers);
+  const recommendations = generateRecommendations(answers, { orgName });
 
   // If still empty, keep as-is.
   if (!Array.isArray(recommendations) || recommendations.length === 0) return result;
@@ -261,7 +261,9 @@ router.get("/recommendations/:assessmentId", (req, res) => {
   
   if (!result || !assessment) return res.status(404).json({ error: "Assessment not found" });
   
-  const recommendations = generateRecommendations(assessment.answers);
+  const recommendations = generateRecommendations(assessment.answers, {
+    orgName: result.smeProfile?.organizationName || "Organization"
+  });
   return res.json({
     companyName: result.smeProfile?.organizationName || "Organization",
     recommendations

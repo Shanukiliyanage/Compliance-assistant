@@ -32,31 +32,41 @@ export function getRecommendationForControl(
 
     // Normalize suffix formats: ".Q1", "_Q1", "-Q1".
     const m = /^(\d+\.\d+)[._-]Q(\d+)$/i.exec(id);
-    if (!m) return id;
-    const base = m[1];
-    const qn = Number(m[2]);
-    if (!Number.isFinite(qn) || qn < 1) return id;
+    let normalizedId = id;
+    if (m) {
+      const base = m[1];
+      const qn = Number(m[2]);
+      if (Number.isFinite(qn) && qn >= 1) {
+        const map = {
+          "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
+          "5.1": { 1: "5.1", 2: "5.2" },
+          "6.1": { 1: "6.1", 2: "6.2" },
+          "7.1": { 1: "7.1", 2: "7.2" },
+          "8.1": { 1: "8.1", 2: "8.2" },
+          "9.1": { 1: "9.1", 2: "9.2" },
+          "10.1": { 1: "10.1", 2: "10.2" },
+        };
+        normalizedId = map?.[base]?.[qn] || base;
+      }
+    }
 
-    // Legacy Stage 1 mapping:
-    // - Some older UIs asked multiple questions under a single clause base like "4.1",
-    //   saving answers as 4.1.Q1, 4.1.Q2, 4.1.Q3.
-    // - Our rulebook uses the ISO clause keys: 4.1, 4.2, 4.3, ...
-    // So we map (base, Qn) -> clause key.
-    const map = {
-      // Clause 4 legacy variants:
-      // Some builds stored Clause 4 Q1/Q2 under a shared base "4.1".
-      // In the current questionnaire, stakeholder expectations map to 4.2 and ISMS scope maps to 4.3.
-      // Map legacy Q1/Q2 accordingly.
-      "4.1": { 1: "4.2", 2: "4.3", 3: "4.1" },
-      "5.1": { 1: "5.1", 2: "5.2" },
-      "6.1": { 1: "6.1", 2: "6.2" },
-      "7.1": { 1: "7.1", 2: "7.2" },
-      "8.1": { 1: "8.1", 2: "8.2" },
-      "9.1": { 1: "9.1", 2: "9.2" },
-      "10.1": { 1: "10.1", 2: "10.2" },
-    };
+    // Match plain IDs like "4.1", "5.2", "10.1" (including those just normalized above)
+    const mPlain = /^(\d+\.\d+)$/.exec(normalizedId);
+    if (mPlain) {
+      const base = mPlain[1];
+      const clMap = {
+        "4.1": "CL4_CONTEXT", "4.2": "CL4_CONTEXT", "4.3": "CL4_CONTEXT",
+        "5.1": "CL5_LEADERSHIP", "5.2": "CL5_LEADERSHIP",
+        "6.1": "CL6_PLANNING", "6.2": "CL6_PLANNING",
+        "7.1": "CL7_SUPPORT", "7.2": "CL7_SUPPORT", "7.3": "CL7_SUPPORT",
+        "8.1": "CL8_OPERATION", "8.2": "CL8_OPERATION",
+        "9.1": "CL9_EVALUATION", "9.2": "CL9_EVALUATION",
+        "10.1": "CL10_IMPROVEMENT", "10.2": "CL10_IMPROVEMENT"
+      };
+      return clMap[base] || base;
+    }
 
-    return map?.[base]?.[qn] || base;
+    return normalizedId;
   };
 
   const canonicalizeRuleKey = (rawId) => {

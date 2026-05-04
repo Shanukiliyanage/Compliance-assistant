@@ -191,6 +191,10 @@ export function calculateScores(answers, smeProfile = {}) {
 
   // A. Normal Compliance Scores (User-facing)
   results.complianceScores.stage1 = calculateCompliancePercent(results.summary.stage1);
+  results.complianceScores.stage2 = calculateCompliancePercent(results.summary.stage2);
+  results.complianceScores.stage3 = calculateCompliancePercent(results.summary.stage3);
+  results.complianceScores.stage4 = calculateCompliancePercent(results.summary.stage4);
+  results.complianceScores.stage5 = calculateCompliancePercent(results.summary.stage5);
   
   const annexACombined = {
       yes: results.summary.stage2.yes + results.summary.stage3.yes + results.summary.stage4.yes + results.summary.stage5.yes,
