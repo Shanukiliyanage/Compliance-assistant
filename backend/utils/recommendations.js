@@ -1,7 +1,5 @@
 import { 
-  getRecommendationForControl, 
-  aliasMandatoryQuestionId,
-  canonicalizeRuleKey
+  getRecommendationForControl
 } from "../rules/recommendationRules.js";
 import { getControlWeight } from "../services/weightEngine.js";
 
@@ -230,13 +228,14 @@ export function buildControlStatusSummary(answers, options = {}) {
 
     Object.entries(stage1ClauseAnswers).forEach(([groupId, answersList]) => {
       const complianceState = getControlComplianceState(answersList);
+      const recommendation = getRecommendationForControl(groupId, complianceState, orgName);
       controls.push({
         stageId: "stage1",
         controlId: groupId,
         complianceState,
         priority: getPriorityFromComplianceState(complianceState),
         priorityScore: calculatePriorityScore(groupId, complianceState, industry),
-        recommendation: null
+        recommendation: recommendation || null
       });
     });
 

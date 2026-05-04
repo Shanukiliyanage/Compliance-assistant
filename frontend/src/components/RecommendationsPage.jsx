@@ -207,6 +207,7 @@ function getStage1Controls() {
     if (!group) continue;
     group.questions.push({
       id: String(q?.clause ? clause : (q?.id ?? clause)).trim(),
+      numericId: q?.id,
       question: q?.question ?? q?.text,
       explanation: q?.explanation ?? q?.helpText,
     });
@@ -735,16 +736,6 @@ export default function RecommendationsPage() {
         return "";
       };
 
-      const formatQuestionCellHtml = ({ stageId, control, qid, questionText }) => {
-        const qidStr = String(qid || "").trim();
-        const qText = String(questionText || "").trim();
-        const controlId = String(control?.controlId || "").trim();
-        const ordinal = getQuestionOrdinal(stageId, controlId, qidStr);
-        const label = controlId ? `Control ${controlId}.` : "Control";
-        const qLine = qText ? `${ordinal ? `Q${ordinal} - ` : ""}${qText}` : qidStr;
-        return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(qLine)}</span>`;
-      };
-
       const statusIndex = new Map(
         (report?.controlStatuses || []).map((s) => [`${s.stageId}::${s.controlId}`, s])
       );
@@ -812,6 +803,7 @@ export default function RecommendationsPage() {
             : `${escapeHtml(control.controlId)} - ${escapeHtml(control.controlName || "")}`;
           body += `<h3>${heading}</h3>`;
           const qs = Array.isArray(control.questions) ? control.questions : [];
+          const statusLabel = complianceLabel(status?.complianceState);
           if (qs.length) {
             body += `<table style="border:1px solid #ddd; margin-bottom:20px;">
               <thead>
@@ -827,11 +819,19 @@ export default function RecommendationsPage() {
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
               let answerValue = answers?.[qid] || answers?.[stageId]?.[qid];
               
+              // Robust lookup for Stage 1 (try clause name, numeric ID, and legacy Q-prefixes)
+              if (stageId === "stage1" && (answerValue == null || answerValue === "")) {
+                const nId = q?.numericId || q?.id;
+                answerValue = answers?.[nId] || answers?.[stageId]?.[nId] || 
+                              answers?.[`Q${nId}`] || answers?.[stageId]?.[`Q${nId}`];
+              }
+
               if ((answerValue == null || answerValue === "") && !applicableByRules) {
                 answerValue = "na";
               }
               const questionText = q?.question || q?.text || "";
               const answerLabel = normalizeAnswerLabel(answerValue);
+              const isYesOrNA = answerLabel === "YES" || answerLabel === "N/A";
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
 
               const qidStr = String(qid || "").trim();
@@ -848,16 +848,36 @@ export default function RecommendationsPage() {
                 qidStr: qidStr || qidClause,
               });
               
-              // Fallback: If no question-level rec, use the broader control-level recommendation
+              // Fallback for Stage 1 aliasing (inverse lookup e.g. 4.2 -> 4.1.Q1)
+              if (!rowRecommendationText && stageId === "stage1") {
+                const legacyEntries = {
+                   "4.2": "4.1.Q1", "4.3": "4.1.Q2", "4.1": "4.1.Q3",
+                   "5.1": "5.1.Q1", "5.2": "5.1.Q2",
+                   "6.1": "6.1.Q1", "6.2": "6.1.Q2",
+                   "7.1": "7.1.Q1", "7.2": "7.1.Q2", "7.3": "7.1.Q3",
+                   "8.1": "8.1.Q1", "8.2": "8.1.Q2",
+                   "9.1": "9.1.Q1", "9.2": "9.1.Q2",
+                   "10.1": "10.1.Q1", "10.2": "10.1.Q2"
+                };
+                const legacyId = legacyEntries[qidStr];
+                if (legacyId) {
+                  rowRecommendationText = getRecommendationForQuestionRow({ stageId, qidStr: legacyId });
+                }
+              }
+
               if (!rowRecommendationText) {
-                rowRecommendationText = (rowStatus?.recommendation || status?.recommendation || recommendationText || "");
+                // If it's Stage 1, we often want the group status recommendation if a question-level one is missing
+                rowRecommendationText = (stageId === "stage1" ? (status?.recommendation || rowStatus?.recommendation) : (rowStatus?.recommendation || status?.recommendation)) || recommendationText || "";
               }
 
               body += `<tr>`;
               body += `<td style="padding:12px;">${escapeHtml(questionText)}</td>`;
-              body += `<td style="padding:12px; font-weight:bold;">${escapeHtml(answerLabel)}</td>`;
-              // NA and YES should not have any recommendation text in the cell.
-              body += `<td style="padding:12px;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "")}</td>`;
+              // Answer column: Always show label with badge style
+              body += `<td style="padding:12px; font-weight:bold; text-align:center;">
+                <span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span>
+              </td>`;
+              // Recommendation column: Only show for NO or PARTIAL
+              body += `<td style="padding:12px; color: #334155; line-height: 1.5;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
