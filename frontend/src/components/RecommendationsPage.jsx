@@ -867,9 +867,9 @@ export default function RecommendationsPage() {
               body += `<td style="padding:15px; text-align:left; vertical-align:top; font-weight: 600; color: #1e293b; border-bottom: 1px solid #f1f5f9;">
                 ${escapeHtml(answerLabel)}
               </td>`;
-              // Recommendation column: Only show for NO or PARTIAL
+              // Recommendation column: Only show for NO or PARTIAL, otherwise empty
               body += `<td style="padding:15px; vertical-align:top; color: #475569; line-height: 1.6; border-bottom: 1px solid #f1f5f9;">
-                ${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}
+                ${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "")}
               </td>`;
               body += `</tr>`;
             }
