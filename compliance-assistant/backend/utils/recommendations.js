@@ -213,9 +213,25 @@ export function buildControlStatusSummary(answers, options = {}) {
       });
 
       if (stageId === "stage1") {
+        let clauseNum = null;
         const m = /^(\d+)\./.exec(controlId);
         if (m) {
-          const clauseNum = m[1];
+          clauseNum = m[1];
+        } else {
+          // Fallback: numeric ID mapping from mandatory.json
+          const numericToClause = {
+            "15": "4", "1": "4", "2": "4",
+            "3": "5", "4": "5",
+            "5": "6", "6": "6",
+            "7": "7", "8": "7",
+            "9": "8", "10": "8",
+            "11": "9", "12": "9",
+            "13": "10", "14": "10"
+          };
+          clauseNum = numericToClause[controlId];
+        }
+
+        if (clauseNum) {
           const groupMap = { "4": "CL4_CONTEXT", "5": "CL5_LEADERSHIP", "6": "CL6_PLANNING", "7": "CL7_SUPPORT", "8": "CL8_OPERATION", "9": "CL9_EVALUATION", "10": "CL10_IMPROVEMENT" };
           const groupId = groupMap[clauseNum];
           if (groupId) {
