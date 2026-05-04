@@ -73,18 +73,37 @@ function buildStagePercentages(stageCounts, isMandatory = false) {
   const partialCount = Number(stageCounts.partial ?? 0);
   const noCount = Number(stageCounts.no ?? 0);
   const naCount = Number(stageCounts.na ?? 0);
-  const total = Number(stageCounts.total ?? (yesCount + partialCount + noCount + naCount));
-
+  
   if (isMandatory) {
-    // Mandatory: 3-way (Yes, Partial, No) — no N/A
-    const applicable = yesCount + partialCount + noCount;
-    const [yesPct, partialPct, noPct] = largestRemainderRound([yesCount, partialCount, noCount], applicable || total);
-    return { yes: yesPct, partial: partialPct, no: noPct, na: 0, total: applicable || total, yesCount, partialCount, noCount, naCount: 0 };
+    const total = yesCount + partialCount + noCount;
+    if (total === 0) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0 };
+    
+    return {
+      yes: ((yesCount / total) * 100).toFixed(1),
+      partial: ((partialCount / total) * 100).toFixed(1),
+      no: ((noCount / total) * 100).toFixed(1),
+      na: 0,
+      total,
+      yesCount,
+      partialCount,
+      noCount,
+      naCount: 0
+    };
   } else {
-    // Annex A stages: 4-way (Yes, Partial, No, N/A)
-    const fullTotal = yesCount + partialCount + noCount + naCount;
-    const [yesPct, partialPct, noPct, naPct] = largestRemainderRound([yesCount, partialCount, noCount, naCount], fullTotal || total);
-    return { yes: yesPct, partial: partialPct, no: noPct, na: naPct, total: fullTotal || total, yesCount, partialCount, noCount, naCount };
+    const total = yesCount + partialCount + noCount + naCount;
+    if (total === 0) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0 };
+
+    return {
+      yes: ((yesCount / total) * 100).toFixed(1),
+      partial: ((partialCount / total) * 100).toFixed(1),
+      no: ((noCount / total) * 100).toFixed(1),
+      na: ((naCount / total) * 100).toFixed(1),
+      total,
+      yesCount,
+      partialCount,
+      noCount,
+      naCount
+    };
   }
 }
 
@@ -160,8 +179,13 @@ const PieChartCard = ({ title, data, showNA = false }) => {
     na: data?.na ?? 0,
   };
 
+  const total = stats.yes + stats.partial + stats.no + (showNA ? stats.na : 0);
+  const getPct = (val) => (total > 0 ? ((val / total) * 100).toFixed(1) : "0.0");
+
   const pieData = {
-    labels: showNA ? ["Yes", "Partial", "No", "N/A"] : ["Yes", "Partial", "No"],
+    labels: showNA 
+      ? [`Yes (${getPct(stats.yes)}%)`, `Partial (${getPct(stats.partial)}%)`, `No (${getPct(stats.no)}%)`, `N/A (${getPct(stats.na)}%)`] 
+      : [`Yes (${getPct(stats.yes)}%)`, `Partial (${getPct(stats.partial)}%)`, `No (${getPct(stats.no)}%)`],
     datasets: [{
       data: showNA ? [stats.yes, stats.partial, stats.no, stats.na] : [stats.yes, stats.partial, stats.no],
       backgroundColor: showNA ? [COLORS.yes, COLORS.partial, COLORS.no, COLORS.na] : [COLORS.yes, COLORS.partial, COLORS.no],
@@ -175,12 +199,17 @@ const PieChartCard = ({ title, data, showNA = false }) => {
         position: "bottom",
         labels: {
           color: "#4b5563",
-          font: { weight: "bold" },
+          font: { weight: "bold", size: 11 },
+          padding: 15,
         },
       },
       tooltip: {
         callbacks: {
-          label: (context) => ` ${context.label}: ${context.raw}`,
+          label: (context) => {
+            const val = context.raw;
+            const pct = getPct(val);
+            return ` ${context.label.split(" (")[0]}: ${val} (${pct}%)`;
+          },
         },
       },
     },
