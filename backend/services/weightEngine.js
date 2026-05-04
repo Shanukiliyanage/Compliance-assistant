@@ -11,7 +11,8 @@
 
 const DEFAULT_WEIGHTS = {
   // Mandatory Clauses (Always Critical for ALL sectors)
-  "4": 2, "5": 2, "6": 2, "7": 2, "8": 2, "9": 2, "10": 2,
+  "4": 2, "CL4_1": 2, "CL4_2": 2, "CL4_3": 2,
+  "5": 2, "6": 2, "7": 2, "8": 2, "9": 2, "10": 2,
   
   // Organizational
   "A5.1": 1.5, "A5.15": 2, "A5.19": 1.5, "A5.24": 2, "A5.37": 1.5,
