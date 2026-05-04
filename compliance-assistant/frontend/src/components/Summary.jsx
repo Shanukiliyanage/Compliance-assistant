@@ -149,17 +149,7 @@ const ComplianceBox = ({ title, stats, isMandatory = false }) => {
         }}>
           {title}
         </div>
-        <div style={{
-          background: "#f0fdf4",
-          color: "#166534",
-          padding: "4px 10px",
-          borderRadius: "8px",
-          fontSize: "0.85rem",
-          fontWeight: 700,
-          border: "1px solid #bbf7d0"
-        }}>
-          {complianceScore}%
-        </div>
+
       </div>
 
       <div style={{ display: "grid", gap: "14px" }}>
