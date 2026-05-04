@@ -56,20 +56,20 @@ export function getRecommendationForControl(
       const base = mPlain[1];
       const clMap = {
         "4.1": "CL4_1", "4.2": "CL4_2", "4.3": "CL4_3",
-        "5.1": "CL5_LEADERSHIP", "5.2": "CL5_LEADERSHIP",
-        "6.1": "CL6_PLANNING", "6.2": "CL6_PLANNING",
-        "7.1": "CL7_SUPPORT", "7.2": "CL7_SUPPORT", "7.3": "CL7_SUPPORT",
-        "8.1": "CL8_OPERATION", "8.2": "CL8_OPERATION",
-        "9.1": "CL9_EVALUATION", "9.2": "CL9_EVALUATION",
-        "10.1": "CL10_IMPROVEMENT", "10.2": "CL10_IMPROVEMENT",
+        "5.1": "CL5_1", "5.2": "CL5_2",
+        "6.1": "CL6_1", "6.2": "CL6_2",
+        "7.1": "CL7_1", "7.2": "CL7_2",
+        "8.1": "CL8_1", "8.2": "CL8_2",
+        "9.1": "CL9_1", "9.2": "CL9_2",
+        "10.1": "CL10_1", "10.2": "CL10_2",
         // Support for numeric IDs (ids from mandatory.json)
         "15": "CL4_1", "1": "CL4_2", "2": "CL4_3",
-        "3": "CL5_LEADERSHIP", "4": "CL5_LEADERSHIP",
-        "5": "CL6_PLANNING", "6": "CL6_PLANNING",
-        "7": "CL7_SUPPORT", "8": "CL7_SUPPORT",
-        "9": "CL8_OPERATION", "10": "CL8_OPERATION",
-        "11": "CL9_EVALUATION", "12": "CL9_EVALUATION",
-        "13": "CL10_IMPROVEMENT", "14": "CL10_IMPROVEMENT"
+        "3": "CL5_1", "4": "CL5_2",
+        "5": "CL6_1", "6": "CL6_2",
+        "7": "CL7_1", "8": "CL7_2",
+        "9": "CL8_1", "10": "CL8_2",
+        "11": "CL9_1", "12": "CL9_2",
+        "13": "CL10_1", "14": "CL10_2"
       };
       return clMap[base] || base;
     }
@@ -80,12 +80,12 @@ export function getRecommendationForControl(
       const num = mNumeric[1];
       const numericMap = {
         "15": "CL4_1", "1": "CL4_2", "2": "CL4_3",
-        "3": "CL5_LEADERSHIP", "4": "CL5_LEADERSHIP",
-        "5": "CL6_PLANNING", "6": "CL6_PLANNING",
-        "7": "CL7_SUPPORT", "8": "CL7_SUPPORT",
-        "9": "CL8_OPERATION", "10": "CL8_OPERATION",
-        "11": "CL9_EVALUATION", "12": "CL9_EVALUATION",
-        "13": "CL10_IMPROVEMENT", "14": "CL10_IMPROVEMENT"
+        "3": "CL5_1", "4": "CL5_2",
+        "5": "CL6_1", "6": "CL6_2",
+        "7": "CL7_1", "8": "CL7_2",
+        "9": "CL8_1", "10": "CL8_2",
+        "11": "CL9_1", "12": "CL9_2",
+        "13": "CL10_1", "14": "CL10_2"
       };
       return numericMap[num] || num;
     }
@@ -193,25 +193,73 @@ export function getRecommendationForControl(
       NOT_COMPLIANT: `${orgName} should ensure top management demonstrates active commitment to information security by approving and supporting an information security policy, allocating necessary resources, and establishing clear direction and accountability, in accordance with ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should strengthen leadership involvement in information security by improving policy communication, management oversight, and ongoing review of security performance, as recommended by ISO/IEC 27001.`,
     },
+    CL5_1: {
+      NOT_COMPLIANT: `${orgName} should ensure top management actively demonstrates commitment to information security by providing visible leadership, allocating adequate resources and budget, setting strategic direction, and holding managers accountable for security performance, in accordance with ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen top management commitment by increasing visibility in security governance, formalizing resource allocation, and ensuring leadership regularly reviews and acts on security performance metrics, as recommended by ISO/IEC 27001.`,
+    },
+    CL5_2: {
+      NOT_COMPLIANT: `${orgName} should create a formal Information Security Policy, obtain management approval, communicate it to all employees and relevant parties, assign an owner and review date, and ensure it is accessible and understood across the organization, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should update the Information Security Policy to reflect current operations, ensure it has been communicated to and acknowledged by all staff, confirm it is consistently applied, and establish a regular review cycle with documented evidence of reviews and updates, in line with ISO/IEC 27001.`,
+    },
     CL6_PLANNING: {
       NOT_COMPLIANT: `${orgName} should establish a formal and repeatable information security risk assessment and risk treatment process, including documented decisions and mapped security controls, to systematically manage security risks in line with ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should enhance its existing risk assessment and treatment processes by ensuring they are consistently applied, properly documented, and regularly reviewed, as required by ISO/IEC 27001.`,
+    },
+    CL6_1: {
+      NOT_COMPLIANT: `${orgName} should establish a formal, repeatable process to identify, analyse, and evaluate information security risks, including defined criteria for likelihood and impact assessment, a risk register, and a regular review schedule, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen its risk assessment process by ensuring it is applied consistently, covers all relevant assets and threats, uses defined criteria for risk evaluation, and is reviewed and updated at planned intervals and after significant changes, in line with ISO/IEC 27001.`,
+    },
+    CL6_2: {
+      NOT_COMPLIANT: `${orgName} should document risk treatment decisions for each identified risk (accept, mitigate, transfer, or avoid), map each decision to specific security controls or actions, assign owners and deadlines, and maintain a risk treatment plan, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should complete and formalize risk treatment documentation by ensuring all identified risks have a recorded treatment decision, mapped controls, assigned owners, and tracked implementation status, with regular reviews to confirm effectiveness, in line with ISO/IEC 27001.`,
     },
     CL7_SUPPORT: {
       NOT_COMPLIANT: `${orgName} should provide adequate resources, assign and document information security roles and responsibilities, and implement structured security awareness and training programs to ensure personnel are competent to support the ISMS, in accordance with ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should improve its security support mechanisms by formalizing role assignments, maintaining competency records, and strengthening security awareness activities to ensure consistent staff capability, as recommended by ISO/IEC 27001.`,
     },
+    CL7_1: {
+      NOT_COMPLIANT: `${orgName} should implement a structured security awareness and training program that includes onboarding training for new joiners and at least annual refresher sessions for all staff, covering topics such as phishing, password hygiene, data handling, and incident reporting, with tracked attendance records, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen security awareness and training by ensuring full coverage of all staff and contractors, tailoring content to current threats and role-specific risks, updating materials regularly, and maintaining evidence of completion and comprehension, in line with ISO/IEC 27001.`,
+    },
+    CL7_2: {
+      NOT_COMPLIANT: `${orgName} should formally assign and document information security roles and responsibilities, including who is accountable for governance, risk management, access control, incident response, and supplier security, and communicate these clearly to all relevant personnel, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should review and update documented security roles and responsibilities to ensure they are complete, clearly communicated, and understood by all relevant staff, with defined escalation paths and periodic reviews to reflect organizational changes, in line with ISO/IEC 27001.`,
+    },
     CL8_OPERATION: {
       NOT_COMPLIANT: `${orgName} should define, document, and implement operational procedures for key security activities such as access management, backup, incident handling, and change management to ensure effective operation of information security controls, in line with ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should strengthen operational security by ensuring documented procedures are consistently followed in day-to-day activities and supported by appropriate evidence, as required by ISO/IEC 27001.`,
+    },
+    CL8_1: {
+      NOT_COMPLIANT: `${orgName} should define and document step-by-step operational procedures for key security activities, including access management, backup operations, incident handling, and change management, and ensure they are accessible to relevant staff and version-controlled, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should complete and improve documented operational procedures by filling remaining gaps, keeping procedures current as systems change, assigning owners and review dates, and verifying they are followed consistently, in line with ISO/IEC 27001.`,
+    },
+    CL8_2: {
+      NOT_COMPLIANT: `${orgName} should ensure documented security procedures are actively followed in day-to-day operations, supported by evidence such as access review logs, backup confirmation records, incident tickets with timestamps, and change-approval records, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen evidence of operational compliance by ensuring procedures are consistently applied across all teams, logs and records are maintained and reviewed, and gaps between documented procedures and actual practice are identified and corrected, in line with ISO/IEC 27001.`,
     },
     CL9_EVALUATION: {
       NOT_COMPLIANT: `${orgName} should establish regular monitoring, internal audit, and management review activities to evaluate the effectiveness of information security controls and ISMS performance, as required by ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should enhance its performance evaluation processes by improving the frequency, documentation, and management review of security metrics, audit findings, and incidents, in line with ISO/IEC 27001.`,
     },
+    CL9_1: {
+      NOT_COMPLIANT: `${orgName} should establish and perform regular internal audits of the ISMS to assess whether security controls are implemented effectively and conform to requirements, documenting audit scope, findings, and corrective actions with assigned owners and deadlines, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should improve internal audit practices by increasing frequency and coverage, ensuring audit findings are documented with clear corrective actions, tracking remediation to completion, and reviewing audit effectiveness periodically, in line with ISO/IEC 27001.`,
+    },
+    CL9_2: {
+      NOT_COMPLIANT: `${orgName} should ensure top management conducts regular reviews of information security performance, covering open incidents, audit findings, key performance indicators (such as patch rates, training completion, and access reviews), and that reviews are documented with recorded minutes, actions, owners, and deadlines, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen management review by ensuring reviews occur on a regular schedule, cover all required inputs (incidents, audits, metrics, risk changes), result in documented decisions and actions, and are tracked to completion with evidence, in line with ISO/IEC 27001.`,
+    },
     CL10_IMPROVEMENT: {
       NOT_COMPLIANT: `${orgName} should establish a formal process to record security incidents, audit findings, and non-conformities, track corrective actions to completion, and drive continual improvement of the ISMS, as required by ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should strengthen its improvement processes by consistently tracking corrective actions and proactively identifying opportunities to enhance information security controls and ISMS effectiveness, in line with ISO/IEC 27001.`,
+    },
+    CL10_1: {
+      NOT_COMPLIANT: `${orgName} should implement a formal process to record all security incidents, audit findings, and non-conformities in a centralized log or ticketing system, track corrective actions with assigned owners and target completion dates, and retain evidence that root causes have been addressed, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen corrective action tracking by ensuring all incidents and findings are logged consistently, root causes are identified, remediation is tracked to completion with evidence, and recurring issues are escalated for systemic improvement, in line with ISO/IEC 27001.`,
+    },
+    CL10_2: {
+      NOT_COMPLIANT: `${orgName} should periodically review the ISMS and its controls to identify opportunities for improvement, including conducting lessons-learned sessions after incidents and audits, maintaining an improvement log with named owners and completion dates, and verifying that improvements are effective, as required by ISO/IEC 27001.`,
+      PARTIALLY_COMPLIANT: `${orgName} should strengthen continual improvement by ensuring lessons learned are systematically captured, improvement actions are prioritized and tracked, and the effectiveness of implemented improvements is reviewed periodically with documented evidence, in line with ISO/IEC 27001.`,
     },
 
     "A.5.1": {

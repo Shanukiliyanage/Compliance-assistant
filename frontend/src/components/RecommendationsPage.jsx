@@ -920,18 +920,6 @@ export default function RecommendationsPage() {
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
     </div>
 
-    <div style="margin-bottom: 25px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
-      <h3 style="margin: 0 0 10px; color: #0F172A;">Compliance Summary</h3>
-      <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-        <li><strong>Overall Compliance:</strong> ${Number(report?.scores?.complianceScores?.overall || 0).toFixed(1)}%</li>
-        <li><strong>Mandatory Clauses:</strong> ${Number(report?.scores?.complianceScores?.stage1 || 0).toFixed(1)}%</li>
-        <li><strong>Organizational:</strong> ${Number(report?.scores?.complianceScores?.stage2 || 0).toFixed(1)}%</li>
-        <li><strong>People:</strong> ${Number(report?.scores?.complianceScores?.stage3 || 0).toFixed(1)}%</li>
-        <li><strong>Physical:</strong> ${Number(report?.scores?.complianceScores?.stage4 || 0).toFixed(1)}%</li>
-        <li><strong>Technological:</strong> ${Number(report?.scores?.complianceScores?.stage5 || 0).toFixed(1)}%</li>
-      </ul>
-    </div>
-
     ${body}
     <script>
       window.print();

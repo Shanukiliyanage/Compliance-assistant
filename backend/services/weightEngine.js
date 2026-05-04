@@ -12,12 +12,12 @@
 const DEFAULT_WEIGHTS = {
   // Mandatory Clauses (Always Critical for ALL sectors)
   "4": 2, "CL4_1": 2, "CL4_2": 2, "CL4_3": 2,
-  "5": 2, "CL5_LEADERSHIP": 2,
-  "6": 2, "CL6_PLANNING": 2,
-  "7": 2, "CL7_SUPPORT": 2,
-  "8": 2, "CL8_OPERATION": 2,
-  "9": 2, "CL9_EVALUATION": 2,
-  "10": 2, "CL10_IMPROVEMENT": 2,
+  "5": 2, "CL5_LEADERSHIP": 2, "CL5_1": 2, "CL5_2": 2,
+  "6": 2, "CL6_PLANNING": 2, "CL6_1": 2, "CL6_2": 2,
+  "7": 2, "CL7_SUPPORT": 2, "CL7_1": 2, "CL7_2": 2,
+  "8": 2, "CL8_OPERATION": 2, "CL8_1": 2, "CL8_2": 2,
+  "9": 2, "CL9_EVALUATION": 2, "CL9_1": 2, "CL9_2": 2,
+  "10": 2, "CL10_IMPROVEMENT": 2, "CL10_1": 2, "CL10_2": 2,
   
   // GLOBAL RULE: All other Annex A controls default to 1.0
   // (They don't need to be listed here if the lookup defaults to 1)
