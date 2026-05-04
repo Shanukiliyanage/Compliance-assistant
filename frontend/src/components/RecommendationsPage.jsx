@@ -682,24 +682,9 @@ export default function RecommendationsPage() {
       };
 
       const badgeClassForLabel = (label) => {
-        switch (String(label || "").trim().toUpperCase()) {
-          case "YES":
-            return "badge badge-yes";
-          case "NO":
-            return "badge badge-no";
-          case "PARTIAL":
-            return "badge badge-partial";
-          case "N/A":
-            return "badge badge-na";
-          case "HIGH":
-            return "badge badge-no";
-          case "MEDIUM":
-            return "badge badge-partial";
-          case "LOW":
-            return "badge badge-low";
-          default:
-            return "badge";
-        }
+        // We now use plain text for answers in the report as per user request,
+        // but we'll keep the helper in case we need conditional colors.
+        return "";
       };
 
       const getRecommendationForQuestionRow = ({ stageId, qidStr }) => {
@@ -872,12 +857,12 @@ export default function RecommendationsPage() {
 
               body += `<tr>`;
               body += `<td style="padding:12px;">${escapeHtml(questionText)}</td>`;
-              // Answer column: Always show label with badge style
-              body += `<td style="padding:12px; font-weight:bold; text-align:center;">
-                <span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span>
+              // Answer column: Plain text as per user request
+              body += `<td style="padding:15px; text-align:left; vertical-align:top; font-weight: 500;">
+                ${escapeHtml(answerLabel)}
               </td>`;
               // Recommendation column: Only show for NO or PARTIAL
-              body += `<td style="padding:12px; color: #334155; line-height: 1.5;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
+              body += `<td style="padding:15px; vertical-align:top; color: #334155; line-height: 1.6;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}</td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
@@ -907,13 +892,11 @@ export default function RecommendationsPage() {
       th, td { border: 1px solid #ddd; padding: 12px; vertical-align: top; word-wrap: break-word; line-height: 1.5; }
       th { background: #f8fafc; text-align: left; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
       td { font-size: 13px; color: #333; }
-      .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; line-height: 1.4; border: 2px solid #e5e7eb; background: #f9fafb; color: #111827; white-space: nowrap; }
-      /* Strong, print-friendly color coding for YES/NO/PARTIAL */
-      .badge-yes { background: #dcfce7; border-color: #166534; color: #166534; box-shadow: inset 6px 0 0 #16a34a; }
-      .badge-no { background: #fee2e2; border-color: #991b1b; color: #991b1b; box-shadow: inset 6px 0 0 #dc2626; }
-      .badge-partial { background: #fef9c3; border-color: #854d0e; color: #854d0e; box-shadow: inset 6px 0 0 #ca8a04; }
-      .badge-na { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
-      .badge-low { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+      .badge { display: none; } /* Hide badges in report for now */
+      table { width: 100%; border-collapse: collapse; margin: 10px 0 30px; table-layout: fixed; border: 1px solid #e2e8f0; }
+      th, td { border: 1px solid #e2e8f0; padding: 15px; vertical-align: top; word-wrap: break-word; line-height: 1.6; }
+      th { background: #fdfdfd; text-align: left; font-weight: bold; font-size: 14px; color: #1e293b; border-bottom: 2px solid #e2e8f0; }
+      td { font-size: 13.5px; color: #334155; }
       @media print {
         body { margin: 12mm; }
         /* Ask the browser to preserve colors when printing to PDF */

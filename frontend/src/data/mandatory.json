@@ -1,14 +1,20 @@
 [
   {
+    "id": 15,
+    "clause": "4.1",
+    "question": "Have you identified and documented your organization's business purpose, strategic direction, and the internal and external issues that affect information security?",
+    "explanation": "e.g., internal (culture, values, knowledge) and external (legal, technological, market, social) factors that affect your security goals."
+  },
+  {
     "id": 1,
     "clause": "4.2",
-    "question": "Have you identified key stakeholders and their information-security expectations?",
+    "question": "Have you identified and documented the interested parties relevant to your ISMS (such as customers, regulators, employees, suppliers, and partners) and their information security requirements?",
     "explanation": "Stakeholders are any individuals or groups that have an interest in, or are affected by, the activities, decisions or outcomes of an organisation (e.g. owners, business partners, management, clients, regulators, suppliers, employees, etc.)"
   },
   {
     "id": 2,
     "clause": "4.3",
-    "question": "Have you defined the scope of your ISMS (locations, systems, data, processes covered)?",
+    "question": "Have you defined and documented the scope of your ISMS, including the locations, systems, data, and processes covered?",
     "explanation": "The scope defines which parts of your business, systems and data are covered by your information security measures, and which are not."
   },
   {

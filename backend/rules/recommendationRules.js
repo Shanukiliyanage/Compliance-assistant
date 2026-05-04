@@ -55,7 +55,7 @@ export function getRecommendationForControl(
     if (mPlain) {
       const base = mPlain[1];
       const clMap = {
-        "4.1": "CL4_CONTEXT", "4.2": "CL4_CONTEXT", "4.3": "CL4_CONTEXT",
+        "4.1": "CL4_1", "4.2": "CL4_2", "4.3": "CL4_3",
         "5.1": "CL5_LEADERSHIP", "5.2": "CL5_LEADERSHIP",
         "6.1": "CL6_PLANNING", "6.2": "CL6_PLANNING",
         "7.1": "CL7_SUPPORT", "7.2": "CL7_SUPPORT", "7.3": "CL7_SUPPORT",
@@ -152,6 +152,18 @@ export function getRecommendationForControl(
     CL4_CONTEXT: {
       NOT_COMPLIANT: `${orgName} should formally identify and document its business purpose, strategic direction, relevant internal and external issues, interested parties, and the scope of the ISMS to ensure information security requirements are clearly defined and aligned with organizational objectives, as required by ISO/IEC 27001.`,
       PARTIALLY_COMPLIANT: `${orgName} should review and enhance its documentation of organizational context, interested parties, and ISMS scope to ensure completeness, consistency, and alignment with current business and security requirements, in line with ISO/IEC 27001.`,
+    },
+    CL4_1: {
+      NOT_COMPLIANT: `${orgName} must formally identify and document its business purpose, strategic direction, and the internal/external issues (legal, tech, market, etc.) that affect information security.`,
+      PARTIALLY_COMPLIANT: `${orgName} should complete its documentation of business context by capturing missing internal/external issues, clarifying impacts on information security, assigning ownership, and reviewing it regularly (and when things change).`,
+    },
+    CL4_2: {
+      NOT_COMPLIANT: `${orgName} must identify all relevant interested parties (stakeholders) and document their specific information security requirements and expectations.`,
+      PARTIALLY_COMPLIANT: `${orgName} should complete the stakeholder list and fill missing expectations. Make sure the requirements are clear, owned by someone, and reviewed regularly (and when things change).`,
+    },
+    CL4_3: {
+      NOT_COMPLIANT: `${orgName} must clearly define and document the scope of the ISMS, including physical locations, organizational units, assets, and technology to be covered.`,
+      PARTIALLY_COMPLIANT: `${orgName} should make the scope clearer and more complete (what’s in/out, key systems and data, third parties). Keep it controlled and updated when the business or IT changes.`,
     },
     CL5_LEADERSHIP: {
       NOT_COMPLIANT: `${orgName} should ensure top management demonstrates active commitment to information security by approving and supporting an information security policy, allocating necessary resources, and establishing clear direction and accountability, in accordance with ISO/IEC 27001.`,
