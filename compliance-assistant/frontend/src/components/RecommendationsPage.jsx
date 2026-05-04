@@ -207,6 +207,7 @@ function getStage1Controls() {
     if (!group) continue;
     group.questions.push({
       id: String(q?.clause ? clause : (q?.id ?? clause)).trim(),
+      numericId: q?.id,
       question: q?.question ?? q?.text,
       explanation: q?.explanation ?? q?.helpText,
     });
@@ -681,24 +682,9 @@ export default function RecommendationsPage() {
       };
 
       const badgeClassForLabel = (label) => {
-        switch (String(label || "").trim().toUpperCase()) {
-          case "YES":
-            return "badge badge-yes";
-          case "NO":
-            return "badge badge-no";
-          case "PARTIAL":
-            return "badge badge-partial";
-          case "N/A":
-            return "badge badge-na";
-          case "HIGH":
-            return "badge badge-no";
-          case "MEDIUM":
-            return "badge badge-partial";
-          case "LOW":
-            return "badge badge-low";
-          default:
-            return "badge";
-        }
+        // We now use plain text for answers in the report as per user request,
+        // but we'll keep the helper in case we need conditional colors.
+        return "";
       };
 
       const getRecommendationForQuestionRow = ({ stageId, qidStr }) => {
@@ -733,16 +719,6 @@ export default function RecommendationsPage() {
         }
 
         return "";
-      };
-
-      const formatQuestionCellHtml = ({ stageId, control, qid, questionText }) => {
-        const qidStr = String(qid || "").trim();
-        const qText = String(questionText || "").trim();
-        const controlId = String(control?.controlId || "").trim();
-        const ordinal = getQuestionOrdinal(stageId, controlId, qidStr);
-        const label = controlId ? `Control ${controlId}.` : "Control";
-        const qLine = qText ? `${ordinal ? `Q${ordinal} - ` : ""}${qText}` : qidStr;
-        return `${escapeHtml(label)}<br/><span style="color:#111827">${escapeHtml(qLine)}</span>`;
       };
 
       const statusIndex = new Map(
@@ -812,13 +788,14 @@ export default function RecommendationsPage() {
             : `${escapeHtml(control.controlId)} - ${escapeHtml(control.controlName || "")}`;
           body += `<h3>${heading}</h3>`;
           const qs = Array.isArray(control.questions) ? control.questions : [];
+          const statusLabel = complianceLabel(status?.complianceState);
           if (qs.length) {
-            body += `<table style="border:1px solid #ddd; margin-bottom:20px;">
+            body += `<table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
               <thead>
-                <tr style="background:#f8fafc;">
-                  <th style="width:40%; padding:12px; border:1px solid #ddd; font-weight:bold;">Question</th>
-                  <th style="width:15%; padding:12px; border:1px solid #ddd; font-weight:bold;">Answer</th>
-                  <th style="padding:12px; border:1px solid #ddd; font-weight:bold;">Recommendation</th>
+                <tr style="background:#f8fafc; border-bottom: 2px solid #e2e8f0;">
+                  <th style="width:45%; padding:15px; text-align:left; font-weight:bold; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Question</th>
+                  <th style="width:15%; padding:15px; text-align:left; font-weight:bold; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Answer</th>
+                  <th style="padding:15px; text-align:left; font-weight:bold; font-size:12px; color:#475569; text-transform:uppercase; letter-spacing:0.05em;">Recommendation</th>
                 </tr>
               </thead>
               <tbody>`;
@@ -827,11 +804,25 @@ export default function RecommendationsPage() {
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
               let answerValue = answers?.[qid] || answers?.[stageId]?.[qid];
               
+              // Aggressive lookup for Stage 1 (try clause name, numeric ID, and legacy Q-prefixes)
+              if (stageId === "stage1" && (answerValue == null || answerValue === "")) {
+                const nId = q?.numericId || q?.id;
+                answerValue = answers?.[nId] || answers?.[stageId]?.[nId] || 
+                              answers?.[String(nId)] || answers?.[stageId]?.[String(nId)] ||
+                              answers?.[`Q${nId}`] || answers?.[stageId]?.[`Q${nId}`];
+              }
+
               if ((answerValue == null || answerValue === "") && !applicableByRules) {
                 answerValue = "na";
               }
               const questionText = q?.question || q?.text || "";
-              const answerLabel = normalizeAnswerLabel(answerValue);
+              let answerLabel = normalizeAnswerLabel(answerValue);
+              
+              // Ensure we don't show an empty Answer column
+              if (!answerLabel || answerLabel === "UNKNOWN") {
+                answerLabel = "NO"; // Fallback to NO if mandatory and missing
+              }
+              const isYesOrNA = answerLabel === "YES" || answerLabel === "N/A";
               const showRecForAnswer = answerLabel === "NO" || answerLabel === "PARTIAL";
 
               const qidStr = String(qid || "").trim();
@@ -848,16 +839,38 @@ export default function RecommendationsPage() {
                 qidStr: qidStr || qidClause,
               });
               
-              // Fallback: If no question-level rec, use the broader control-level recommendation
+              // Fallback for Stage 1 aliasing (inverse lookup e.g. 4.2 -> 4.1.Q1)
+              if (!rowRecommendationText && stageId === "stage1") {
+                const legacyEntries = {
+                   "4.2": "4.1.Q1", "4.3": "4.1.Q2", "4.1": "4.1.Q3",
+                   "5.1": "5.1.Q1", "5.2": "5.1.Q2",
+                   "6.1": "6.1.Q1", "6.2": "6.1.Q2",
+                   "7.1": "7.1.Q1", "7.2": "7.1.Q2", "7.3": "7.1.Q3",
+                   "8.1": "8.1.Q1", "8.2": "8.1.Q2",
+                   "9.1": "9.1.Q1", "9.2": "9.1.Q2",
+                   "10.1": "10.1.Q1", "10.2": "10.1.Q2"
+                };
+                const legacyId = legacyEntries[qidStr];
+                if (legacyId) {
+                  rowRecommendationText = getRecommendationForQuestionRow({ stageId, qidStr: legacyId });
+                }
+              }
+
               if (!rowRecommendationText) {
-                rowRecommendationText = (rowStatus?.recommendation || status?.recommendation || recommendationText || "");
+                // If it's Stage 1, we often want the group status recommendation if a question-level one is missing
+                rowRecommendationText = (stageId === "stage1" ? (status?.recommendation || rowStatus?.recommendation) : (rowStatus?.recommendation || status?.recommendation)) || recommendationText || "";
               }
 
               body += `<tr>`;
               body += `<td style="padding:12px;">${escapeHtml(questionText)}</td>`;
-              body += `<td style="padding:12px; font-weight:bold;">${escapeHtml(answerLabel)}</td>`;
-              // NA and YES should not have any recommendation text in the cell.
-              body += `<td style="padding:12px;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "")}</td>`;
+              // Answer column: Plain text as per user request
+              body += `<td style="padding:15px; text-align:left; vertical-align:top; font-weight: 600; color: #1e293b; border-bottom: 1px solid #f1f5f9;">
+                ${escapeHtml(answerLabel)}
+              </td>`;
+              // Recommendation column: Only show for NO or PARTIAL
+              body += `<td style="padding:15px; vertical-align:top; color: #475569; line-height: 1.6; border-bottom: 1px solid #f1f5f9;">
+                ${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "-")}
+              </td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
@@ -887,13 +900,11 @@ export default function RecommendationsPage() {
       th, td { border: 1px solid #ddd; padding: 12px; vertical-align: top; word-wrap: break-word; line-height: 1.5; }
       th { background: #f8fafc; text-align: left; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
       td { font-size: 13px; color: #333; }
-      .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; line-height: 1.4; border: 2px solid #e5e7eb; background: #f9fafb; color: #111827; white-space: nowrap; }
-      /* Strong, print-friendly color coding for YES/NO/PARTIAL */
-      .badge-yes { background: #dcfce7; border-color: #166534; color: #166534; box-shadow: inset 6px 0 0 #16a34a; }
-      .badge-no { background: #fee2e2; border-color: #991b1b; color: #991b1b; box-shadow: inset 6px 0 0 #dc2626; }
-      .badge-partial { background: #fef9c3; border-color: #854d0e; color: #854d0e; box-shadow: inset 6px 0 0 #ca8a04; }
-      .badge-na { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
-      .badge-low { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+      .badge { display: none; } /* Hide badges in report for now */
+      table { width: 100%; border-collapse: collapse; margin: 10px 0 30px; table-layout: fixed; border: 1px solid #e2e8f0; }
+      th, td { border: 1px solid #e2e8f0; padding: 15px; vertical-align: top; word-wrap: break-word; line-height: 1.6; }
+      th { background: #fdfdfd; text-align: left; font-weight: bold; font-size: 14px; color: #1e293b; border-bottom: 2px solid #e2e8f0; }
+      td { font-size: 13.5px; color: #334155; }
       @media print {
         body { margin: 12mm; }
         /* Ask the browser to preserve colors when printing to PDF */
