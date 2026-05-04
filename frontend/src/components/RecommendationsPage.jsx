@@ -807,7 +807,15 @@ export default function RecommendationsPage() {
           body += `<h3>${heading}</h3>`;
           const qs = Array.isArray(control.questions) ? control.questions : [];
           if (qs.length) {
-            body += `<table><thead><tr><th style="width:45%">Question</th><th style="width:15%">Answer</th><th>Recommendation</th></tr></thead><tbody>`;
+            body += `<table style="border:1px solid #ddd; margin-bottom:20px;">
+              <thead>
+                <tr style="background:#f8fafc;">
+                  <th style="width:40%; padding:12px; border:1px solid #ddd; font-weight:bold;">Question</th>
+                  <th style="width:15%; padding:12px; border:1px solid #ddd; font-weight:bold;">Answer</th>
+                  <th style="padding:12px; border:1px solid #ddd; font-weight:bold;">Recommendation</th>
+                </tr>
+              </thead>
+              <tbody>`;
             for (const q of qs) {
               const qid = q?.id;
               const applicableByRules = isQuestionApplicable(stageId, control.controlId, q, answers);
@@ -836,10 +844,10 @@ export default function RecommendationsPage() {
               if (!rowRecommendationText) rowRecommendationText = rowStatus?.recommendation ? String(rowStatus.recommendation) : "";
 
               body += `<tr>`;
-              body += `<td>${formatQuestionCellHtml({ stageId, control, qid, questionText })}</td>`;
-              body += `<td><span class="${badgeClassForLabel(answerLabel)}">${escapeHtml(answerLabel)}</span></td>`;
+              body += `<td style="padding:12px;">${escapeHtml(questionText)}</td>`;
+              body += `<td style="padding:12px; font-weight:bold;">${escapeHtml(answerLabel)}</td>`;
               // NA and YES should not have any recommendation text in the cell.
-              body += `<td>${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "")}</td>`;
+              body += `<td style="padding:12px;">${escapeHtml(showRecForAnswer ? (rowRecommendationText || "-") : "")}</td>`;
               body += `</tr>`;
             }
             body += `</tbody></table>`;
@@ -865,9 +873,10 @@ export default function RecommendationsPage() {
       h2 { margin-top: 28px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
       .meta { color: #444; margin-bottom: 18px; }
       .control { margin: 14px 0 18px; page-break-inside: avoid; }
-      table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; }
-      th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
-      th { background: #f5f5f5; text-align: left; }
+      table { width: 100%; border-collapse: collapse; margin: 10px 0 20px; table-layout: fixed; }
+      th, td { border: 1px solid #ddd; padding: 12px; vertical-align: top; word-wrap: break-word; line-height: 1.5; }
+      th { background: #f8fafc; text-align: left; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+      td { font-size: 13px; color: #333; }
       .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; line-height: 1.4; border: 2px solid #e5e7eb; background: #f9fafb; color: #111827; white-space: nowrap; }
       /* Strong, print-friendly color coding for YES/NO/PARTIAL */
       .badge-yes { background: #dcfce7; border-color: #166534; color: #166534; box-shadow: inset 6px 0 0 #16a34a; }
