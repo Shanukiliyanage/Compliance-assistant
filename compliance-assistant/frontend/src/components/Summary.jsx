@@ -67,7 +67,7 @@ function largestRemainderRound(counts, total) {
 /* ─────────────── Per-Stage Percentage Builder ─────────────── */
 
 function buildStagePercentages(stageCounts, isMandatory = false) {
-  if (!stageCounts) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0 };
+  if (!stageCounts) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0, complianceScore: 0 };
 
   const yesCount = Number(stageCounts.yes ?? 0);
   const partialCount = Number(stageCounts.partial ?? 0);
@@ -76,8 +76,10 @@ function buildStagePercentages(stageCounts, isMandatory = false) {
   
   if (isMandatory) {
     const total = yesCount + partialCount + noCount;
-    if (total === 0) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0 };
+    if (total === 0) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0, complianceScore: 0 };
     
+    const complianceScore = ((yesCount + 0.5 * partialCount) / total) * 100;
+
     return {
       yes: ((yesCount / total) * 100).toFixed(1),
       partial: ((partialCount / total) * 100).toFixed(1),
@@ -87,11 +89,15 @@ function buildStagePercentages(stageCounts, isMandatory = false) {
       yesCount,
       partialCount,
       noCount,
-      naCount: 0
+      naCount: 0,
+      complianceScore
     };
   } else {
     const total = yesCount + partialCount + noCount + naCount;
-    if (total === 0) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0 };
+    if (total === 0) return { yes: 0, partial: 0, no: 0, na: 0, total: 0, yesCount: 0, partialCount: 0, noCount: 0, naCount: 0, complianceScore: 0 };
+
+    const totalApplicable = yesCount + partialCount + noCount;
+    const complianceScore = totalApplicable > 0 ? ((yesCount + 0.5 * partialCount) / totalApplicable) * 100 : 0;
 
     return {
       yes: ((yesCount / total) * 100).toFixed(1),
@@ -102,7 +108,8 @@ function buildStagePercentages(stageCounts, isMandatory = false) {
       yesCount,
       partialCount,
       noCount,
-      naCount
+      naCount,
+      complianceScore
     };
   }
 }
@@ -118,56 +125,74 @@ const COLORS = {
 
 /* ─────────────── ComplianceBox — One card per stage ─────────────── */
 
-const ComplianceBox = ({ title, stats, isMandatory = false }) => (
-  <div style={{
-    background: "white",
-    padding: "28px 22px",
-    borderRadius: "18px",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-  }}>
+const ComplianceBox = ({ title, stats, isMandatory = false }) => {
+  const complianceScore = Number(stats.complianceScore || 0).toFixed(1);
+  
+  return (
     <div style={{
-      color: "#0F172A",
-      marginBottom: "16px",
-      fontSize: "1rem",
-      fontWeight: 800,
+      background: "white",
+      padding: "28px 22px",
+      borderRadius: "18px",
+      border: "1px solid #e5e7eb",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative"
     }}>
-      {title}
-    </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+        <div style={{
+          color: "#0F172A",
+          fontSize: "1rem",
+          fontWeight: 800,
+          maxWidth: "60%"
+        }}>
+          {title}
+        </div>
+        <div style={{
+          background: "#f0fdf4",
+          color: "#166534",
+          padding: "4px 10px",
+          borderRadius: "8px",
+          fontSize: "0.85rem",
+          fontWeight: 700,
+          border: "1px solid #bbf7d0"
+        }}>
+          {complianceScore}%
+        </div>
+      </div>
 
-    <div style={{ display: "grid", gap: "14px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Yes</span>
-        <span style={{ fontWeight: 800, color: COLORS.yes, fontSize: "1rem" }}>
-          {stats.yes}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.yesCount}/{stats.total})</span>
-        </span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Partial</span>
-        <span style={{ fontWeight: 800, color: COLORS.partial, fontSize: "1rem" }}>
-          {stats.partial}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.partialCount}/{stats.total})</span>
-        </span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>No</span>
-        <span style={{ fontWeight: 800, color: COLORS.no, fontSize: "1rem" }}>
-          {stats.no}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.noCount}/{stats.total})</span>
-        </span>
-      </div>
-      {!isMandatory && (
+      <div style={{ display: "grid", gap: "14px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Not applicable</span>
-          <span style={{ fontWeight: 800, color: COLORS.na, fontSize: "1rem" }}>
-            {stats.na}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.naCount}/{stats.total})</span>
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Yes</span>
+          <span style={{ fontWeight: 800, color: COLORS.yes, fontSize: "1rem" }}>
+            {stats.yes}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.yesCount}/{stats.total})</span>
           </span>
         </div>
-      )}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Partial</span>
+          <span style={{ fontWeight: 800, color: COLORS.partial, fontSize: "1rem" }}>
+            {stats.partial}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.partialCount}/{stats.total})</span>
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>No</span>
+          <span style={{ fontWeight: 800, color: COLORS.no, fontSize: "1rem" }}>
+            {stats.no}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.noCount}/{stats.total})</span>
+          </span>
+        </div>
+        {!isMandatory && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 500 }}>Not applicable</span>
+            <span style={{ fontWeight: 800, color: COLORS.na, fontSize: "1rem" }}>
+              {stats.na}% <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontWeight: 600, marginLeft: "4px" }}>({stats.naCount}/{stats.total})</span>
+            </span>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ─────────────── PieChartCard ─────────────── */
 
