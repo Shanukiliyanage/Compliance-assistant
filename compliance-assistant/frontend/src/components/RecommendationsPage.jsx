@@ -884,6 +884,10 @@ export default function RecommendationsPage() {
         }
       }
 
+      const maturityScore = report?.scores?.weightedScores?.overall != null 
+        ? Number(report.scores.weightedScores.overall).toFixed(1) 
+        : "N/A";
+
       const html = `<!doctype html>
 <html>
   <head>
@@ -894,7 +898,7 @@ export default function RecommendationsPage() {
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
       h1 { margin: 0 0 8px; }
       h2 { margin-top: 28px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
-      .meta { color: #444; margin-bottom: 18px; }
+      .meta { color: #444; margin-bottom: 18px; line-height: 1.6; }
       .control { margin: 14px 0 18px; page-break-inside: avoid; }
       table { width: 100%; border-collapse: collapse; margin: 10px 0 20px; table-layout: fixed; }
       th, td { border: 1px solid #ddd; padding: 12px; vertical-align: top; word-wrap: break-word; line-height: 1.5; }
@@ -917,6 +921,7 @@ export default function RecommendationsPage() {
     <div class="meta">
       <div><strong>Assessment ID:</strong> ${escapeHtml(assessmentId)}</div>
       <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
+      <div><strong>Security Maturity Index:</strong> <span style="color: #2563eb; font-weight: bold;">${maturityScore}%</span></div>
       <div><strong>Generated:</strong> ${escapeHtml(generatedAt)}</div>
     </div>
 
